@@ -18,6 +18,10 @@ const MenuItem = new mongoose.Schema({
         type: String,
         default: "none",
         required: false,
+    },
+    Availability:{
+        type: Boolean,
+        reuired: false
     }
 });
 
