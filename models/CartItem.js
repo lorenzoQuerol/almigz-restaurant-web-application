@@ -27,6 +27,12 @@ const CartItem = new mongoose.Schema({
                 default: "none",
                 required: false,
             },
+
+        //Is this possible
+        cartItem:{
+            type: MenuItem,
+            required: true
+
         }
     }],
 });
