@@ -7,10 +7,32 @@ const CartItem = new mongoose.Schema({
             required: true
         },
         
+        //The menu Item that was chosen
+        menuItem:{
+            itemName:{
+                type: String,
+                required: true,
+            },
+            desc:{
+                type: String,
+                required: true,
+            },
+            price:{
+                type: Number,
+                required: true,
+            },
+        
+            itemImgURL:{
+                type: String,
+                default: "none",
+                required: false,
+            },
+
         //Is this possible
         cartItem:{
             type: MenuItem,
             required: true
+
         }
     }],
 });
