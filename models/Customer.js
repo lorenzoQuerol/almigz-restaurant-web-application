@@ -1,5 +1,6 @@
+import cart
 const mongoose = require('mongoose');
-
+const CartItem = require('./CartItem');
 const Customer = new mongoose.Schema({
     firstName:{
         type: String,
@@ -35,8 +36,8 @@ const Customer = new mongoose.Schema({
     
     checkout:{ //schema for the items the user wishes to checkout
         checkoutCart: {
-            type: CartItem,
-            required: false
+            type: Schema.Types.ObjectId,
+            ref: 'CartItem'
         },
         payMethod:{ //payment information object
             payType:{
