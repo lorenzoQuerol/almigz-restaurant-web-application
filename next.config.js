@@ -7,12 +7,4 @@ module.exports = {
     CONTENTFUL_ACCESS_TOKEN: 'zOgM8Qj5VXL9pjyqYuhbFvxvJE0vQzZRL_2Wt7uADZs',
     CONTENTFUL_PREVIEW_ACCESS_TOKEN: 'FeIT2KtX3Sy2GfGj2-b2q4yDISjkABqGTrMl5IqKpJw',
   },
-  compilerOptions: {
-    baseUrl: './',
-    paths: {
-      '@components/*': ['components/*'],
-      '@utils/*': ['utils/*'],
-      '@models/*': ['models/*'],
-    },
-  },
 };
