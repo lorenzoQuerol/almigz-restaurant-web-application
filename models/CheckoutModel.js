@@ -1,16 +1,18 @@
 import mongoose from "mongoose";
 import CartSchema from "@models/CartModel";
+import UserSchema from "@models/UserModel";
 
 const CheckoutSchema = new mongoose.Schema({
-    userId: {
+    ownerId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
+        ref: User,
     },
 
     // Delivery or Pickup
     type: {
         type: String,
-        required: true,
+        required: false,
     },
 
     // Gcash or COD
@@ -25,4 +27,5 @@ const CheckoutSchema = new mongoose.Schema({
     },
 });
 
+const User = mongoose.model("User", UserSchema);
 export default mongoose.models.Checkout || mongoose.model("Checkout", CheckoutSchema);
