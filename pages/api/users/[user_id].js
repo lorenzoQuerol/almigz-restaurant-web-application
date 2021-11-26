@@ -1,4 +1,4 @@
-import createConnection from "@utils/createConnection";
+import createConnection from "@utils/mongoDBConnection";
 import User from "@models/UserModel";
 
 async function handler(req, res) {
