@@ -44,8 +44,7 @@ async function handler(req, res) {
         case "DELETE":
             try {
                 const deletedUser = await User.deleteOne({ _id: user_id });
-                if (!deletedUser)
-                    return res.status(404).json({ success: false });
+                if (!deletedUser) return res.status(404).json({ success: false });
 
                 res.status(200).json({ success: true, data: deletedUser });
             } catch (err) {
