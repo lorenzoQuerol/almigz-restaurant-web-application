@@ -1,20 +1,20 @@
-import mongoose from 'mongoose';
-import MenuSchema from '@models/MenuModel';
+import mongoose from "mongoose";
+import MenuSchema from "@models/MenuModel";
 
 const CartItemSchema = new mongoose.Schema({
-  quantity: {
-    type: Number,
-    required: true,
-  },
+    quantity: {
+        type: Number,
+        required: true,
+    },
 
-  menuItem: {
-    type: MenuSchema,
-    required: true,
-  },
+    menuItem: {
+        type: MenuSchema,
+        required: true,
+    },
 });
 
 const CartSchema = new mongoose.Schema({
-  cart: [CartItemSchema],
+    cart: [CartItemSchema],
 });
 
-export default mongoose.models.Cart || mongoose.model('Cart', CartSchema);
+export default mongoose.models.Cart || mongoose.model("Cart", CartSchema);
