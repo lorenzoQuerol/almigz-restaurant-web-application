@@ -10,29 +10,29 @@ let cached = global.mongoose;
 if (!cached) cached = global.mongoose = null;
 
 async function createConnection() {
-    // Return existing connection
-    if (cached.connection) {
-        console.log(
-            `[${new Date().toISOString()}] Existing connection to MongoDB server detected. Returning current connection...`
-        );
-        return cached.connection;
+  // Return existing connection
+  if (cached) {
+    console.log(
+      `[${new Date().toISOString()}] Existing connection to MongoDB server detected. Returning current connection...`
+    );
+    return cached;
+  }
+
+  // Create new connection
+  if (!cached) {
+    try {
+      const opts = {
+        bufferCommands: false,
+      };
+
+      cached = await mongoose.connect(MONGODB_URI, opts);
+      console.log(`[${new Date().toISOString()}] Successfully connected to MongoDB Server!`);
+
+      return cached;
+    } catch (err) {
+      throw new Error(`There was a problem connecting to MongoDB...\n${err}`);
     }
-
-    // Create new connection
-    if (!cached.promise) {
-        try {
-            const opts = {
-                bufferCommands: false,
-            };
-
-            cached.connection = await mongoose.connect(MONGODB_URI, opts);
-            console.log(`[${new Date().toISOString()}] Successfully connected to MongoDB Server!`);
-
-            return cached.connection;
-        } catch (err) {
-            throw new Error(`There was a problem connecting to MongoDB...\n${err}`);
-        }
-    }
+  }
 }
 
 export default createConnection;
