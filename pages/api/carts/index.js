@@ -32,7 +32,7 @@ async function handler(req, res) {
             break;
 
         default:
-            res.status(400).json({ success: false });
+            res.status(500).json({ success: false, msg: "Route is not valid." });
             break;
     }
 }

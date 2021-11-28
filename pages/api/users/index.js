@@ -1,4 +1,6 @@
 import createConnection from "@utils/mongoDBConnection";
+import { hash } from "bcryptjs";
+
 import User from "@models/UserModel";
 
 async function handler(req, res) {
@@ -27,19 +29,27 @@ async function handler(req, res) {
                 if (duplicate)
                     return res.status(400).json({
                         success: false,
-                        msg: "Email address already exists in the system. Please use a different email address!",
+                        msg: "Email address already exists in the system. Please use a different email address.",
                     });
 
+                // Encrypt password
+                req.body.password = await hash(req.body.password, 12);
+
+                // Create new document
                 const user = await User.create(req.body);
 
-                res.status(201).json({ success: true, data: user });
+                res.status(201).json({
+                    success: true,
+                    msg: "User account created successfully.",
+                    data: user,
+                });
             } catch (err) {
                 res.status(400).json({ success: false, msg: err });
             }
             break;
 
         default:
-            res.status(400).json({ success: false });
+            res.status(500).json({ success: false, msg: "Route is not valid." });
             break;
     }
 }
