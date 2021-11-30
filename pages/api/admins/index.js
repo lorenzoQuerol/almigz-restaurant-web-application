@@ -13,7 +13,7 @@ async function handler(req, res) {
     switch (method) {
         case "GET":
             try {
-                const admins = await Admin.find({});
+                const admins = await Admin.find({}, { __v: false });
 
                 res.status(200).json({ success: true, data: admins });
             } catch (err) {

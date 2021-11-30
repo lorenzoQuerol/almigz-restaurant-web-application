@@ -15,11 +15,14 @@ async function handler(req, res) {
         // Update user
         case "PUT":
             try {
+                /* 
+                    TODO: If password changed, re-hash password before updating 
+                */
+
                 const user = await User.findByIdAndUpdate(user_id, req.body, {
                     new: true,
                     runValidators: true,
                 });
-
                 if (!user) return res.status(404).json({ success: false });
 
                 res.status(200).json({ success: true, data: user });
@@ -31,7 +34,7 @@ async function handler(req, res) {
         // Get user
         case "GET":
             try {
-                const user = await User.findById(user_id);
+                const user = await User.findById(user_id, { __v: false, cart: false });
                 if (!user) return res.status(404).json({ success: false });
 
                 res.status(200).json({ success: true, data: user });
@@ -43,7 +46,7 @@ async function handler(req, res) {
         // Delete user
         case "DELETE":
             try {
-                const deletedUser = await User.deleteOne({ _id: user_id });
+                const deletedUser = await User.findByIdAndDelete(user_id);
                 if (!deletedUser) return res.status(404).json({ success: false });
 
                 res.status(200).json({ success: true, data: deletedUser });

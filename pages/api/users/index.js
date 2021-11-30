@@ -1,6 +1,5 @@
 import createConnection from "@utils/mongoDBConnection";
 import { hash } from "bcryptjs";
-
 import User from "@models/UserModel";
 
 async function handler(req, res) {
@@ -13,7 +12,7 @@ async function handler(req, res) {
     switch (method) {
         case "GET":
             try {
-                const users = await User.find({});
+                const users = await User.find({}, { __v: false, cart: false });
 
                 res.status(200).json({ success: true, data: users });
             } catch (err) {
