@@ -44,12 +44,17 @@ async function handler(req, res) {
                     data: user,
                 });
             } catch (err) {
+                console.log(err);
                 res.status(400).json({ success: false, msg: err });
             }
             break;
 
         default:
+<<<<<<< Updated upstream
             res.status(500).json({ success: false, msg: "Route is not valid." });
+=======
+            res.status(500).json({ success: false, msg: "Invalid method." });
+>>>>>>> Stashed changes
             break;
     }
 }
