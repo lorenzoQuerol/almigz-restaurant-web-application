@@ -78,12 +78,12 @@ const UserSchema = new mongoose.Schema({
     },
 
     contactNum: {
-        type: Number,
+        type: String,
         required: true,
     },
 
     altContactNum: {
-        type: Number,
+        type: String,
         required: false,
     },
 
