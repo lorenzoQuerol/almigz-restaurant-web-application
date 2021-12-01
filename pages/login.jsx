@@ -1,44 +1,57 @@
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
-import styles from '../styles/Home.module.css'
-import loginRequest  from '@utils/login'
-import {useState} from "react";
+import { signIn } from "next-auth/client";
+import { useState } from "react";
 
-export default function Home() {  
-    const [email           ,setEmail]          = useState(''); 
-    const [password        ,setPassword]       = useState('');
-    
-    const submitLogin = (e) =>{
-        e.preventDefault();
-        var userInput = ({
-            email:email,
-            password:password
-        })
-        loginRequest(userInput);
-    }
+export default function login() {
+    // Login credentials
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    // Login message (success or error)
+    const [message, setMessage] = useState("");
+
+    const submitLogin = async (event) => {
+        event.preventDefault();
+
+        // Check if credentials are complete
+        if (email && password) {
+            const status = await signIn("credentials", {
+                email: email,
+                password: password,
+                callbackUrl: `${process.env.NEXT_PUBLIC_URL}`,
+            });
+
+            if (!status.error) setMessage("Login successful");
+            else setMessage("Login unsuccessful! Please check your credentials.");
+        } else {
+            setMessage("Email or password is missing.");
+        }
+    };
+
     return (
-        <div>
+        <>
             <h1>Login</h1>
-            <div class="form-control">
-                <form onSubmit = {submitLogin}>
-                    <label class="label">Email Address</label>
-                    <input class="input input-bordered"
-                        type = "email" 
-                        name = "email"
-                        value = {email}
-                        onChange = {(e)=> setEmail(e.target.value)}
+            <div className="form-control">
+                <form onSubmit={submitLogin}>
+                    <label className="label">Email Address</label>
+                    <input
+                        className="input input-bordered"
+                        type="email"
+                        name="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     ></input>
-                
-                    <label class="label">Password</label>
-                    <input class="input input-bordered"
-                        type = "text" 
-                        name = "password"
-                        value = {password}
-                        onChange = {(e)=> setPassword(e.target.value)}
+
+                    <label className="label">Password</label>
+                    <input
+                        className="input input-bordered"
+                        type="text"
+                        name="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     ></input>
-                    <button class="btn">Submit</button>
+                    <button className="btn">Submit</button>
                 </form>
             </div>
-        </div>
-    )
-  }
+        </>
+    );
+}
