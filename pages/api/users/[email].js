@@ -7,7 +7,7 @@ async function handler(req, res) {
 
     // Unpack the request
     const {
-        query: { user_id },
+        query: { email },
         method,
     } = req;
 
@@ -19,7 +19,7 @@ async function handler(req, res) {
                     TODO: If password changed, re-hash password before updating 
                 */
 
-                const user = await User.findByIdAndUpdate(user_id, req.body, {
+                const user = await User.findOneAndUpdate({ email: email }, req.body, {
                     new: true,
                     runValidators: true,
                 });
@@ -34,8 +34,8 @@ async function handler(req, res) {
         // Get user
         case "GET":
             try {
-                const user = await User.findById(user_id, { __v: false, cart: false });
-                if (!user) return res.status(404).json({ success: false });
+                const user = await User.findOne({ email: email }, { __v: false, cart: false });
+                if (!user) return res.status(404).json({ success: false, msg: "User not found." });
 
                 res.status(200).json({ success: true, data: user });
             } catch (err) {
@@ -46,10 +46,15 @@ async function handler(req, res) {
         // Delete user
         case "DELETE":
             try {
-                const deletedUser = await User.findByIdAndDelete(user_id);
-                if (!deletedUser) return res.status(404).json({ success: false });
+                const deletedUser = await User.findOneAndDelete({ email: email });
+                if (!deletedUser)
+                    return res.status(404).json({ success: false, msg: "User not found." });
 
-                res.status(200).json({ success: true, data: deletedUser });
+                res.status(200).json({
+                    success: true,
+                    msg: "User account deleted successfully.",
+                    data: deletedUser,
+                });
             } catch (err) {
                 res.status(400).json({ success: false, msg: err });
             }
