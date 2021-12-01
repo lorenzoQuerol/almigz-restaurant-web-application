@@ -7,7 +7,7 @@ async function handler(req, res) {
 
     // Unpack the request
     const {
-        query: { admin_id },
+        query: { email },
         method,
     } = req;
 
@@ -18,8 +18,7 @@ async function handler(req, res) {
                 /* 
                     TODO: If password changed, re-hash password before updating 
                 */
-
-                const admin = await Admin.findByIdAndUpdate(admin_id, req.body, {
+                const admin = await Admin.findOneAndUpdate({ email: email }, req.body, {
                     new: true,
                     runValidators: true,
                 });
@@ -40,7 +39,7 @@ async function handler(req, res) {
         // Get admin
         case "GET":
             try {
-                const admin = await Admin.findById(admin_id);
+                const admin = await Admin.findOneAndUpdate({ email: email });
                 if (!admin)
                     return res.status(400).json({ success: false, msg: "Admin not found." });
 
@@ -54,14 +53,18 @@ async function handler(req, res) {
         case "DELETE":
             try {
                 // Check if admin account is deletable
-                const deletedAdmin = await Admin.deleteOne({ _id: admin_id, isDelete: true });
+                const deletedAdmin = await Admin.deleteOne({ email: email, isDelete: true });
                 if (!deletedAdmin)
                     return res.status(400).json({
                         success: false,
                         msg: "This admin account cannot be found or deleted.",
                     });
 
-                res.status(200).json({ success: true, msg: deletedAdmin });
+                res.status(200).json({
+                    success: true,
+                    msg: "Admin account deleted successfully.",
+                    data: deletedAdmin,
+                });
             } catch (err) {
                 res.status(400).json({ success: false, msg: err });
             }
