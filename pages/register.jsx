@@ -1,108 +1,138 @@
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
-import styles from '../styles/Home.module.css'
-import {useState} from "react";
-import uploadToDb from "@utils/register"
+import { useState } from "react";
+import registerUser from "@utils/registerUser";
 
-export default function Home() {                
-    const [fname           ,setFname]           = useState('');    
-    const [lname           ,setLname]           = useState('');     
-    const [email           ,setEmail]           = useState(''); 
-    const [password        ,setPassword]        = useState('');     
-    const [address         ,setAddress]         = useState('');     
-    const [contactNum      ,setNum1]            = useState('');     
-    const [altContactNum   ,setNum2]            = useState('');
-    const [cpassword       ,setCpassword]       = useState('');
-    
-    const submitRegister = (e) =>{
-        e.preventDefault();
-        var userData = ({
-            firstName:fname,
-            lastName:lname,
-            email:email,
-            password:password, 
-            homeAddress:address,
-            contactNum:contactNum,
-            altContactNum:altContactNum 
-        });
-        if(password != cpassword)
-            alert("Password does not match");
-        else{
-            uploadToDb(userData);
+export default function register() {
+    // User information
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [address, setAddress] = useState("");
+    const [contactNum, setContactNum] = useState("");
+    const [altContactNum, setAltContactNum] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
+    // API response message
+    const [message, setMessage] = useState("");
+
+    const submitRegister = (event) => {
+        event.preventDefault();
+
+        // Initialize user object
+        var userData = {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password,
+            homeAddress: address,
+            contactNum: contactNum,
+            altContactNum: altContactNum,
+        };
+
+        if (password === confirmPassword) {
+            const response = registerUser(userData);
+            if (response.success) {
+                setMessage(response.msg);
+                /*
+                    TODO: Redirect to homepage, display in UI the message for successful registration
+                    READ: NextJS useRouter methods
+                */
+            } else {
+                setMessage(response.msg);
+                /*
+                    TODO: Display in UI error message
+                    RECOMMEND: set states for errors, conditionally render
+                */
+            }
+        } else {
+            /*
+                TODO: Display in UI some error message
+                RECOMMEND: set states for errors, conditionally render
+            */
+            alert("Password does not match.");
         }
-    }
+    };
+
     return (
-        <div>
+        <>
             <h1>Register</h1>
-            <div class="form-control">
-                <form onSubmit = {submitRegister}>
-                    <label class="label">First Name</label>
-                    <input class="input input-sm input-bordered"
-                        type = "text" 
-                        name = "fname"
-                        value = {fname}
-                        onChange = {(e)=> setFname(e.target.value)}
+            <div className="form-control">
+                <form onSubmit={submitRegister}>
+                    <label className="label">First Name</label>
+                    <input
+                        className="input input-sm input-bordered"
+                        type="text"
+                        name="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                     ></input>
 
-                    <label class="label">Last Name</label>
-                    <input class="input input-sm input-bordered" 
-                        type = "text" 
-                        name = "lname"
-                        value = {lname}
-                        onChange = {(e)=> setLname(e.target.value)}
+                    <label className="label">Last Name</label>
+                    <input
+                        className="input input-sm input-bordered"
+                        type="text"
+                        name="lastName"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
                     ></input>
 
-                    <label class="label">Email Address</label>
-                    <input class="input input-sm input-bordered"
-                        type = "email" 
-                        name = "email"
-                        value = {email}
-                        onChange = {(e)=> setEmail(e.target.value)}
+                    <label className="label">Email Address</label>
+                    <input
+                        className="input input-sm input-bordered"
+                        type="email"
+                        name="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     ></input>
 
-                    <label class="label">Password</label>
-                    <input class="input input-sm input-bordered"
-                        type = "password" 
-                        name = "password"
-                        value = {password}
-                        onChange = {(e)=> setPassword(e.target.value)}
+                    <label className="label">Password</label>
+                    <input
+                        className="input input-sm input-bordered"
+                        type="password"
+                        name="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     ></input>
 
-                    <label class="label">Confirm Password</label>
-                    <input class="input input-sm input-bordered"
-                        type = "password" 
-                        name = "cpassword"
-                        value = {cpassword}
-                        onChange = {(e)=> setCpassword(e.target.value)}
+                    <label className="label">Confirm Password</label>
+                    <input
+                        className="input input-sm input-bordered"
+                        type="password"
+                        name="confirmPassword"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                     ></input>
 
-                    <label class="label">Home Address</label>
-                    <input  class="input input-sm input-bordered" 
-                        type = "text" 
-                        name = "address"
-                        value = {address}
-                        onChange = {(e)=> setAddress(e.target.value)}
+                    <label className="label">Home Address</label>
+                    <input
+                        className="input input-sm input-bordered"
+                        type="text"
+                        name="address"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
                     ></input>
 
-                    <label class="label">Contact Number 1</label>
-                    <input class="input input-sm input-bordered"
-                        type = "tel" 
-                        name = "num1"
-                        value = {contactNum}
-                        onChange = {(e)=> setNum1(e.target.value)}
+                    <label className="label">Contact Number 1</label>
+                    <input
+                        className="input input-sm input-bordered"
+                        type="tel"
+                        name="contactNum"
+                        value={contactNum}
+                        onChange={(e) => setContactNum(e.target.value)}
                     ></input>
 
-                    <label class="label">Contact Number 2</label>
-                    <input  class="input input-sm input-bordered"
-                        type = "tel"
-                        name = "num2"
-                        value = {altContactNum}
-                        onChange = {(e)=> setNum2(e.target.value)}
+                    <label className="label">Alternate Contact Number</label>
+                    <input
+                        className="input input-sm input-bordered"
+                        type="tel"
+                        name="altContactNum"
+                        value={altContactNum}
+                        onChange={(e) => setAltContactNum(e.target.value)}
                     ></input>
 
-                    <button class="btn">Submit</button>
+                    <button className="btn">Submit</button>
                 </form>
             </div>
-        </div>
-    )
-  }
+        </>
+    );
+}
