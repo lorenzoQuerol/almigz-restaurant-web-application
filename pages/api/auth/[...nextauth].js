@@ -1,9 +1,7 @@
 import NextAuth from "next-auth";
 import Providers from "next-auth/providers";
-
+import axios from "axios";
 import { compare } from "bcryptjs";
-
-import User from "@models/UserModel";
 
 export default NextAuth({
     // Configure JWT
@@ -11,36 +9,31 @@ export default NextAuth({
         jwt: true,
     },
 
+    pages: {
+        signIn: "/auth/login",
+        //     signOut: "/auth/signout",
+        //     error: "/auth/error", // Error code passed in query string as ?error=
+        //     verifyRequest: "/auth/verify-request", // (used for check email message)
+        //     newUser: "/auth/new-user", // New users will be directed here on first sign in (leave the property out if not of interest)
+    },
+
     // Specify Provider
     providers: [
         Providers.Credentials({
-            async authorize(req, res) {
-                // Create connection to database
-                await createConnection();
+            async authorize(credentials) {
+                // Unpack the credentials
+                const { email, password } = credentials;
 
-                // Unpack the request
-                const {
-                    query: { password, email },
-                } = req;
+                // Get user via email
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_URL}/api/users/${email}`);
+                const user = res.data;
+                if (!user) throw new Error("User not found.");
 
-                try {
-                    // Get user via email
-                    const result = await User.findOne({ email: email });
+                // Check hashed password with database password
+                const checkPassword = await compare(password, user.data.password);
+                if (!checkPassword) throw new Error("Incorrect password.");
 
-                    if (!result)
-                        return res
-                            .status(404)
-                            .json({ success: false, msg: "User cannot be found." });
-
-                    // Check hashed password with database password
-                    const checkPassword = await compare(password, result.password);
-
-                    if (!checkPassword) res.status(401).json({ success: false, msg: err });
-
-                    res.status(200).json({ success: true, data: result });
-                } catch (err) {
-                    res.status(500).json({ success: false, msg: err });
-                }
+                return { email: user.data.email };
             },
         }),
     ],
