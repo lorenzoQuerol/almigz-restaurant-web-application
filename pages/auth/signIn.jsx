@@ -1,34 +1,45 @@
-import { signIn } from "next-auth/client";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
-export default function login() {
+export default function signInPage() {
+    const router = useRouter();
+
     // Login credentials
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    // Login message (success or error)
-    const [message, setMessage] = useState("");
+    /*
+        TODO - DESIGNERS: Up to you how to display the error message in the UI
+    */
+    const [message, setErrorMessage] = useState("");
 
     const submitLogin = async (event) => {
         event.preventDefault();
 
         // Check if credentials are complete
         if (email && password) {
+            // Call signIn hook
             const status = await signIn("credentials", {
+                redirect: false,
                 email: email,
                 password: password,
-                callbackUrl: `${process.env.NEXT_PUBLIC_URL}`,
             });
 
-            if (!status.error) setMessage("Login successful");
-            else setMessage("Login unsuccessful! Please check your credentials.");
+            // Redirect to home page if sign in successful, set error message if not
+            if (status.ok) router.push(process.env.NEXTAUTH_URL);
+            else setErrorMessage("Email and password do not match.");
         } else {
-            setMessage("Email or password is missing.");
+            setErrorMessage("Email or password is missing.");
         }
     };
 
     return (
         <>
+            {
+                // Error message will only render if message is defined
+                message && <h1>{message}</h1>
+            }
             <h1>Login</h1>
             <div className="form-control">
                 <form onSubmit={submitLogin}>
