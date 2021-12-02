@@ -1,4 +1,6 @@
 import createConnection from "@utils/mongoDBConnection";
+import { hash, compare } from "bcryptjs";
+
 import User from "@models/UserModel";
 
 async function handler(req, res) {
@@ -15,17 +17,25 @@ async function handler(req, res) {
         // Update user
         case "PUT":
             try {
-                /* 
-                    TODO: If password changed, re-hash password before updating 
-                */
+                // Find user
+                const user = await User.findOne({ email: email }, { __v: false, cart: false });
+                if (!user) return res.status(404).json({ success: false, msg: "User not found." });
 
-                const user = await User.findOneAndUpdate({ email: email }, req.body, {
+                // Check to see if password was changed, re-hash if changed
+                const samePassword = await compare(req.body.password, user.password);
+                if (!samePassword) user.password = await hash(req.body.password, 12);
+
+                // Update user
+                const updatedUser = await User.findByIdAndUpdate(user._id, user, {
                     new: true,
                     runValidators: true,
                 });
-                if (!user) return res.status(404).json({ success: false });
 
-                res.status(200).json({ success: true, data: user });
+                res.status(200).json({
+                    success: true,
+                    msg: "User account updated successfully.",
+                    data: updatedUser,
+                });
             } catch (err) {
                 res.status(400).json({ success: false, msg: err });
             }

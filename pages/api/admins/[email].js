@@ -1,4 +1,6 @@
 import createConnection from "@utils/mongoDBConnection";
+import { hash, compare } from "bcryptjs";
+
 import Admin from "@models/AdminModel";
 
 async function handler(req, res) {
@@ -15,21 +17,25 @@ async function handler(req, res) {
         // Update admin
         case "PUT":
             try {
-                /* 
-                    TODO: If password changed, re-hash password before updating 
-                */
-                const admin = await Admin.findOneAndUpdate({ email: email }, req.body, {
+                // Find admin
+                const admin = await Admin.findOne({ email: email }, { __v: false, cart: false });
+                if (!admin)
+                    return res.status(404).json({ success: false, msg: "Admin not found." });
+
+                // Check to see if password was changed, re-hash if changed
+                const samePassword = await compare(req.body.password, admin.password);
+                if (!samePassword) admin.password = await hash(req.body.password, 12);
+
+                // Update user
+                const updatedAdmin = await Admin.findByIdAndUpdate(admin._id, admin, {
                     new: true,
                     runValidators: true,
                 });
 
-                if (!admin)
-                    return res.status(404).json({ success: false, msg: "Admin not found." });
-
                 res.status(200).json({
                     success: true,
                     msg: "Admin account updated successfully.",
-                    data: admin,
+                    data: updatedAdmin,
                 });
             } catch (err) {
                 res.status(400).json({ success: false, msg: err });
@@ -39,7 +45,7 @@ async function handler(req, res) {
         // Get admin
         case "GET":
             try {
-                const admin = await Admin.findOneAndUpdate({ email: email });
+                const admin = await Admin.findOne({ email: email }, { __v: false, cart: false });
                 if (!admin)
                     return res.status(400).json({ success: false, msg: "Admin not found." });
 
