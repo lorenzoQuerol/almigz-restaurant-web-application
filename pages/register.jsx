@@ -27,6 +27,10 @@ export default function Home() {
         });
         if(password != cpassword)
             alert("Password does not match");
+        else if (contactNum.length != 11 || contactNum.substring(0,2) != "09")
+            alert("Please input a valid contact number.")
+        else if (altContactNum.length != 11 || altContactNum.substring(0,2) != "09")
+            alert("Alternate contact number is invalid.")
         else{
             uploadToDb(userData);
         }
