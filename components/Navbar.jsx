@@ -6,7 +6,7 @@ const Navbar = () => {
   return (
     <nav class="navbar h-24 mb-2 shadow-lg text-neutral-content rounded-box border-t-8 border-green-800">
     	<div class="flex items-center">
-			<div class="lg:flex self-center">
+			<div class="lg:flex self-center text-base ">
                 <Link href="/">
 				<div class="m-4">
                 <Image src="/logo.png" alt="store-logo" width={200} height={50}/>
@@ -14,13 +14,13 @@ const Navbar = () => {
                 </Link>
 
 				<Link href="/">
-                <a class="font-normal text-lg rounded-btn self-center m-5 hover:font-medium hover:text-green-700">
+                <a class="font-normal rounded-btn self-center m-5 hover:font-medium hover:text-green-700">
 					HOME
 				</a>
                 </Link>
                 
 				<Link href="/menu">
-                <a class="font-normal text-lg rounded-btn self-center m-5 hover:font-medium hover:text-green-700">
+                <a class="font-normal rounded-btn self-center m-5 hover:font-medium hover:text-green-700">
 					MENU
 				</a>
                 </Link>
@@ -28,12 +28,12 @@ const Navbar = () => {
 		</div>
 		<div class="">
 				<Link href="/login">
-                <a class="font-normal text-lg rounded-btn self-center m-5 hover:font-medium hover:text-green-700">
+                <a class="font-normal rounded-btn self-center m-5 hover:font-medium hover:text-green-700">
 					LOGIN
 				</a>
                 </Link>
 				<Link href="/register">
-                <a class="font-normal text-lg rounded-btn self-center m-5 hover:font-medium hover:text-green-700">
+                <a class="font-normal rounded-btn self-center m-5 hover:font-medium hover:text-green-700">
 					REGISTER
 				</a>
                 </Link>
