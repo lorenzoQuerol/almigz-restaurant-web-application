@@ -7,7 +7,7 @@ async function handler(req, res) {
 
     // Unpack the request
     const {
-        query: { user_id },
+        query: { email },
         method,
     } = req;
 
@@ -15,7 +15,7 @@ async function handler(req, res) {
         // Update cart
         case "PUT":
             try {
-                const cart = await User.findByIdAndUpdate(user_id, req.body, {
+                const cart = await User.findOneAndUpdate({ email: email }, req.body, {
                     new: true,
                     runValidators: true,
                 });
@@ -34,7 +34,7 @@ async function handler(req, res) {
         // Get cart
         case "GET":
             try {
-                const cart = await User.findById(user_id, "cart");
+                const cart = await User.findOne({ email: email }, "cart");
                 if (!cart) return res.status(404).json({ success: false, msg: "User not found." });
 
                 res.status(200).json({ success: true, data: cart });
