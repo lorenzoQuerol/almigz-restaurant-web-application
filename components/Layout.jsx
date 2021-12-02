@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Footer from "./Footer"
 import Navbar from "./Navbar"
 
+
 const Layout = ({ children }) => {
   return (
     <html data-theme="lofi">
@@ -11,7 +12,9 @@ const Layout = ({ children }) => {
         <link rel="icon" href="/logo.ico" />
       </Head>
       <Navbar />
+      <div class="w-screen min-h-screen flex justify-center">
       { children }
+      </div>
       <Footer />
     </div>
     </html>
