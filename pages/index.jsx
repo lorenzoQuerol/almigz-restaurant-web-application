@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import styles from "../styles/Home.module.css";
 import { useSession, signIn, signOut } from "next-auth/react";
 
-export default async function Home() {
+export default function Home() {
     const { data: session, status } = useSession();
 
     /*
