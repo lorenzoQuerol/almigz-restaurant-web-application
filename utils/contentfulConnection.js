@@ -1,4 +1,4 @@
-export default async function connectToContentful(query) {
+async function connectToContentful(query) {
     // Create a GraphQL query
     const fetchUrl = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
     const fetchOptions = {
@@ -17,3 +17,5 @@ export default async function connectToContentful(query) {
         throw new Error("Could not fetch data from Contentful.");
     }
 }
+
+export default connectToContentful;
