@@ -1,76 +1,4 @@
-export async function getFoodItem(slug) {
-    const query = `{
-      foodItemCollection(where: {slug: "${slug}"}) {
-        items {
-          productName
-          category
-          productDescription
-          productPrice
-          available
-          productImagesCollection {
-            items {
-              title
-              description
-              contentType
-              fileName
-              size
-              url
-              width
-              height
-            }
-          }
-          slug
-        }
-      }
-    }`;
-
-    try {
-        const response = await connectToContentful(query);
-        const foodItem = response.data.foodItemCollection.items[0];
-
-        return foodItem;
-    } catch (err) {
-        console.error(`[${new Date().toISOString()}] ${err}`);
-    }
-}
-
-export async function getAllFoodItems() {
-    const query = `{
-    foodItemCollection {
-      items {
-        productName
-        category
-        productDescription
-        productPrice
-        available
-        productImagesCollection {
-          items {
-            title
-            description
-            contentType
-            fileName
-            size
-            url
-            width
-            height
-          }
-        }
-        slug
-        }
-      }
-    }`;
-
-    try {
-        const response = await connectToContentful(query);
-        const foodItems = response.data.foodItemCollection.items;
-
-        return foodItems;
-    } catch (err) {
-        console.error(`[${new Date().toISOString()}] ${err}`);
-    }
-}
-
-export async function connectToContentful(query) {
+async function connectToContentful(query) {
     // Create a GraphQL query
     const fetchUrl = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
     const fetchOptions = {
@@ -89,3 +17,5 @@ export async function connectToContentful(query) {
         throw new Error("Could not fetch data from Contentful.");
     }
 }
+
+export default connectToContentful;
