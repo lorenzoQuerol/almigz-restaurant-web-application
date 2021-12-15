@@ -35,13 +35,13 @@ export default function signInPage() {
     };
 
     return (
-        <div class="w-1/2 flex-col text-center">
-            <h1 class="text-5xl font-rale text-black font-bold p-8">Login</h1>
-            <div class="rounded-md shadow-xl border-t border-t-gray-100 p-10">
-                <form class="font-rale font-lg text-gray-800 font-bold" onSubmit={submitLogin}>
-                    <label class="label">Email Address</label>
+        <div className="w-1/2 flex-col text-center">
+            <h1 className="text-5xl font-rale text-black font-bold p-8">Login</h1>
+            <div className="rounded-md shadow-xl border-t border-t-gray-100 p-10">
+                <form className="font-rale font-lg text-gray-800 font-bold" onSubmit={submitLogin}>
+                    <label className="label">Email Address</label>
                     <input
-                        class="input p-5  input-sm input-bordered rounded-md w-full focus:ring-2 focus:ring-blue-300"
+                        className="input p-5  input-sm input-bordered rounded-md w-full focus:ring-2 focus:ring-blue-300"
                         type="email"
                         name="email"
                         placeholder="Email Address"
@@ -49,16 +49,16 @@ export default function signInPage() {
                         onChange={(e) => setEmail(e.target.value)}
                     ></input>
 
-                    <label class="label mt-4">Password</label>
+                    <label className="label mt-4">Password</label>
                     <input
-                        class="input p-5  input-sm input-bordered rounded-md w-full focus:ring-2 focus:ring-blue-300"
-                        type="text"
+                        className="input p-5  input-sm input-bordered rounded-md w-full focus:ring-2 focus:ring-blue-300"
+                        type="password"
                         name="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     ></input>
-                    <button class="font-normal text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300">
+                    <button className="font-normal text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300">
                         Submit
                     </button>
                 </form>

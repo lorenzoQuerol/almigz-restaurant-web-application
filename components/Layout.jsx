@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 
 const Layout = ({ children }) => {
     return (
-        <html data-theme="lofi">
+        <html data-theme="lofi" className="w-full">
             <div>
                 <Head>
                     <title>Al Migz Special Binalot</title>

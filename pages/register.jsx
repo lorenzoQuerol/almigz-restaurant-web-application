@@ -37,6 +37,7 @@ export default function register() {
                     TODO: Redirect to homepage, display in UI the message for successful registration
                     READ: NextJS useRouter methods
                 */
+                return NextResponse.redirect('/')
             } else {
                 setMessage(response.msg);
                 /*
