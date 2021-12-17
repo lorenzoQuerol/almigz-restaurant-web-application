@@ -2,7 +2,7 @@ import axios from "axios";
 
 async function registerUser(newUserData) {
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}/api/users`, newUserData);
+        const response = await axios.post(`${process.env.NEXTAUTH_URL}/api/users`, newUserData);
         const success = { success: response.data.success, msg: response.data.msg };
         return success;
     } catch (err) {
