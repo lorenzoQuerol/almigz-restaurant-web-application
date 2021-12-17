@@ -12,7 +12,7 @@ export default function FoodItemPage() {
     const router = useRouter();
     const { data, error } = useSWR(`/api/foodItems/${router.query.food_slug}`, fetcher);
     const { data: session, status } = useSession();
-
+    const [qty, setQty] = useState(1);
     const [total, setTotal] = useState("");
     
     if (error) return <div>failed to load</div>
@@ -20,16 +20,28 @@ export default function FoodItemPage() {
     
     const updateTotal = async (num) => {
         num = Number(num);
-        if (Number.isInteger(num) && num > 0 && num < 10000)
+        if (Number.isInteger(num) && num > 0 && num < 10000) {
             setTotal(data.data.productPrice * num);
+            setQty(num);
+        }
     };
 
     const addToCart = async (event) => {
         event.preventDefault();
 
         if (session) {
-            console.log("logged in -> cart");
-            router.push("/cart");
+            const item = {
+                data: data.data,
+                qty: qty
+            }
+            // console.log(`/menu/${router.query.food_slug}`);
+            router.replace({
+                pathname: '/cart',
+                query: {item: JSON.stringify(item)},
+            },
+            `/menu/${router.query.food_slug}`,
+            { shallow: true }
+            );
         } 
         else {
             alert("Please login before adding to cart.");
