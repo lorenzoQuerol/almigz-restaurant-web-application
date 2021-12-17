@@ -43,13 +43,16 @@ const Navbar = () => {
                     <div className="flex justify-end items-center flex-1 m-3">
                         <a href="/cart">
                                 <div className="m-4">
-                                    <Image src="/cart.png" className="bg-white rounded hover:bg-green-100" alt="Add to Cart" width={35} height={35} />
+                                    <svg xmlns="http://www.w3.org/2000/svg" alt="View Cart" className="h-8 w-8 p-0 bg-white rounded hover:bg-green-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                    </svg>
+                                    {/* <Image src="/cart.png" className="bg-white rounded hover:bg-green-100" alt="Add to Cart" width={35} height={35} /> */}
                                 </div>
                         </a>                     
                         <div className="dropdown">
                             <div  tabIndex="0" className="m-1 btn font-normal bg-white rounded ">
                                 Hi, {session.user.name}!
-                                <svg className="ml-2" width="10px" height="10px" viewBox="0 -6 524 524" xmlns="http://www.w3.org/2000/svg" ><title>Account Options</title><path d="M64 191L98 157 262 320 426 157 460 191 262 387 64 191Z" /></svg>
+                                <svg className="ml-2 w-4 h-4" viewBox="0 -6 524 524" xmlns="http://www.w3.org/2000/svg" ><title>Account Options</title><path d="M64 191L98 157 262 320 426 157 460 191 262 387 64 191Z" /></svg>
                             </div> 
                             <ul className="p-2 shadow shadow menu dropdown-content bg-base-100 rounded w-44 divide-y">
                                 <li>
