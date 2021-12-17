@@ -1,34 +1,16 @@
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
-import styles from "../styles/Home.module.css";
 import Image from "next/image";
 import Link from "next/link";
+import useSWR from 'swr';
+import { data } from "autoprefixer";
 
-
-import { useSession, signIn, signOut } from "next-auth/react";
+// const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function Home() {
-    const { data: session, status } = useSession();
+    // const { data, error } = useSWR('/api/homepage/', fetcher);
 
-    /*
-      DESIGNERS: You can now use the session to conditionally render components for 
-      authenticated or unauthenticated users. Session will return null if user is not
-      logged in.
-
-      @status will return "authenticated" | "loading" | "unauthenticated"
-    */
-
-    // if (session) {
-    //     return (
-    //         <>
-    //             <div>
-    //                 <h1>HOMEPAGE</h1>
-    //             </div>
-    //             Signed in as {session.user.name} <br />
-    //             <button onClick={signOut}>Sign out</button>
-    //         </>
-    //     );
-    // }
+    // if (error) return <div>failed to load</div>
+    // if (!data) return <div>loading...</div>
+    // var pic = data.data.announcementsCollection.items;
 
     return (
         <>

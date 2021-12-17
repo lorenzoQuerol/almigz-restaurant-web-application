@@ -7,6 +7,8 @@ import { useSession, signIn, signOut } from "next-auth/react";
 
 const Navbar = () => {
     const { data: session, status } = useSession();
+
+    // signOut({ callbackUrl: 'http://localhost:3000/' });
     
     if (session) {
         return (
@@ -45,7 +47,7 @@ const Navbar = () => {
                                 </div>
                         </a>                     
                         <div className="dropdown">
-                            <div  tabindex="0" class="m-1 btn font-normal bg-white rounded ">
+                            <div  tabIndex="0" className="m-1 btn font-normal bg-white rounded ">
                                 Hi, {session.user.name}!
                                 <svg className="ml-2" width="10px" height="10px" viewBox="0 -6 524 524" xmlns="http://www.w3.org/2000/svg" ><title>Account Options</title><path d="M64 191L98 157 262 320 426 157 460 191 262 387 64 191Z" /></svg>
                             </div> 
@@ -54,7 +56,7 @@ const Navbar = () => {
                                 <a href="/account">My Account</a>
                                 </li>  
                                 <li>
-                                <a onClick={signOut} >Sign Out</a>
+                                <a href="#" onClick={(e) => signOut({ callbackUrl: 'http://localhost:3000/' })} >Sign Out</a>
                                 </li>
                             </ul>
                         </div>
@@ -65,6 +67,7 @@ const Navbar = () => {
     }
     else {
         return (
+            <>
             <nav className="w-full h-24 mb-2 border-t-8 border-green-800 shadow-lg navbar text-neutral-content rounded-box">
                 <div className="flex items-center">
                     <div className="self-center text-base lg:flex ">
@@ -106,6 +109,7 @@ const Navbar = () => {
                     </div>
                 </div>
             </nav>
+            </>
         );
     }
 

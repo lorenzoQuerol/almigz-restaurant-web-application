@@ -58,6 +58,7 @@ export default function signInPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     ></input>
+                    <div className="text-red-500 font-sans font-normal text-left mt-4">{message}</div>
                     <button className="font-normal text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300">
                         Submit
                     </button>
