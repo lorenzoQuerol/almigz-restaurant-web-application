@@ -56,6 +56,17 @@ export default function Example() {
         // }
     }
   const [open, setOpen] = useState(true)
+  const [delfee, setDelFee] = useState(50);
+  const [subtotal, setSubtotal] = useState(200);
+  const [total, setTotal] = useState(delfee + subtotal);
+
+  const updateTotal = async (num) => {
+    num = Number(num);
+    if (Number.isInteger(num) && num > 0 && num < 10000) {
+        setTotal(product[0].data.productPrice * num);
+        setQty(num);
+    }
+  };
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -153,20 +164,20 @@ export default function Example() {
                   <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
                     <div className="flex justify-between text-base font-medium text-gray-900">
                       <p>Subtotal</p>
-                      <p>P262.00</p>
+                      <p>P{subtotal}</p>
                     </div>
                     <div className="flex justify-between text-base text-medium text-gray-500 my-3">
                       <p>Delivery Fee</p>
-                      <p>P50.00</p>
+                      <p>P{delfee}</p>
                     </div>
                     <div className="flex justify-between text-base font-medium text-gray-900">
                       <p>Total</p>
-                      <p>P312.00</p>
+                      <p>P{total}</p>
                     </div>
                     {/* <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p> */}
                     <div className="mt-6">
                       <a
-                        href="#"
+                        href="/checkout"
                         className="flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700"
                       >
                         Proceed to Checkout
