@@ -1,39 +1,49 @@
 import mongoose from "mongoose";
 import Double from "@mongoosejs/double";
 
-MenuItemSchema = new mongoose.Schema({
+const MenuItemSchema = new mongoose.Schema({
 	productName: {
 		type: String,
-		required: false,
+		required: true,
 	},
 
 	price: {
 		type: Double,
-		required: false,
+		required: true,
 	},
 });
 
 const CartItemSchema = new mongoose.Schema({
 	quantity: {
 		type: Number,
-		required: false,
+		required: true,
 	},
 
 	menuItem: {
 		type: MenuItemSchema,
-		required: false,
+		required: true,
 	},
 });
 
 const TransactionSchema = new mongoose.Schema({
+	orderStatus: {
+		type: String,
+		required: true,
+	},
+
 	// DELIVERY or PICKUP
 	type: {
 		type: String,
-		required: false,
+		required: true,
 	},
 
 	// BASIC DETAILS
 	fullName: {
+		type: String,
+		required: true,
+	},
+
+	email: {
 		type: String,
 		required: true,
 	},
@@ -46,7 +56,6 @@ const TransactionSchema = new mongoose.Schema({
 	order: {
 		type: [CartItemSchema],
 		required: true,
-		default: [],
 	},
 
 	totalPrice: {
@@ -55,16 +64,9 @@ const TransactionSchema = new mongoose.Schema({
 	},
 
 	// FOR DELIVERY
-	email: {
-		type: String,
-		required: false,
-		default: "",
-	},
-
 	address: {
 		type: String,
 		required: false,
-		default: "",
 	},
 
 	payMethod: {
@@ -80,7 +82,6 @@ const TransactionSchema = new mongoose.Schema({
 	deliverType: {
 		type: String,
 		required: false,
-		default: "NOW",
 	},
 
 	// FOR PICKUP
@@ -92,7 +93,6 @@ const TransactionSchema = new mongoose.Schema({
 	pickupType: {
 		type: String,
 		required: false,
-		default: "NOW",
 	},
 });
 
