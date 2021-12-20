@@ -31,6 +31,11 @@ const products = [
 //   // More products...
 ]
 
+// function check (entry) {
+//   if (!products.includes(entry))
+//             products.push(entry);
+// }
+
 export default function Example() {
     const router = useRouter();
     console.log(router.query);
@@ -44,6 +49,11 @@ export default function Example() {
         }
         if (!products.includes(entry))
             products.push(entry);
+        // const ind = products.findIndex(e => e.data === entry)
+        // console.log('ind: ' + ind);
+        // if (ind != -1) { //item existing
+            
+        // }
     }
   const [open, setOpen] = useState(true)
 
@@ -77,7 +87,7 @@ export default function Example() {
                 <div className="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
                   <div className="flex-1 py-6 overflow-y-auto px-4 sm:px-6">
                     <div className="flex items-start justify-between">
-                      <Dialog.Title className="text-lg font-medium text-gray-900">Shopping cart</Dialog.Title>
+                      <Dialog.Title className="text-lg font-medium text-gray-900">My Food Cart</Dialog.Title>
                       <div className="ml-3 h-7 flex items-center">
                         <button
                           type="button"
@@ -114,8 +124,18 @@ export default function Example() {
                                   <p className="mt-1 text-sm text-gray-500">P {product.data.productPrice}</p>
                                 </div>
                                 <div className="flex-1 flex items-end justify-between text-sm">
-                                  <p className="text-gray-500">Qty: {product.qty}</p>
-
+                                  <p className="text-gray-500">Qty: 
+                                  <input
+                                      className="input font-black-100 mx-2 text-normal w-14 input-sm input-bordered rounded-md focus:ring-2 focus:ring-blue-300" 
+                                      type='number'
+                                      min='1'
+                                      step='1'
+                                      max='9999' 
+                                      placeholder="1"
+                                      onLoad={(e)=> setTotal(product.qty)}
+                                      onChange={(e) => updateTotal(e.target.value)}
+                                  ></input>pc
+                                  </p>
                                   <div className="flex">
                                     <button type="button"  className="font-medium text-green-600 hover:text-green-500">
                                       Remove
@@ -133,15 +153,23 @@ export default function Example() {
                   <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
                     <div className="flex justify-between text-base font-medium text-gray-900">
                       <p>Subtotal</p>
-                      <p>$262.00</p>
+                      <p>P262.00</p>
                     </div>
-                    <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
+                    <div className="flex justify-between text-base text-medium text-gray-500 my-3">
+                      <p>Delivery Fee</p>
+                      <p>P50.00</p>
+                    </div>
+                    <div className="flex justify-between text-base font-medium text-gray-900">
+                      <p>Total</p>
+                      <p>P312.00</p>
+                    </div>
+                    {/* <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p> */}
                     <div className="mt-6">
                       <a
                         href="#"
                         className="flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700"
                       >
-                        Checkout
+                        Proceed to Checkout
                       </a>
                     </div>
                     <div className="mt-6 flex justify-center text-sm text-center text-gray-500">
@@ -152,7 +180,7 @@ export default function Example() {
                           className="text-green-600 font-medium hover:text-green-500"
                           onClick={() => setOpen(false)}
                         >
-                          Continue Shopping<span aria-hidden="true"> &rarr;</span>
+                          Add more items<span aria-hidden="true"> &rarr;</span>
                         </button>
                       </p>
                     </div>
