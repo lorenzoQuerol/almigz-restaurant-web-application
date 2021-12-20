@@ -5,17 +5,17 @@ import Navbar from "./Navbar";
 const Layout = ({ children }) => {
     return (
         <>
-        <html data-theme="lofi" className="w-full">
-            <div>
+        {/* <html > */}
+            <div className="w-full">
                 <Head>
                     <title>Al Migz Special Binalot</title>
                     <link rel="icon" href="/logo.ico" />
                 </Head>
                 <Navbar/>
-                <div className="flex justify-center w-screen min-h-screen">{children}</div>
+                <main className="flex justify-center w-screen min-h-screen">{children}</main>
                 <Footer/>
             </div>
-        </html>
+        {/* </html> */}
         </>
     );
 };
