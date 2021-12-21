@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { data } from "autoprefixer";
 
 var ctr = 0;
-const products = [
+const products = new Array() // [
 //   {
 //     id: 1,
 //     name: 'Throwback Hip Bag',
@@ -29,7 +29,7 @@ const products = [
 //       'Front of satchel with blue canvas body, black straps and handle, drawstring top, and front zipper pouch.',
 //   },
 //   // More products...
-]
+// ]
 
 // function check (entry) {
 //   if (!products.includes(entry))
@@ -38,22 +38,23 @@ const products = [
 
 export default function Example() {
     const router = useRouter();
-    console.log(router.query);
+    
     if (!(Object.keys(router.query).length === 0)) {
-        const item = JSON.parse(router.query.item);
-        console.log(item);
-        const entry = {
-            id: ctr, 
-            data: item.data,
-            qty: item.qty
-        }
-        if (!products.includes(entry))
-            products.push(entry);
-        // const ind = products.findIndex(e => e.data === entry)
-        // console.log('ind: ' + ind);
-        // if (ind != -1) { //item existing
-            
+        const products = JSON.parse(localStorage.getItem("foodCart"));
+        console.log(products);
+        
+        // const entry = {
+        //     id: ctr, 
+        //     data: item.data,
+        //     qty: item.qty
         // }
+        // if (!products.includes(entry))
+        //     products.push(entry);
+        // // const ind = products.findIndex(e => e.data === entry)
+        // // console.log('ind: ' + ind);
+        // // if (ind != -1) { //item existing
+            
+        // // }
     }
   const [open, setOpen] = useState(true)
   const [delfee, setDelFee] = useState(50);
