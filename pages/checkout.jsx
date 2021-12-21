@@ -40,10 +40,10 @@ export default function MenuPage() {
 
     return (
         <>
-            <div className="w-full text-center">
-                Checkout
-            </div>
-            
+            CHECKOUT: <br/>
+            <a className="bg-red-400 h-10 text-black" href="/receipt" target="_blank">
+                <btn>Place Order (Open Receipt)</btn>
+            </a>
         </>
     );
 }
