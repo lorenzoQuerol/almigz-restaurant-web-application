@@ -35,10 +35,10 @@ export default function FoodItemPage() {
                 qty: qty
             }
             pushToCart(item)
-            // console.log(`/menu/${router.query.food_slug}`);
+            console.log(`/menu/${router.query.food_slug}`);
             router.replace({
                 pathname: '/cart',
-                query: {item: JSON.stringify(item)},
+                // query: {item: JSON.stringify(item)},
             },
             `/menu/${router.query.food_slug}`,
             { shallow: true }

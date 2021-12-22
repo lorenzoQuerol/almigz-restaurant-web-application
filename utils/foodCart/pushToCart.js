@@ -15,11 +15,8 @@ const pushToCart = async (data) =>  {
 
     
 
-    if(0 == foodCart.length)
+    if(i == foodCart.length)
         foodCart.push(data);
-        
-    console.log(foodCart[0].qty)
-    console.log(foodCart)
     localStorage.setItem("foodCart", JSON.stringify(foodCart));
     // console.log(JSON.parse(localStorage.getItem("foodCart")));
     //localStorage.clear()
