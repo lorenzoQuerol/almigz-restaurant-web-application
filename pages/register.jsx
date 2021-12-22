@@ -34,7 +34,7 @@ export default function register() {
 		};
 
 		// Register user
-		if (firstName && lastName && email && password && confirmPassword && homeAddress && contactNum && altContactNum) {
+		if (firstName && lastName && email && password && confirmPassword && homeAddress && contactNum) {
 			if (password === confirmPassword) {
 				const response = await registerUser(userData);
 				// SUCCESS: Redirect to homepage
