@@ -72,7 +72,7 @@ export default function FoodItemPage() {
                     <Image src={pic} layout="intrinsic" className="shadow-2xl shadow-black-400 bg-gray-100" width="300" height="200"/>
                     <h1 className="mt-8">{data.data.productDescription}</h1>
                     <h1 className="text-green-700 font-bold text-2xl mt-12 pb-3">P {total}</h1>
-                    <form onSubmit={addToCart} className="flex-col ju">
+                    <form onSubmit={addToCart} className="flex-col">
                         <input
                             className="input p-5 pr-2 mr-2 font-black-100 text-xl w-24 input-sm input-bordered rounded-md focus:ring-2 focus:ring-blue-300" 
                             type='number'
