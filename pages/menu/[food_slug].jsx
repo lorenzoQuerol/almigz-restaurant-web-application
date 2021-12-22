@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from 'swr';
-
+import pushToCart from '@utils/foodCart/pushToCart'
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function FoodItemPage() {
@@ -34,10 +34,11 @@ export default function FoodItemPage() {
                 data: data.data,
                 qty: qty
             }
-            // console.log(`/menu/${router.query.food_slug}`);
+            pushToCart(item)
+            console.log(`/menu/${router.query.food_slug}`);
             router.replace({
                 pathname: '/cart',
-                query: {item: JSON.stringify(item)},
+                // query: {item: JSON.stringify(item)},
             },
             `/menu/${router.query.food_slug}`,
             { shallow: true }
