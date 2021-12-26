@@ -2,17 +2,16 @@
 import { Fragment, useState, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
-import { useRouter } from "next/router";
-import { data } from "autoprefixer";
 import getCart from "@utils/foodCart/getCart"
+import { useRouter } from "next/router";
 
 var ctr = 0;
 
-export default function Example() {
-  const router = useRouter();
+const Cart = () =>  {
   const [products, setProducts] = useState(new Array());
-
-  const [open, setOpen] = useState(true)
+  const router = useRouter();
+  
+  const [open, setOpen] = useState(true);
   const [delfee, setDelFee] = useState(50);
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(delfee + subtotal);
@@ -23,9 +22,12 @@ export default function Example() {
     setProducts(cart.data);
     setSubtotal(cart.total + subtotal)
     setTotal(cart.total + subtotal + delfee)
-    console.log(total)
+    console.log(total) 
   }, [])
 
+  const close = () => {
+    setOpen(false);
+  }
   
   const deleteItem = (name) =>{
     for (var i = 0; i < products.length; i++){
@@ -62,7 +64,7 @@ export default function Example() {
   if(products){
     return (
       <Transition.Root show={open} as={Fragment}>
-        <Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={setOpen}>
+        <Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={close}>
           <div className="absolute inset-0 overflow-hidden">
             <Transition.Child
               as={Fragment}
@@ -95,7 +97,7 @@ export default function Example() {
                           <button
                             type="button"
                             className="-m-2 p-2 text-gray-400 hover:text-gray-500"
-                            onClick={() => setOpen(false)}
+                            onClick={close}
                           >
                             <span className="sr-only">Close panel</span>
                             <XIcon className="h-6 w-6" aria-hidden="true" />
@@ -107,7 +109,7 @@ export default function Example() {
                         <div className="flow-root">
                           <ul role="list" className="-my-6 divide-y divide-gray-200">
                             {products.map((product) => (
-                              <li key={product.id} className="py-6 flex">
+                              <li key={product.productName} className="py-6 flex">
                                 <div className="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
                                   <img
                                     src={product.data.productImagesCollection.items[0].url}
@@ -169,13 +171,14 @@ export default function Example() {
                         <p>P{total}</p>
                       </div>
                       {/* <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p> */}
-                      <div className="mt-6">
-                        <a
+                      <div className="mt-6 grid justify-items-stretch">
+                        <button
+                          onClick={() => {router.push('/checkout'); close(); }}
                           href="/checkout"
                           className="flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700"
                         >
                           Proceed to Checkout
-                        </a>
+                        </button>
                       </div>
                       <div className="mt-6 flex justify-center text-sm text-center text-gray-500">
                         <p>
@@ -183,7 +186,7 @@ export default function Example() {
                           <button
                             type="button"
                             className="text-green-600 font-medium hover:text-green-500"
-                            onClick={() => setOpen(false)}
+                            onClick={() => {router.push('/menu'); close(); }}
                           >
                             Add more items<span aria-hidden="true"> &rarr;</span>
                           </button>
@@ -202,7 +205,7 @@ export default function Example() {
   else{
     return (
       <Transition.Root show={open} as={Fragment}>
-        <Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={setOpen}>
+        <Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={close}>
           <div className="absolute inset-0 overflow-hidden">
             <Transition.Child
               as={Fragment}
@@ -235,7 +238,7 @@ export default function Example() {
                           <button
                             type="button"
                             className="-m-2 p-2 text-gray-400 hover:text-gray-500"
-                            onClick={() => setOpen(false)}
+                            onClick={close}
                           >
                             <span className="sr-only">Close panel</span>
                             <XIcon className="h-6 w-6" aria-hidden="true" />
@@ -280,7 +283,7 @@ export default function Example() {
                           <button
                             type="button"
                             className="text-green-600 font-medium hover:text-green-500"
-                            onClick={() => setOpen(false)}
+                            onClick={close}
                           >
                             Add more items<span aria-hidden="true"> &rarr;</span>
                           </button>
@@ -298,3 +301,5 @@ export default function Example() {
   }
   
 }
+
+export default Cart;

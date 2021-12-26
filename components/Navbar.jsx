@@ -1,13 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
-import styles from "../styles/Home.module.css";
+import Cart from "./Cart";
 
-import { useSession, signIn, signOut } from "next-auth/react";
-
+import { useSession, signOut } from "next-auth/react";
+import { Transition } from '@headlessui/react'
+import { useState } from "react";
 
 const Navbar = () => {
     const { data: session, status } = useSession();
-
+    const [isShown, setIsShown] = useState(false);
     // signOut({ callbackUrl: 'http://localhost:3000/' });
     
     if (session) {
@@ -41,14 +42,14 @@ const Navbar = () => {
                         </div>
                     </div>
                     <div className="flex justify-end items-center flex-1 m-3">
-                        <a href="/cart">
+                        <button onClick={() => setIsShown(!isShown)}>
                                 <div className="m-4">
                                     <svg xmlns="http://www.w3.org/2000/svg" alt="View Cart" className="h-8 w-8 p-0 bg-white rounded hover:bg-green-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                     </svg>
                                     {/* <Image src="/cart.png" className="bg-white rounded hover:bg-green-100" alt="Add to Cart" width={35} height={35} /> */}
                                 </div>
-                        </a>                     
+                        </button>                     
                         <div className="dropdown">
                             <div  tabIndex="0" className="m-1 btn font-normal bg-white rounded ">
                                 Hi, {session.user.name}!
@@ -65,6 +66,9 @@ const Navbar = () => {
                         </div>
                     </div>
                 </nav>
+                <Transition show={isShown} onUnload={() => setIsShown(false)}>
+                    <Cart/>
+                </Transition>
             </>
         );
     }
@@ -114,10 +118,7 @@ const Navbar = () => {
             </nav>
             </>
         );
-    }
-
-
-    
+    }    
 };
 
 export default Navbar;

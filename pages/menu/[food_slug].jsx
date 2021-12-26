@@ -1,15 +1,19 @@
-import { data } from "autoprefixer";
 import { useRouter } from "next/router";
 import { useSession} from "next-auth/react";
 import { useState } from "react";
+import useSWR from 'swr';
 import Link from "next/link";
 import Image from "next/image";
-import useSWR from 'swr';
+import { Transition } from '@headlessui/react'
 import pushToCart from '@utils/foodCart/pushToCart'
+import Cart from "components/Cart";
+
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function FoodItemPage() {
     const router = useRouter();
+    
+    const [isShown, setIsShown] = useState(false);
     const { data, error } = useSWR(`/api/foodItems/${router.query.food_slug}`, fetcher);
     const { data: session, status } = useSession();
     const [qty, setQty] = useState(1);
@@ -34,15 +38,8 @@ export default function FoodItemPage() {
                 data: data.data,
                 qty: qty
             }
-            pushToCart(item)
-            console.log(`/menu/${router.query.food_slug}`);
-            router.replace({
-                pathname: '/cart',
-                // query: {item: JSON.stringify(item)},
-            },
-            `/menu/${router.query.food_slug}`,
-            { shallow: true }
-            );
+            pushToCart(item);
+            setIsShown(true);
         } 
         else {
             alert("Please login before adding to cart.");
@@ -89,6 +86,9 @@ export default function FoodItemPage() {
                         </button>
                     </form>
                 </div>
+                <Transition show={isShown}>
+                    <Cart/>
+                </Transition>
             </>
         )
     }
