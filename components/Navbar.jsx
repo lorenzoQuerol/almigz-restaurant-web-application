@@ -8,6 +8,10 @@ import { useSession, signIn, signOut } from "next-auth/react";
 const Navbar = () => {
     const { data: session, status } = useSession();
 
+    const logOut = () => {
+        signOut({ callbackUrl: 'http://localhost:3000/' })
+        localStorage.clear()
+    }
     // signOut({ callbackUrl: 'http://localhost:3000/' });
     
     if (session) {
@@ -59,7 +63,7 @@ const Navbar = () => {
                                 <a href="/account">My Account</a>
                                 </li>  
                                 <li>
-                                <a href="#" onClick={(e) => signOut({ callbackUrl: 'http://localhost:3000/' })} >Sign Out</a>
+                                <a href="#" onClick={(e) => logOut()} >Sign Out</a>
                                 </li>
                             </ul>
                         </div>
