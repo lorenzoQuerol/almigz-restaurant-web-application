@@ -7,7 +7,7 @@ const MenuItemSchema = new mongoose.Schema({
 		required: true,
 	},
 
-	price: {
+	productPrice: {
 		type: Double,
 		required: true,
 	},
@@ -49,13 +49,18 @@ const TransactionSchema = new mongoose.Schema({
 	},
 
 	contactNum: {
-		type: String,
+		type: Array,
 		required: true,
 	},
 
 	order: {
 		type: [CartItemSchema],
 		required: true,
+	},
+
+	specialInstructions: {
+		type: String,
+		required: false,
 	},
 
 	totalPrice: {
@@ -76,10 +81,10 @@ const TransactionSchema = new mongoose.Schema({
 
 	change: {
 		type: String,
-		required: false,
+		required: Number,
 	},
 
-	deliverType: {
+	deliverTime: {
 		type: String,
 		required: false,
 	},
@@ -90,7 +95,7 @@ const TransactionSchema = new mongoose.Schema({
 		required: false,
 	},
 
-	pickupType: {
+	pickupTime: {
 		type: String,
 		required: false,
 	},

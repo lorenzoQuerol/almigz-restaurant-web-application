@@ -28,11 +28,15 @@ async function handler(req, res) {
 		case "POST":
 			const transaction = await Transaction.create(req.body);
 
-			res.status(201).json({
-				success: true,
-				msg: "Transaction made sucessfully.",
-				data: transaction,
-			});
+			try {
+				res.status(201).json({
+					success: true,
+					msg: "Transaction made sucessfully.",
+					data: transaction,
+				});
+			} catch (err) {
+				res.status(400).json({ success: false, msg: err });
+			}
 			break;
 
 		default:

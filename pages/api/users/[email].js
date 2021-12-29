@@ -26,7 +26,7 @@ async function handler(req, res) {
 				if (!samePassword) user.password = await hash(req.body.password, 12);
 
 				// Update user
-				const updatedUser = await User.findOne({ email: email }, user, {
+				const updatedUser = await User.findOneAndUpdate({ email: email }, user, {
 					new: true,
 					runValidators: true,
 				});

@@ -27,10 +27,11 @@ async function handler(req, res) {
 		// Update transaction (status)
 		case "PUT":
 			try {
-				const updatedTransaction = await Transaction.updateOne({ email: email }, req.body, {
+				const updatedTransaction = await Transaction.findOneAndUpdate({ email: email }, req.body, {
 					new: true,
 					runValidators: true,
 				});
+				if (!updatedTransaction) return res.status(404).json({ success: false, msg: "Transaction does not exist." });
 
 				res.status(200).json({
 					success: true,
