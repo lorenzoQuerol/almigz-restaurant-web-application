@@ -47,10 +47,13 @@ const products = [
 ]
 
 export default function Receipt() {
+    // const router = useRouter();
     const [delfee, setDelFee] = useState(50);
     const [subtotal, setSubtotal] = useState(200);
     const [total, setTotal] = useState(delfee + subtotal);
-    const router = useRouter();
+    // const [col, setCol] = useState();
+    // const [options, setOptions] = useState();
+    // const router = useRouter();
     //get date and time string
     var datetime = new Date().today() + "   " + new Date().timeNow();
     
@@ -62,9 +65,11 @@ export default function Receipt() {
     const cash = 1000;
     const change = 20;
 
+    var options;
+    var col;
     //newly added vars
-    const col = "red";
-    const status = "INCOMING ORDER";
+    // const col = "red";
+    const status = "ORDER PROCESSED";
     const delpick = "Delivery";
     const userInfo = {
         name: "John Doe",
@@ -74,7 +79,21 @@ export default function Receipt() {
     }
     const notes = "Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint."
     // console.log(datetime);
-	return (
+
+    const stat = new Array(6);
+    stat.fill(false);
+    console.log(stat);
+	if (status === "INCOMING ORDER") {
+        col = "red";
+        stat[0] = true;
+    }
+    else if (status == "ORDER PROCESSED") {
+        col = "yellow";
+        stat.fill(false);
+        stat[1] = true;
+        console.log(stat);
+    }
+    return (
         <div className={`w-full flex flex-col`}>
             <div className="flex flex-row justify-center items-start  m-5">
                 <div className="w-1/2 self-left flex flex-col">
@@ -146,7 +165,7 @@ export default function Receipt() {
                     </div>
                 </div>
                 <div className="p-3 mx-3 w-1/4 border rounded-md text-black bg-white shadow-lg divide-y">
-                    <div className="text-center bg-red-100">
+                    <div className={`text-center bg-${col}-100`}>
                             <b>For {delpick.toUpperCase()}</b><br/>
                             {delpick} Time: 11:00 A.M.
                     </div>
@@ -165,8 +184,8 @@ export default function Receipt() {
                 </div>
             </div>
             {/* <div className={`sticky left-0 bottom-0 bg-white w-full shadow-${col}`}> */}
-            <div className={`flex-col bg-gradient-to-t from-gray-100 w-full flex justify-center p-3`}>
-                <div className="flex justify-center">
+            <div className={`flex-col w-full flex justify-center p-3 mb-5`}>
+                {/* <div className="flex justify-center">
                     <ul className="w-2/3 steps">
                         <li data-content="?" className="step step-neutral ">Incoming</li> 
                         <li data-content="!" className="step step-neutral">Processed</li> 
@@ -174,7 +193,8 @@ export default function Receipt() {
                         <li data-content="✕" className="step step-neutral">In Delivery/<br/>Ready for Pick up</li> 
                         <li data-content="★" className="step step-neutral">Completed</li>
                     </ul>
-                </div>
+                </div> */}
+                {stat[0] && 
                 <div className="self-center">
                     <button className="font-normal self-center text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300"
                         onClick={() => router.push('/tracker')}>
@@ -184,8 +204,16 @@ export default function Receipt() {
                         onClick={() => router.push('/tracker')}>
                         Cancel Order
                     </button>
-                </div>
-                <span className="text-center">Go to <span className="self-center font-semibold underline hover:text-green-700"><Link href="/orders"> DASHBOARD</Link></span></span>
+                
+                </div>}
+                {stat[1] && 
+                <div className="self-center">
+                    <button className="font-normal self-center text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300"
+                        onClick={() => router.push('/tracker')}>
+                        Prepare Order
+                    </button>
+                </div>}
+                <span className="text-center text-black">Go to <span className="self-center font-semibold underline hover:text-green-700"><Link href="/orders"> DASHBOARD</Link></span></span>
             </div>
         </div>
 	);
