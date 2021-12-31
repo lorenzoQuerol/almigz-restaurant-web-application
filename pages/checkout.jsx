@@ -110,7 +110,6 @@ export default function CheckoutPage() {
 
 		// Send transaction object
 		const response = await confirmTransaction(transaction);
-		console.log(response);
 	};
 
 	return (
