@@ -58,9 +58,9 @@ export default function CheckoutPage() {
 			setTotalPrice(order.total + delFee);
 
 			// TEMPORARY - test transaction
-			setPayMethod("GCash");
-			setChange(1000);
-			setDeliverTime("Now");
+			// setPayMethod("GCash");
+			// setChange(1000);
+			// setDeliverTime("Now");
 		}
 	}, [data, user]);
 
