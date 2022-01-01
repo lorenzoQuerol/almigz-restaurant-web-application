@@ -1,15 +1,10 @@
-const getCart = () =>{
-    const foodCart = JSON.parse(localStorage.getItem('foodCart'))
-    
-    var total = 0
-    if(foodCart){
-        for (var i = 0; i < foodCart.length; i++)
-        total += foodCart[i].data.productPrice * foodCart[i].qty
-    }
-    return {data:foodCart, total:total} ;
-    
+export default function getCart() {
+	if (typeof window !== "undefined") {
+		const foodCart = JSON.parse(localStorage.getItem("foodCart"));
 
+		let total = 0;
+		if (foodCart) foodCart.forEach((item) => (total += item.menuItem.productPrice * item.quantity));
 
+		return { data: foodCart, total: total };
+	}
 }
-
-export default getCart;
