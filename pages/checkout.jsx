@@ -65,7 +65,7 @@ export default function CheckoutPage() {
 		// Initialize transaction object
 		const transaction = {
 			dateCreated: new Date(),
-			orderStatus: 0,
+			orderStatus: 0, // Initial incoming order status
 			type: type,
 			fullName: fullName,
 			email: email,
@@ -83,6 +83,12 @@ export default function CheckoutPage() {
 
 		// Send transaction object
 		const response = await confirmTransaction(transaction);
+
+		if (response.success) {
+			// Handle here if successful transaction
+		} else {
+			// Handle here if unsuccessful transaction
+		}
 	};
 
 	return (
