@@ -1,21 +1,6 @@
-// GraphQL query
-const query = `{
-  foodItemCollection {
-    items {
-      productName
-      productDescription
-      productPrice
-      available
-      slug
-    }
-  }
-}`;
-
-export default async function fetchFoodItems() {
+async function connectToContentful(query) {
     // Create a GraphQL query
-
     const fetchUrl = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
-
     const fetchOptions = {
         method: "POST",
         headers: {
@@ -27,8 +12,10 @@ export default async function fetchFoodItems() {
 
     try {
         const response = await fetch(fetchUrl, fetchOptions).then((response) => response.json());
-        return response.data.foodItemCollection;
+        return response;
     } catch (error) {
-        throw new Error("Could not fetch data from Contentful!");
+        throw new Error("Could not fetch data from Contentful.");
     }
 }
+
+export default connectToContentful;

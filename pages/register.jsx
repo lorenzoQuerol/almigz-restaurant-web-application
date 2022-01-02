@@ -1,108 +1,138 @@
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
-import styles from '../styles/Home.module.css'
-import {useState} from "react";
-import uploadToDb from "@utils/register"
+import { useState } from "react";
+import registerUser from "@utils/registerUser";
+import { useRouter } from "next/router";
 
-export default function Home() {                
-    const [fname           ,setFname]           = useState('');    
-    const [lname           ,setLname]           = useState('');     
-    const [email           ,setEmail]           = useState(''); 
-    const [password        ,setPassword]        = useState('');     
-    const [address         ,setAddress]         = useState('');     
-    const [contactNum      ,setNum1]            = useState('');     
-    const [altContactNum   ,setNum2]            = useState('');
-    const [cpassword       ,setCpassword]       = useState('');
-    
-    const submitRegister = (e) =>{
-        e.preventDefault();
-        var userData = ({
-            firstName:fname,
-            lastName:lname,
-            email:email,
-            password:password, 
-            homeAddress:address,
-            contactNum:contactNum,
-            altContactNum:altContactNum 
-        });
-        if(password != cpassword)
-            alert("Password does not match");
-        else{
-            uploadToDb(userData);
-        }
-    }
-    return (
-        <div>
-            <h1>Register</h1>
-            <div class="form-control">
-                <form onSubmit = {submitRegister}>
-                    <label class="label">First Name</label>
-                    <input class="input input-sm input-bordered"
-                        type = "text" 
-                        name = "fname"
-                        value = {fname}
-                        onChange = {(e)=> setFname(e.target.value)}
-                    ></input>
+export default function register() {
+	const router = useRouter();
 
-                    <label class="label">Last Name</label>
-                    <input class="input input-sm input-bordered" 
-                        type = "text" 
-                        name = "lname"
-                        value = {lname}
-                        onChange = {(e)=> setLname(e.target.value)}
-                    ></input>
+	// User information
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [homeAddress, setAddress] = useState("");
+	const [contactNum, setContactNum] = useState("");
+	const [altContactNum, setAltContactNum] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
 
-                    <label class="label">Email Address</label>
-                    <input class="input input-sm input-bordered"
-                        type = "email" 
-                        name = "email"
-                        value = {email}
-                        onChange = {(e)=> setEmail(e.target.value)}
-                    ></input>
+	// API response message
+	const [message, setMessage] = useState("");
 
-                    <label class="label">Password</label>
-                    <input class="input input-sm input-bordered"
-                        type = "password" 
-                        name = "password"
-                        value = {password}
-                        onChange = {(e)=> setPassword(e.target.value)}
-                    ></input>
+	const submitRegister = async (event) => {
+		event.preventDefault(); // Prevent page from refreshing for errors in input
 
-                    <label class="label">Confirm Password</label>
-                    <input class="input input-sm input-bordered"
-                        type = "password" 
-                        name = "cpassword"
-                        value = {cpassword}
-                        onChange = {(e)=> setCpassword(e.target.value)}
-                    ></input>
+		// New user object
+		var userData = {
+			firstName: firstName,
+			lastName: lastName,
+			email: email,
+			password: password,
+			homeAddress: homeAddress,
+			contactNum: contactNum,
+			altContactNum: altContactNum,
+			cart: {},
+		};
 
-                    <label class="label">Home Address</label>
-                    <input  class="input input-sm input-bordered" 
-                        type = "text" 
-                        name = "address"
-                        value = {address}
-                        onChange = {(e)=> setAddress(e.target.value)}
-                    ></input>
+		// Register user
+		if (firstName && lastName && email && password && confirmPassword && homeAddress && contactNum) {
+			if (password === confirmPassword) {
+				const response = await registerUser(userData);
+				// SUCCESS: Redirect to homepage
+				if (response.success) return router.push(process.env.NEXTAUTH_URL);
+				else setMessage(response.msg); // ERROR: Email exists in the system
+			} else setMessage("Password does not match."); // ERROR: Passwords do not match
+		} else setMessage("Please fill out all fields."); // ERROR: Empty Fields
+	};
 
-                    <label class="label">Contact Number 1</label>
-                    <input class="input input-sm input-bordered"
-                        type = "tel" 
-                        name = "num1"
-                        value = {contactNum}
-                        onChange = {(e)=> setNum1(e.target.value)}
-                    ></input>
+	return (
+		<div className="flex-col w-1/2 text-center">
+			<h1 className="p-8 text-5xl font-bold text-black font-rale">Sign Up</h1>
+			<div className="p-10 border-t rounded-md shadow-xl border-t-gray-100">
+				<form className="font-bold text-gray-800 font-rale font-lg" onSubmit={submitRegister}>
+					<label className="label">First Name</label>
+					<input
+						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+						type="text"
+						name="firstName"
+						placeholder="First Name"
+						value={firstName}
+						onChange={(e) => setFirstName(e.target.value)}
+					></input>
 
-                    <label class="label">Contact Number 2</label>
-                    <input  class="input input-sm input-bordered"
-                        type = "tel"
-                        name = "num2"
-                        value = {altContactNum}
-                        onChange = {(e)=> setNum2(e.target.value)}
-                    ></input>
+					<label className="mt-4 label">Last Name</label>
+					<input
+						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+						type="text"
+						name="lastName"
+						placeholder="Last Name"
+						value={lastName}
+						onChange={(e) => setLastName(e.target.value)}
+					></input>
 
-                    <button class="btn">Submit</button>
-                </form>
-            </div>
-        </div>
-    )
-  }
+					<label className="mt-4 label">Email Address</label>
+					<input
+						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+						type="email"
+						name="email"
+						placeholder="example@email.com"
+						value={email}
+						onChange={(e) => setEmail(e.target.value)}
+					></input>
+
+					<label className="mt-4 label">Password</label>
+					<input
+						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+						type="password"
+						name="password"
+						placeholder="Password"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+					></input>
+
+					<label className="mt-4 label">Confirm Password</label>
+					<input
+						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+						type="password"
+						name="confirmPassword"
+						placeholder="Confirm Password"
+						value={confirmPassword}
+						onChange={(e) => setConfirmPassword(e.target.value)}
+					></input>
+
+					<label className="mt-4 label">Home Address</label>
+					<textarea
+						className="w-full h-20 p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+						type="text"
+						name="homeAddress"
+						placeholder="Home Address"
+						value={homeAddress}
+						onChange={(e) => setAddress(e.target.value)}
+					></textarea>
+
+					<label className="mt-4 label">Contact Number 1</label>
+					<input
+						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+						type="tel"
+						name="contactNum"
+						placeholder="09XXXXXXXXX (Mobile Number)"
+						value={contactNum}
+						onChange={(e) => setContactNum(e.target.value)}
+					></input>
+
+					<label className="mt-4 label">Contact Number 2</label>
+					<input
+						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+						type="tel"
+						name="altContactNum"
+						placeholder="Mobile or Telephone Number"
+						value={altContactNum}
+						onChange={(e) => setAltContactNum(e.target.value)}
+					></input>
+					<br />
+					<div className="mt-4 font-sans font-normal text-left text-red-500">{message}</div>
+					<button className="p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300">Submit</button>
+				</form>
+			</div>
+		</div>
+	);
+}
