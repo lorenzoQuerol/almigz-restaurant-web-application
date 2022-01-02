@@ -7,10 +7,7 @@ async function handler(req, res) {
 	await createConnection();
 
 	// Unpack the request
-	const {
-		query: { email },
-		method,
-	} = req;
+	const { method } = req;
 
 	switch (method) {
 		// Get all transactions
