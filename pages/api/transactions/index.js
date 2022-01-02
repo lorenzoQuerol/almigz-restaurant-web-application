@@ -1,15 +1,13 @@
 import createConnection from "@utils/mongoDBConnection";
 import Transaction from "@models/TransactionModel";
+import transactionErrorHandler from "@handlers/transactionErrorHandler";
 
 async function handler(req, res) {
 	// Create connection to database
 	await createConnection();
 
 	// Unpack the request
-	const {
-		query: { email },
-		method,
-	} = req;
+	const { method } = req;
 
 	switch (method) {
 		// Get all transactions
@@ -20,22 +18,26 @@ async function handler(req, res) {
 
 				res.status(200).json({ success: true, data: transactions });
 			} catch (err) {
-				res.status(400).json({ success: false, msg: err });
+				res.status(400).json({ success: false, msg: `Error getting transactions: ${err.message}` });
 			}
 			break;
 
 		// Create new transaction document
 		case "POST":
-			const transaction = await Transaction.create(req.body);
-
 			try {
+				const transaction = await Transaction.create(req.body);
 				res.status(201).json({
 					success: true,
 					msg: "Transaction made sucessfully.",
 					data: transaction,
 				});
 			} catch (err) {
-				res.status(400).json({ success: false, msg: err });
+				const missingFields = transactionErrorHandler(err);
+				res.status(400).json({
+					success: false,
+					msg: "Transaction creation failed.",
+					missingFields: missingFields,
+				});
 			}
 			break;
 

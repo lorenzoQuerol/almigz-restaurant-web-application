@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
+import axios from "axios";
 
 import getCart from "@utils/foodCart/getCart";
 import confirmTransaction from "@utils/confirmTransaction";
@@ -36,21 +37,14 @@ export default function CheckoutPage() {
 	const [storeLocation, setStoreLocation] = useState("");
 	const [pickupTime, setPickupTime] = useState("Now");
 
-	// Get session email
-	useMemo(() => {
-		if (session) setEmail(session.user.email);
-	}, [session]);
-
-	// Fetch user details via SWR
 	const { data, error } = useSWR(`/api/users/${email}`, fetcher);
+	const cart = getCart();
 
-	// Initialize form values
-	useMemo(() => {
-		const cart = getCart();
-		setOrder(cart);
-
+	useEffect(() => {
+		if (session) setEmail(session.user.email);
 		if (data) setUser(data.data);
-		if (user && cart) {
+		if (cart) setOrder(cart);
+		if (user) {
 			setFullName(`${user.firstName} ${user.lastName}`);
 			setEmail(user.email);
 			setContactNum([user.contactNum, user.altContactNum]);
@@ -58,29 +52,22 @@ export default function CheckoutPage() {
 			setTotalPrice(order.total + delFee);
 
 			// TEMPORARY - test transaction
-			// setPayMethod("GCash");
-			// setChange(1000);
-			// setDeliverTime("Now");
+			setPayMethod("GCash");
+			setChange(1000);
+			setDeliverTime("Now");
 		}
-	}, [data, user]);
+	}, [session, email, data, user]);
 
 	// Submit transaction
 	const submitTransaction = async (event) => {
 		event.preventDefault();
 
-		// Pre-process cart for transaction
-		order.data.forEach((item) => {
-			delete item.menuItem.category;
-			delete item.menuItem.description;
-			delete item.menuItem.isAvailable;
-			delete item.menuItem.imgUrls;
-		});
-
 		// Initialize transaction object
 		const transaction = {
-			orderStatus: "Confirmed",
+			dateCreated: new Date(),
+			orderStatus: 0, // Initial incoming order status
 			type: type,
-			fullName: null,
+			fullName: fullName,
 			email: email,
 			contactNum: contactNum,
 			order: order.data,
@@ -94,22 +81,14 @@ export default function CheckoutPage() {
 			pickupTime: pickupTime,
 		};
 
-		// Set to null for fields not required in DELIVERY type
-		if (type === "Delivery") {
-			transaction.storeLocation = null;
-			transaction.pickupTime = null;
-		}
-
-		// Set to null for fields not required in PICKUP type
-		if (type === "Pickup") {
-			transaction.address = null;
-			transaction.payMethod = null;
-			transaction.change = null;
-			transaction.deliverTime = null;
-		}
-
 		// Send transaction object
 		const response = await confirmTransaction(transaction);
+
+		if (response.success) {
+			// Handle here if successful transaction
+		} else {
+			// Handle here if unsuccessful transaction
+		}
 	};
 
 	return (
