@@ -28,13 +28,13 @@ export default function Example() {
 
 	const deleteItem = (name) => {
 		for (var i = 0; i < products.length; i++) {
-			if (products[i].data.productName == name) break;
+			if (products[i].menuItem.productName == name) break;
 		}
 		var temp = products;
 		temp.splice(i, 1);
 
 		var temp = 0;
-		for (var i = 0; i < products.length; i++) temp += products[i].quantity * products[i].data.productPrice;
+		for (var i = 0; i < products.length; i++) temp += products[i].quantity * products[i].menuItem.productPrice;
 
 		setSubtotal(temp);
 		setTotal(temp + delfee);
@@ -44,11 +44,11 @@ export default function Example() {
 
 	const updateTotal = async (value, name) => {
 		for (var i = 0; i < products.length; i++) {
-			if (products[i].data.productName == name) break;
+			if (products[i].menuItem.productName == name) break;
 		}
 		products[i].quantity = value;
 		var temp = 0;
-		for (var i = 0; i < products.length; i++) temp += products[i].quantity * products[i].data.productPrice;
+		for (var i = 0; i < products.length; i++) temp += products[i].quantity * products[i].menuItem.productPrice;
 		setSubtotal(temp);
 		setTotal(temp + delfee);
 		localStorage.setItem("foodCart", JSON.stringify(products));
