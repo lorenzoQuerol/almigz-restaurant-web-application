@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import registerUser from "@utils/registerUser";
 import { useRouter } from "next/router";
 
@@ -28,19 +29,26 @@ export default function register() {
 			email: email,
 			password: password,
 			homeAddress: homeAddress,
-			contactNum: contactNum,
-			altContactNum: altContactNum,
+			contactNum: "+63" + contactNum,
+			altContactNum: !!altContactNum ? "+63" + altContactNum : altContactNum,
 			cart: {},
 		};
 
 		// Register user
 		if (firstName && lastName && email && password && confirmPassword && homeAddress && contactNum) {
-			if (password === confirmPassword) {
+			if (contactNum == altContactNum) {
+				setMessage("Please enter another mobile number for Contact Number 2.");
+			} else if (password === confirmPassword) {
 				const response = await registerUser(userData);
-				// SUCCESS: Redirect to homepage
-				if (response.success) return router.push(process.env.NEXTAUTH_URL);
-				else setMessage(response.msg); // ERROR: Email exists in the system
-			} else setMessage("Password does not match."); // ERROR: Passwords do not match
+				// SUCCESS: Automatically sign in and redirect to homepage
+				if (response.success) {
+					await signIn("credentials", {
+						email: email,
+						password: password,
+						callbackUrl: process.env.NEXTAUTH_URL,
+					});
+				} else setMessage(response.msg); // ERROR: Email exists in the system
+			} else setMessage("Passwords do not match."); // ERROR: Passwords do not match
 		} else setMessage("Please fill out all fields."); // ERROR: Empty Fields
 	};
 
@@ -57,6 +65,7 @@ export default function register() {
 						placeholder="First Name"
 						value={firstName}
 						onChange={(e) => setFirstName(e.target.value)}
+						required
 					></input>
 
 					<label className="mt-4 label">Last Name</label>
@@ -67,6 +76,7 @@ export default function register() {
 						placeholder="Last Name"
 						value={lastName}
 						onChange={(e) => setLastName(e.target.value)}
+						required
 					></input>
 
 					<label className="mt-4 label">Email Address</label>
@@ -77,6 +87,7 @@ export default function register() {
 						placeholder="example@email.com"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
+						required
 					></input>
 
 					<label className="mt-4 label">Password</label>
@@ -84,9 +95,13 @@ export default function register() {
 						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 						type="password"
 						name="password"
+						minLength="8"
+						pattern="[^\s]{8,}"
+						title="Password should have at least 8 characters and should not contain whitespace."
 						placeholder="Password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
+						required
 					></input>
 
 					<label className="mt-4 label">Confirm Password</label>
@@ -97,6 +112,7 @@ export default function register() {
 						placeholder="Confirm Password"
 						value={confirmPassword}
 						onChange={(e) => setConfirmPassword(e.target.value)}
+						required
 					></input>
 
 					<label className="mt-4 label">Home Address</label>
@@ -107,27 +123,43 @@ export default function register() {
 						placeholder="Home Address"
 						value={homeAddress}
 						onChange={(e) => setAddress(e.target.value)}
+						required
 					></textarea>
 
 					<label className="mt-4 label">Contact Number 1</label>
-					<input
-						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
-						type="tel"
-						name="contactNum"
-						placeholder="09XXXXXXXXX (Mobile Number)"
-						value={contactNum}
-						onChange={(e) => setContactNum(e.target.value)}
-					></input>
+					<div className="flex items-center w-full pl-2 font-sans font-medium text-gray-600 rounded-md align-left">
+						+63
+						<input
+							className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							type="tel"
+							name="contactNum"
+							maxLength="10"
+							minLength="10"
+							pattern="[0-9]{10}"
+							title="Input should only contain 10 digits."
+							placeholder="9XXXXXXXXX (Mobile Number)"
+							value={contactNum}
+							onChange={(e) => setContactNum(e.target.value)}
+							required
+						></input>
+					</div>
 
 					<label className="mt-4 label">Contact Number 2</label>
-					<input
-						className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
-						type="tel"
-						name="altContactNum"
-						placeholder="Mobile or Telephone Number"
-						value={altContactNum}
-						onChange={(e) => setAltContactNum(e.target.value)}
-					></input>
+					<div className="flex items-center w-full pl-2 font-sans font-medium text-gray-600 rounded-md align-left">
+						+63
+						<input
+							className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							type="tel"
+							name="altContactNum"
+							maxLength="10"
+							minLength="10"
+							pattern="[0-9]{10}"
+							title="Input should only contain 10 digits."
+							placeholder="9XXXXXXXXX (Mobile Number)"
+							value={altContactNum}
+							onChange={(e) => setAltContactNum(e.target.value)}
+						></input>
+					</div>
 					<br />
 					<div className="mt-4 font-sans font-normal text-left text-red-500">{message}</div>
 					<button className="p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300">Submit</button>
