@@ -27,7 +27,8 @@ async function handler(req, res) {
 				const response = await connectToContentful(query);
 				if (!response) res.status(404).json({ success: false, msg: "Cannot find home page items." });
 
-				const homepageItems = response.data.homepageAnnouncementCollection.items[0].announcementsCollection.items;
+				// const homepageItems = response.data.homepageAnnouncementCollection.items[0].announcementsCollection.items;
+				const homepageItems = response.data.homepageAnnouncementCollection.items;
 
 				res.status(200).json({ success: true, data: homepageItems });
 			} catch (err) {
