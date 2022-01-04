@@ -26,6 +26,10 @@ const CartItemSchema = new mongoose.Schema({
 });
 
 const TransactionSchema = new mongoose.Schema({
+  invoiceNum: {
+    type: Number,
+    required: true,
+  },
   dateCreated: {
     type: Date,
     required: true,
