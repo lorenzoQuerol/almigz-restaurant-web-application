@@ -3,15 +3,16 @@ import Link from "next/link";
 import useSWR from 'swr';
 import { data } from "autoprefixer";
 
-// const fetcher = (url) => fetch(url).then((res) => res.json());
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function Home() {
-    // const { data, error } = useSWR('/api/homepage/', fetcher);
+    const { data, error } = useSWR('/api/homepage/', fetcher);
 
-    // if (error) return <div>failed to load</div>
-    // if (!data) return <div>loading...</div>
+    if (error) return <div>failed to load</div>
+    if (!data) return <div>loading...</div>
     // var pic = data.data.announcementsCollection.items;
-
+    // console.log(data.data);
+    const banners = data.data;
     return (
         <>
             <div className="flex-col w-full justify-center">
@@ -23,9 +24,13 @@ export default function Home() {
                         </a>
                     </Link>
                 </div>    
-                <Image className="" src="/banner1.jpeg" alt="announcement" width={1260} height={825} />
-                <Image className="" src="/banner2.jpeg" alt="announcement" width={1260} height={825} />
-
+                {banners.map((pics) =>
+                    <div>
+                    {pics.announcementsCollection.items.map((pic) => (
+                        <Image className="" src={pic.url} alt="announcement" width={1260} height={825} />
+                    ))} 
+                    </div>   
+                )}
                 <div className="flex items-center self-center justify-center mt-10">
                     <h1 className="text-xl font-rale text-black font-bold p-2">Also available in: </h1>
                     <a href="https://food.grab.com/ph/en/" target="_blank">
