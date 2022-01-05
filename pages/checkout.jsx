@@ -15,8 +15,13 @@ export default function CheckoutPage() {
 	// TEMPORARY - delivery fee
 	const delFee = 50;
 
-	// Session
-	const { data: session, status } = useSession();
+	// Get Session
+	const { data: session, status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			router.push("auth/signIn");
+		},
+	});
 
 	// User
 	const [user, setUser] = useState();
@@ -50,9 +55,6 @@ export default function CheckoutPage() {
 	const cart = getStorageValue("foodCart");
 
 	useEffect(() => {
-		// If session is undefined, redirect to sign in page
-		if (status === "unauthenticated") router.push("auth/signIn");
-
 		if (session) setEmail(session.user.email);
 
 		if (data) setUser(data.data);
@@ -107,16 +109,14 @@ export default function CheckoutPage() {
 		}
 	};
 
-	if (status === "authenticated") {
-		return (
-			<>
-				CHECKOUT: <br />
-				<form onSubmit={submitTransaction}>
-					<button>Place Order (Open Receipt)</button>
-				</form>
-			</>
-		);
-	} else {
-		return <h1>Loading...</h1>;
-	}
+	if (status === "loading") return <h1>Loading...</h1>;
+
+	return (
+		<>
+			CHECKOUT: <br />
+			<form onSubmit={submitTransaction}>
+				<button>Place Order (Open Receipt)</button>
+			</form>
+		</>
+	);
 }

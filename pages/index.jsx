@@ -6,10 +6,11 @@ import { data } from "autoprefixer";
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function Home() {
+	console.log("nice");
 	const { data, error } = useSWR("/api/homepage/", fetcher);
 
-	if (error) return <div>failed to load</div>;
-	if (!data) return <div>Loading...</div>;
+	// if (error) return <div>failed to load</div>;
+	if (!data) return <h1>Loading...</h1>;
 
 	const banners = data.data;
 
