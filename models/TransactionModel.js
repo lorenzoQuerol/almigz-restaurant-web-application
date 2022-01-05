@@ -107,6 +107,11 @@ const TransactionSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+
+  reason: {
+    type: String,
+    required: false,
+  } 
 });
 
 export default mongoose.models.Transaction || mongoose.model('Transaction', TransactionSchema);

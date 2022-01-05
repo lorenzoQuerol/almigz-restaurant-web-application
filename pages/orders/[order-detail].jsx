@@ -1,98 +1,181 @@
-import { useRouter } from "next/router";
+import router, { useRouter } from "next/router";
 import { useState } from "react";
 import Link from "next/link";
 import useSWR from 'swr';
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
-
-//temporary invoice number (starting at 1)
-var inv = 1;
-
-//to get date
-Date.prototype.today = function () { 
-    return (((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1) +"/"+ ((this.getDate() < 10)?"0":"") + this.getDate() +"/"+ this.getFullYear();
-}
-
-//to get time
-Date.prototype.timeNow = function () {
-     return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
-}
-
-//sample array
+//sample order array (R)
 const products = [
     {
-        qty: 3,
-        productName:'Pork Binagoongan',
-        price: 80,
-        // total: 240 optional
+        quantity: 3,
+        menuItem: {
+            productName:'Pork Binagoongan',
+            productPrice: 80.00,
+        }
     },
     {
-        qty: 1,
-        productName:'Malabon (Small)',
-        price: 380,
-        // total: 380 optional
+        quantity: 1,
+        menuItem: {
+            productName:'Malabon (Small)',
+            productPrice: 380.00,
+        }
     },
     {
-        qty: 2,
-        productName:'Malabon Medium',
-        price: 80,
-        // total: 160 optional
+        quantity: 2,
+        menuItem: {
+            productName:'Malabon Medium',
+            productPrice: 80.00,
+        }
     },
     {
-        qty: 4,
-        productName:'Sizzling Sisig',
-        price: 90,
-        // total: 360 optional
+        quantity: 4,
+        menuItem: {
+            productName:'Sizzling Sisig',
+            productPrice: 90.00,
+        }
     }
 ]
 
+//SAMPLE: DEL-COD (R)
+var transSample1 = {
+    invoiceNum: 1,
+    dateCreated: "01/05/2022 06:40:40",
+    orderStatus: 0,
+    type: "Delivery",
+    fullName: "John Doe",
+    email: "johndoe@gmail.com",
+    contactNum: [ "+639123456789", "+639012345678"],
+    order: products,
+    specialInstructions: "Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
+    totalPrice: 1190.00,
+    address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
+    payMethod: "Cash on Delivery",
+    change: "810",
+    deliverTime: "Now",
+    storeLocation: "",
+    pickupTime: "",
+    reason: "A reason..."
+}
+
+//SAMPLE: DEL-GCASH (R)
+var transSample2 = {
+    invoiceNum: 1,
+    dateCreated: "01/05/2022 06:40:40",
+    orderStatus: 0,
+    type: "Delivery",
+    fullName: "John Doe",
+    email: "johndoe@gmail.com",
+    contactNum: [ "+639123456789", "+639012345678"],
+    order: products,
+    specialInstructions: "Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
+    totalPrice: 1190.00,
+    address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
+    payMethod: "GCash",
+    change: "",
+    deliverTime: "11:00 AM",
+    storeLocation: "",
+    pickupTime: "",
+}
+
+//SAMPLE: PICKUP (R)
+var transSample3 = {
+    invoiceNum: 1,
+    dateCreated: "01/05/2022 06:40:40",
+    orderStatus: 0,
+    type: "Pickup",
+    fullName: "John Doe",
+    email: "johndoe@gmail.com",
+    contactNum: [ "+639123456789", "+639012345678"],
+    order: products,
+    specialInstructions: "Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
+    totalPrice: 1190.00,
+    address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
+    payMethod: "",
+    change: "",
+    deliverTime: "",
+    storeLocation: "Branch 1",
+    pickupTime: "12:00 PM",
+}
+
+/* Status Conditional Rendering Variables (K)*/
+const statFlags = new Array(6);
+statFlags.fill(false);
+const statColors = ["bg-red-200", "bg-yellow-200", "bg-[#CF9FFF]", "bg-blue-200", "bg-green-200", "bg-gray-200"];
+
+// const fetcher = (url) => fetch(url).then((res) => res.json());
+
 export default function Receipt() {
+    /* FETCHING (K) */
     // const router = useRouter();
-    const [delfee, setDelFee] = useState(50);
-    const [subtotal, setSubtotal] = useState(200);
-    const [total, setTotal] = useState(delfee + subtotal);
-    // const [col, setCol] = useState();
-    // const [options, setOptions] = useState();
-    // const router = useRouter();
-    //get date and time string
-    var datetime = new Date().today() + "   " + new Date().timeNow();
+	// const { data, error } = useSWR(`/api/transactions/${router.query.order_detail}`, fetcher);
+	
+	// if (error) return <div>failed to load</div>;
+	// if (!data) return <div>loading</div>;
+
+
+    /* FOR TESTING ONLY (R) */
+    const trans = transSample1;
+    // const trans = transSample2;
+    // const trans = transSample3;
+
+
+    /* ACTUAL (K)*/ 
+    // const trans = data.data;
     
-    //display invoice number with leading 0's (Order #0001)
-    const num = inv.toString().padStart(4, '0');
+    const [reason, setReason] = useState(trans.reason);
+    const [message, setMessage] = useState("");
 
-    //Specify mode of payment
-    const mop = "Cash on Delivery";
-    const cash = 1000;
-    const change = 20;
+    //delpickFlag: true (Delivery), false (Pickup)
+    
+    var delFee, payMethod, total, cash, change, delpickFlag;
+    /* Delivery Fee & Payment Method (K) */
+    
+    console.log(trans.type === "Delivery");
+	if (trans.type === "Delivery") {
+        delFee = 50; //temporary 
+        payMethod = trans.payMethod; 
+        delpickFlag = true;
+    }
+    else if (trans.type === "Pickup") {
+        delFee = 0;
+        payMethod = "(on pickup)";
+        delpickFlag = false;
+    }
 
-    var options;
-    var col;
-    //newly added vars
-    // const col = "red";
-    const status = "ORDER PROCESSED";
-    const delpick = "Delivery";
-    const userInfo = {
-        name: "John Doe",
-        email:"johndoe@gmail.com",
-        contact: [ "+639123456789", "+639012345678"],
-        address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila"
+    /* Set total, cash, and change values (K) */
+    if (payMethod === "Cash on Delivery") {
+        total = trans.totalPrice;
+        change = trans.change;
+        cash = parseInt(total) + parseInt(change);
     }
-    const notes = "Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint."
-    // console.log(datetime);
+    else if (payMethod === "GCash" || payMethod === "(on pickup)" ) {
+        change = "-";
+        cash = "-";
+        total = "";
+    }
 
-    const stat = new Array(6);
-    stat.fill(false);
-    console.log(stat);
-	if (status === "INCOMING ORDER") {
-        col = "red";
-        stat[0] = true;
-    }
-    else if (status == "ORDER PROCESSED") {
-        col = "yellow";
-        stat.fill(false);
-        stat[1] = true;
-        console.log(stat);
-    }
+    /* Set Status Conditional Rendering Flag (K)*/
+    statFlags.fill(false);
+    statFlags[trans.orderStatus] = true;
+
+    const updateStatus = async (value) => {
+        /* TODO: Update orderStatus in database */
+		
+        /* FOR TESTING ONLY (R) */
+        transSample1.orderStatus = parseInt(value); 
+        // transSample2.orderStatus = parseInt(value); 
+        // transSample3.orderStatus = parseInt(value); 
+
+
+        router.push('/orders/1'); //temporary - reload same order page
+	};
+
+    const saveReason = async (value) => {
+        /* TODO: Update reason in database */
+        setReason(value);
+		transSample1.reason = value; //for testing only (R)
+        //if (success)
+            setMessage("Changes saved.");
+	};
     return (
         <div className={`w-full flex flex-col`}>
             <div className="flex flex-row justify-center items-start  m-5">
@@ -100,10 +183,18 @@ export default function Receipt() {
                     <div className="flex flex-col border rounded-md">
                         <div className="shadow-lg bg-gray-100 flex rounded-t justify-between items-center p-5 pb-3">
                             <div className="">
-                                <h1 className="text-4xl font-rale text-black font-bold">Order #{num}</h1>
-                                <p className="mt-1 text-sm text-gray-500 ml-1">Date: {datetime}</p>
+                                <h1 className="text-4xl font-rale text-black font-bold">Order #{trans.invoiceNum.toString().padStart(4, '0')}</h1>
+                                <p className="mt-1 text-sm text-gray-500 ml-1">Date: {trans.dateCreated}</p>
                             </div>
-                            <div className={`p-2 bg-${col}-500 text-white font-normal flex items-center rounded-lg`}>{status}</div>
+                            {statFlags[0] && <div className="p-2 bg-red-500 text-white font-normal flex items-center rounded-lg">INCOMING ORDER</div>}
+                            {statFlags[1] && <div className="p-2 bg-yellow-500 text-white font-normal flex items-center rounded-lg">ORDER PROCESSED</div>}
+                            {statFlags[2] && <div className="p-2 bg-[#9a37c4] text-white font-normal flex items-center rounded-lg">ORDER IN PREPARATION</div>}
+                            {statFlags[3] && <div className="p-2 bg-blue-500 text-white font-normal flex items-center rounded-lg">
+                                {delpickFlag &&  <p>ORDER IN DELIVERY</p>}
+                                {!delpickFlag && <p>READY FOR PICK UP</p>}
+                            </div>}
+                            {statFlags[4] && <div className="p-2 bg-green-500 text-white font-normal flex items-center rounded-lg">COMPLETED ORDER</div>}
+                            {statFlags[5] && <div className="p-2 bg-gray-500 text-white font-normal flex items-center rounded-lg">CANCELLED ORDER</div>}
                         </div>
                         <div className="shadow-lg p-5 pt-4 bg-white rounded-b">
                             <div className="flex justify-between">
@@ -117,101 +208,120 @@ export default function Receipt() {
                                     </tr>
                                     </thead> 
                                     <tbody className="divide-y divide-gray-200">
-                                    {products.map((product) => (
-                                    <tr key={product.productName} className="text-center py-3">
-                                        <td className="py-1 font-sans">{product.qty}</td> 
-                                        <td className="">{product.productName}</td> 
-                                        <td className="font-sans">{product.price}</td> 
-                                        <td className="font-sans">{product.price * product.qty}</td>
+                                    {trans.order.map((product) => (
+                                    <tr key={product.menuItem.productName} className="text-center py-3">
+                                        <td className="py-1 font-sans">{product.quantity}</td> 
+                                        <td className="">{product.menuItem.productName}</td> 
+                                        <td className="font-sans">{product.menuItem.productPrice}</td> 
+                                        <td className="font-sans">{product.menuItem.productPrice * product.quantity}</td>
                                     </tr>
                                     ))}
                                     </tbody>
                                 </table>
                             </div>
-                            {/* <p className="mt-5 text-sm text-gray-500">This report is generated automatically and does not serve as an official receipt.</p> */}
                         </div>
                     </div>                        
-                    {/* <div className="border-t border-gray-200 pt-8 pb-6 px-4 sm:px-6"> */}
                     <div className="bg-white border shadow-lg rounded-md mt-2 flex justify-between items-center flex-row">
                         <div className="p-5 px-4 sm:px-6">
-                            <h1 className="text-normal font-semibold text-gray-900">Payment Method: {mop}</h1>
+                            <h1 className="text-normal font-semibold text-gray-900">Payment Method: {payMethod}</h1>
                             <div className="flex justify-between text-base text-gray-900 mt-3">
                             <p>Cash</p>
-                            <p>P{cash}</p>
+                            <p>{cash}</p>
                             </div>
                             <div className="flex justify-between text-base text-medium text-gray-400 my-2">
                             <p>Total</p>
-                            <p>- P{total}</p>
+                            <p>-{total}</p>
                             </div>
                             <div className="flex justify-between text-base text-gray-900">
                             <p>Change</p>
-                            <p>P{change}</p>
+                            <p>{change}</p>
                             </div>
                         </div>
                         <div className="p-5 w-1/3 divide-y">
                             <div className="flex justify-between text-base font-medium text-gray-900">
                             <p>Subtotal</p>
-                            <p>P{subtotal}</p>
+                            <p>P {trans.totalPrice - delFee}</p>
                             </div>
                             <div className="flex justify-between text-base text-medium text-gray-500 my-3">
                             <p>Delivery Fee</p>
-                            <p>P{delfee}</p>
+                            <p>P {delFee}</p>
                             </div>
                             <div className="flex justify-between text-xl my-1 font-medium text-gray-900">
                             <p>Total</p>
-                            <p>P{total}</p>
+                            <p>P {trans.totalPrice}</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="p-3 mx-3 w-1/4 border rounded-md text-black bg-white shadow-lg divide-y">
-                    <div className={`text-center bg-${col}-100`}>
-                            <b>For {delpick.toUpperCase()}</b><br/>
-                            {delpick} Time: 11:00 A.M.
-                    </div>
+                    {/* For DELIVERY */}
+                    {delpickFlag && <div className={`text-center ${statColors[trans.orderStatus]}`}>
+                            <b>For DELIVERY</b><br/>
+                            Delivery Time: {trans.deliverTime}
+                    </div>}
+                    {!delpickFlag && <div className={`text-center ${statColors[trans.orderStatus]}`}>
+                            <b>For PICK UP</b><br/>
+                            Store: {trans.storeLocation}<br/>
+                            Pick Up Time: {trans.pickupTime}
+                    </div>}
                     <div className="py-2 pb-10">
-                            <b> {userInfo.name}</b><br/>
-                            {userInfo.email}<br/>
-                            {userInfo.contact.map((num) => (
+                            <b> {trans.fullName}</b><br/>
+                            {trans.email}<br/>
+                            {trans.contactNum.map((num) => (
                             <span>{num}<br/></span>
                             ))}
-                            {userInfo.address}<br/>
+                            {trans.address}<br/>
                     </div>
                     <div className="pt-2 text-gray-400 font-light leading-normal text-sm">
                         <span className="italic font-medium">Special Instructions</span><br/>
-                        <span>{notes}</span>
+                        <span>{trans.specialInstructions}</span>
                     </div>
                 </div>
             </div>
             {/* <div className={`sticky left-0 bottom-0 bg-white w-full shadow-${col}`}> */}
             <div className={`flex-col w-full flex justify-center p-3 mb-5`}>
-                {/* <div className="flex justify-center">
-                    <ul className="w-2/3 steps">
-                        <li data-content="?" className="step step-neutral ">Incoming</li> 
-                        <li data-content="!" className="step step-neutral">Processed</li> 
-                        <li data-content="✓" className="step step-neutral">In Preparation</li> 
-                        <li data-content="✕" className="step step-neutral">In Delivery/<br/>Ready for Pick up</li> 
-                        <li data-content="★" className="step step-neutral">Completed</li>
-                    </ul>
-                </div> */}
-                {stat[0] && 
-                <div className="self-center">
+                {statFlags[0] && <div className="self-center">
                     <button className="font-normal self-center text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300"
-                        onClick={() => router.push('/tracker')}>
+                        onClick={() => updateStatus(1)}>
                         Accept Order
                     </button>
                     <button className="font-normal self-center text-white rounded-lg m-2 p-4 pl-7 pr-7 bg-red-500 hover:font-medium hover:bg-red-300"
-                        onClick={() => router.push('/tracker')}>
+                        onClick={() => updateStatus(5)}>
                         Cancel Order
                     </button>
                 
                 </div>}
-                {stat[1] && 
-                <div className="self-center">
+                {statFlags[1] && <div className="self-center">
                     <button className="font-normal self-center text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300"
-                        onClick={() => router.push('/tracker')}>
+                        onClick={() => updateStatus(2)}>
                         Prepare Order
                     </button>
+                </div>}
+                {statFlags[2] && <div className="self-center">
+                    <button className="font-normal self-center text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300"
+                        onClick={() => updateStatus(3)}>
+                        Ready for Deliver / Pickup
+                    </button>
+                </div>}
+                {statFlags[3] && <div className="self-center">
+                    <button className="font-normal self-center text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300"
+                        onClick={() => updateStatus(4)}>
+                        Complete Order
+                    </button>
+                </div>}
+                {statFlags[4] && <div className="self-center">
+                    <div className="text-black text-xl font-bold text-center mb-3">ORDER STATUS: <span className="text-green-600">COMPLETED</span> </div>
+                </div>}
+                {statFlags[5] && <div className="self-center flex flex-col mb-3 w-1/2">
+                    <div className="text-black text-xl font-bold text-center mb-3">ORDER STATUS: <span className="text-red-600">CANCELLED</span> </div>
+                    <label>
+                        Remarks/Reason:
+                    </label>
+                    <textarea contentEditable="true" suppressContentEditableWarning={true}  
+                        className="border focus:text-black p-1" 
+                        value={reason} 
+                        onChange={(e) => saveReason(e.target.value)}>{trans.reason}</textarea>
+                    <p className="italic tracking-wider text-center my-1 text-sm text-green-500 bg-green-100">{message}</p>
                 </div>}
                 <span className="text-center text-black">Go to <span className="self-center font-semibold underline hover:text-green-700"><Link href="/orders"> DASHBOARD</Link></span></span>
             </div>
