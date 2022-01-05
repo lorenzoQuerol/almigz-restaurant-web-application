@@ -51,7 +51,7 @@ export default function CheckoutPage() {
 
 	useEffect(() => {
 		// If session is undefined, redirect to sign in page
-		if (!session) router.push("auth/signIn");
+		if (status === "unauthenticated") router.push("auth/signIn");
 
 		if (session) setEmail(session.user.email);
 
@@ -69,7 +69,7 @@ export default function CheckoutPage() {
 			setChange(1000);
 			setDeliverTime("Now");
 		}
-	}, [session, email, data, user]);
+	}, [session, status, email, data, user]);
 
 	// Handle submit transaction
 	const submitTransaction = async (event) => {
@@ -107,15 +107,16 @@ export default function CheckoutPage() {
 		}
 	};
 
-	// When rendering client side don't display anything until loading is complete
-	if (typeof window !== "undefined" && status === "loading") return null;
-
-	return (
-		<>
-			CHECKOUT: <br />
-			<form onSubmit={submitTransaction}>
-				<button>Place Order (Open Receipt)</button>
-			</form>
-		</>
-	);
+	if (status === "authenticated") {
+		return (
+			<>
+				CHECKOUT: <br />
+				<form onSubmit={submitTransaction}>
+					<button>Place Order (Open Receipt)</button>
+				</form>
+			</>
+		);
+	} else {
+		return <h1>Loading...</h1>;
+	}
 }

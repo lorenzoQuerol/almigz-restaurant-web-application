@@ -1,10 +1,13 @@
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import checkEmail from "@utils/checkEmail";
 
 export default function signInPage() {
 	const router = useRouter();
+
+	// Get session
+	const { data: session, status } = useSession();
 
 	// Login credentials
 	const [email, setEmail] = useState("");
@@ -12,6 +15,10 @@ export default function signInPage() {
 
 	// For API error messages
 	const [message, setErrorMessage] = useState("");
+
+	useEffect(() => {
+		if (status === "authenticated") router.push("/");
+	}, [session, status]);
 
 	const submitLogin = async (event) => {
 		event.preventDefault();
@@ -36,34 +43,38 @@ export default function signInPage() {
 		} else setErrorMessage("Email or password is missing.");
 	};
 
-	return (
-		<div className="w-1/2 flex-col text-center">
-			<h1 className="text-5xl font-rale text-black font-bold p-8">Login</h1>
-			<div className="rounded-md shadow-xl border-t border-t-gray-100 p-10">
-				<form className="font-rale font-lg text-gray-800 font-bold" onSubmit={submitLogin}>
-					<label className="label">Email Address</label>
-					<input
-						className="input p-5  input-sm input-bordered rounded-md w-full focus:ring-2 focus:ring-blue-300"
-						type="email"
-						name="email"
-						placeholder="Email Address"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-					></input>
+	if (status === "unauthenticated") {
+		return (
+			<div className="flex-col w-1/2 text-center">
+				<h1 className="p-8 text-5xl font-bold text-black font-rale">Login</h1>
+				<div className="p-10 border-t rounded-md shadow-xl border-t-gray-100">
+					<form className="font-bold text-gray-800 font-rale font-lg" onSubmit={submitLogin}>
+						<label className="label">Email Address</label>
+						<input
+							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							type="email"
+							name="email"
+							placeholder="Email Address"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+						></input>
 
-					<label className="label mt-4">Password</label>
-					<input
-						className="input p-5  input-sm input-bordered rounded-md w-full focus:ring-2 focus:ring-blue-300"
-						type="password"
-						name="password"
-						placeholder="Password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-					></input>
-					<div className="text-red-500 font-sans font-normal text-left mt-4">{message}</div>
-					<button className="font-normal text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300">Submit</button>
-				</form>
+						<label className="mt-4 label">Password</label>
+						<input
+							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							type="password"
+							name="password"
+							placeholder="Password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+						></input>
+						<div className="mt-4 font-sans font-normal text-left text-red-500">{message}</div>
+						<button className="p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300">Submit</button>
+					</form>
+				</div>
 			</div>
-		</div>
-	);
+		);
+	} else {
+		return <h1>Loading...</h1>;
+	}
 }

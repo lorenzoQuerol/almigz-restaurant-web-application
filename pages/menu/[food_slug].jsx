@@ -62,6 +62,7 @@ export default function FoodItemPage() {
 			</div>
 		);
 	}
+
 	//render food item page
 	else {
 		var pic = data.data.productImagesCollection.items[0].url;
