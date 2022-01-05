@@ -144,6 +144,9 @@ export default function Receipt() {
 		router.push("/tracker");
 	};
 
+	// When rendering client side don't display anything until loading is complete
+	if (typeof window !== "undefined") return null;
+
 	return (
 		<div className="flex flex-col w-1/2 mt-5">
 			<div className="p-5 pb-3 bg-gray-100 border border-gray-200 shadow-xl">
