@@ -52,6 +52,9 @@ export default function register() {
 		} else setMessage("Please fill out all fields."); // ERROR: Empty Fields
 	};
 
+	// When rendering client side don't display anything until loading is complete
+	if (typeof window !== "undefined") return null;
+
 	return (
 		<div className="flex-col w-1/2 text-center">
 			<h1 className="p-8 text-5xl font-bold text-black font-rale">Sign Up</h1>
