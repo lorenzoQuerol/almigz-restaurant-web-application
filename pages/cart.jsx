@@ -23,7 +23,6 @@ export default function Example() {
 		setProducts(cart.data);
 		setSubtotal(cart.total + subtotal);
 		setTotal(cart.total + subtotal + delfee);
-		console.log(total);
 	}, []);
 
 	const deleteItem = (name) => {
