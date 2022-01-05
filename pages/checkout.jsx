@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
-import axios from "axios";
 
 import getStorageValue from "@utils/localStorage/getStorageValue";
 import confirmTransaction from "@utils/confirmTransaction";
@@ -48,7 +47,11 @@ export default function CheckoutPage() {
 	const cart = getStorageValue("foodCart");
 
 	useEffect(() => {
+		// If session is undefined, redirect to sign in page
+		if (!session) router.push("auth/signIn");
+
 		if (session) setEmail(session.user.email);
+
 		if (data) setUser(data.data);
 		if (cart) setOrder(cart);
 		if (user) {
@@ -100,6 +103,9 @@ export default function CheckoutPage() {
 			// DESIGNER TODO: Handle here if unsuccessful checkout (i.e., missing values).
 		}
 	};
+
+	// When rendering client side don't display anything until loading is complete
+	if (typeof window !== "undefined" && status === "loading") return null;
 
 	return (
 		<>
