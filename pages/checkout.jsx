@@ -43,7 +43,10 @@ export default function CheckoutPage() {
 	// Transaction
 	const [transaction, setTransaction] = useLocalStorage("transaction", null);
 
+	// Get user data
 	const { data, error } = useSWR(`/api/users/${email}`, fetcher);
+
+	// Get cart from local storage
 	const cart = getStorageValue("foodCart");
 
 	useEffect(() => {
