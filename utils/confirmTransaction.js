@@ -27,7 +27,6 @@ export default async function confirmTransaction(newTransaction) {
 		}
 
 		const response = await axios.post(`${process.env.NEXTAUTH_URL}/api/transactions`, newTransaction);
-		delete response.data.data;
 		const success = response.data;
 		return success;
 	} catch (err) {
