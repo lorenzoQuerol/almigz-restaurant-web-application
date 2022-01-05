@@ -35,7 +35,6 @@ export default function FoodItemPage() {
 				quantity: quantity,
 			};
 			pushToCart(item);
-			console.log(`/menu/${router.query.food_slug}`);
 			router.replace(
 				{
 					pathname: "/cart",
@@ -54,9 +53,9 @@ export default function FoodItemPage() {
 	if (!data.data) {
 		return (
 			<div className="flex-col text-center self-top">
-				<h1 className="text-gray-500 m-4 italic font-light">Menu item not found. </h1>
+				<h1 className="m-4 italic font-light text-gray-500">Menu item not found. </h1>
 				<Link href="/menu">
-					<a className="p-2 m-2 font-semibold font-rale text-xl text-yellow-600 border-yellow-500 rounded-btn border-2 hover:text-white hover:bg-yellow-500 hover:border-none">
+					<a className="p-2 m-2 text-xl font-semibold text-yellow-600 border-2 border-yellow-500 font-rale rounded-btn hover:text-white hover:bg-yellow-500 hover:border-none">
 						VIEW MENU
 					</a>
 				</Link>
@@ -69,15 +68,15 @@ export default function FoodItemPage() {
 
 		return (
 			<>
-				<div onLoad={(e) => setTotal(data.data.productPrice)} className="w-1/2 flex-col text-center rounded-md shadow-2xl shadow-yellow-400 p-10">
-					<h1 className="text-3xl font-rale text-black font-bold">{data.data.productName}</h1>
+				<div onLoad={(e) => setTotal(data.data.productPrice)} className="flex-col w-1/2 p-10 text-center rounded-md shadow-2xl shadow-yellow-400">
+					<h1 className="text-3xl font-bold text-black font-rale">{data.data.productName}</h1>
 					<h1>{data.data.category}</h1>
-					<Image src={pic} layout="intrinsic" className="shadow-2xl shadow-black-400 bg-gray-100" width="300" height="200" />
+					<Image src={pic} layout="intrinsic" className="bg-gray-100 shadow-2xl shadow-black-400" width="300" height="200" />
 					<h1 className="mt-8">{data.data.productDescription}</h1>
-					<h1 className="text-green-700 font-bold text-2xl mt-12 pb-3">P {total}</h1>
+					<h1 className="pb-3 mt-12 text-2xl font-bold text-green-700">P {total}</h1>
 					<form onSubmit={addToCart} className="flex-col">
 						<input
-							className="input p-5 pr-2 mr-2 font-black-100 text-xl w-24 input-sm input-bordered rounded-md focus:ring-2 focus:ring-blue-300"
+							className="w-24 p-5 pr-2 mr-2 text-xl rounded-md input font-black-100 input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 							type="number"
 							min="1"
 							step="1"
@@ -87,7 +86,7 @@ export default function FoodItemPage() {
 							onChange={(e) => updateTotal(e.target.value)}
 						></input>
 						pc
-						<button className="font-normal text-white rounded-lg m-5 p-4 pl-7 pr-7 bg-green-500 hover:font-medium hover:bg-green-300">Add to Cart</button>
+						<button className="p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300">Add to Cart</button>
 					</form>
 				</div>
 			</>
