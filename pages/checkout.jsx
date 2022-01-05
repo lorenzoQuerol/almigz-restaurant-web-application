@@ -1,22 +1,26 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import useSWR from "swr";
 import axios from "axios";
 
-import getCart from "@utils/foodCart/getCart";
+import getStorageValue from "@utils/localStorage/getStorageValue";
 import confirmTransaction from "@utils/confirmTransaction";
+import useLocalStorage from "@utils/localStorage/useLocalStorage";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function CheckoutPage() {
+	const router = useRouter();
+
+	// TEMPORARY - delivery fee
+	const delFee = 50;
+
 	// Session
 	const { data: session, status } = useSession();
 
 	// User
 	const [user, setUser] = useState();
-
-	// TEMPORARY - delivery fee
-	const delFee = 50;
 
 	// Additional details
 	const [type, setType] = useState("Delivery");
@@ -37,8 +41,11 @@ export default function CheckoutPage() {
 	const [storeLocation, setStoreLocation] = useState("");
 	const [pickupTime, setPickupTime] = useState("Now");
 
+	// Transaction
+	const [transaction, setTransaction] = useLocalStorage("transaction", null);
+
 	const { data, error } = useSWR(`/api/users/${email}`, fetcher);
-	const cart = getCart();
+	const cart = getStorageValue("foodCart");
 
 	useEffect(() => {
 		if (session) setEmail(session.user.email);
@@ -51,21 +58,22 @@ export default function CheckoutPage() {
 			setAddress(user.homeAddress);
 			setTotalPrice(order.total + delFee);
 
-			// TEMPORARY - test transaction
+			// TEMPORARY - test transaction (UI NEEDED)
 			setPayMethod("GCash");
 			setChange(1000);
 			setDeliverTime("Now");
 		}
 	}, [session, email, data, user]);
 
-	// Submit transaction
+	// Handle submit transaction
 	const submitTransaction = async (event) => {
 		event.preventDefault();
 
 		// Initialize transaction object
 		const transaction = {
+			invoiceNum: 1, // DEVELOPER TODO: This should increment based on the number of documents in the database
 			dateCreated: new Date(),
-			orderStatus: 0, // Initial incoming order status
+			orderStatus: 0, // Initial "incoming order" status
 			type: type,
 			fullName: fullName,
 			email: email,
@@ -84,10 +92,12 @@ export default function CheckoutPage() {
 		// Send transaction object
 		const response = await confirmTransaction(transaction);
 
+		// If successful, set transaction to local storage and redirect to receipt page
 		if (response.success) {
-			// Handle here if successful transaction
+			setTransaction(response.data);
+			router.push("/receipt");
 		} else {
-			// Handle here if unsuccessful transaction
+			// DESIGNER TODO: Handle here if unsuccessful checkout (i.e., missing values).
 		}
 	};
 
