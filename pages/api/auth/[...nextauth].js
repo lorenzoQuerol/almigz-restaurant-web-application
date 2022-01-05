@@ -32,7 +32,7 @@ export default NextAuth({
 					if (!checkPassword) return null;
 
 					// Return user object
-					user = { name: `${user.firstName} ${user.lastName}`, email: user.email };
+					user = { name: `${user.firstName} ${user.lastName}`, email: user.email, isAdmin: user.isAdmin };
 					return user;
 				} catch (err) {
 					return null;
@@ -43,5 +43,24 @@ export default NextAuth({
 
 	pages: {
 		signIn: "/auth/signIn",
+	},
+
+	// Check if the user logging in is an administrator. Fields returned in session:
+	// Admin: user, email, isAdmin (Boolean)
+	// User: user, email
+	callbacks: {
+		jwt: async ({ token, user }) => {
+			if (user) token.isAdmin = user.isAdmin;
+			return token;
+		},
+
+		session: async ({ session, token }) => {
+			if (token.isAdmin) session.user.isAdmin = token.isAdmin;
+			else delete session.user.isAdmin;
+
+			delete session.user.image;
+
+			return session;
+		},
 	},
 });
