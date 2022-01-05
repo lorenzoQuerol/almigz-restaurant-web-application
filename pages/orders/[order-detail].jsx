@@ -186,15 +186,15 @@ export default function Receipt() {
                                 <h1 className="text-4xl font-rale text-black font-bold">Order #{trans.invoiceNum.toString().padStart(4, '0')}</h1>
                                 <p className="mt-1 text-sm text-gray-500 ml-1">Date: {trans.dateCreated}</p>
                             </div>
-                            {statFlags[0] && <div className="p-2 bg-red-500 text-white font-normal flex items-center rounded-lg">INCOMING ORDER</div>}
-                            {statFlags[1] && <div className="p-2 bg-yellow-500 text-white font-normal flex items-center rounded-lg">ORDER PROCESSED</div>}
-                            {statFlags[2] && <div className="p-2 bg-[#9a37c4] text-white font-normal flex items-center rounded-lg">ORDER IN PREPARATION</div>}
-                            {statFlags[3] && <div className="p-2 bg-blue-500 text-white font-normal flex items-center rounded-lg">
+                            {statFlags[0] && <div className="px-1 bg-red-500 text-white font-semibold text-lg flex items-center rounded-lg">INCOMING ORDER</div>}
+                            {statFlags[1] && <div className="px-1 bg-yellow-500 text-white font-semibold text-lg flex items-center rounded-lg">ORDER PROCESSED</div>}
+                            {statFlags[2] && <div className="px-1 bg-[#9a37c4] text-white font-semibold text-lg flex items-center rounded-lg">ORDER IN PREPARATION</div>}
+                            {statFlags[3] && <div className="px-1 bg-blue-500 text-white font-semibold text-lg flex items-center rounded-lg">
                                 {delpickFlag &&  <p>ORDER IN DELIVERY</p>}
                                 {!delpickFlag && <p>READY FOR PICK UP</p>}
                             </div>}
-                            {statFlags[4] && <div className="p-2 bg-green-500 text-white font-normal flex items-center rounded-lg">COMPLETED ORDER</div>}
-                            {statFlags[5] && <div className="p-2 bg-gray-500 text-white font-normal flex items-center rounded-lg">CANCELLED ORDER</div>}
+                            {statFlags[4] && <div className="px-1 bg-green-500 text-white font-semibold text-lg flex items-center rounded-lg">COMPLETED ORDER</div>}
+                            {statFlags[5] && <div className="px-1 bg-gray-500 text-white font-semibold text-lg flex items-center rounded-lg">CANCELLED ORDER</div>}
                         </div>
                         <div className="shadow-lg p-5 pt-4 bg-white rounded-b">
                             <div className="flex justify-between">
