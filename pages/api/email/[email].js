@@ -12,7 +12,7 @@ async function handler(req, res) {
 	} = req;
 
 	switch (method) {
-		// Get user email
+		// Get user email (UNPROTECTED)
 		case "GET":
 			try {
 				const result = await User.findOne({ email: email }, "email");

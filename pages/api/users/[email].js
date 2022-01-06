@@ -1,78 +1,96 @@
-import createConnection from '@utils/mongoDBConnection';
-import { hash, compare } from 'bcryptjs';
+import { hash, compare } from "bcryptjs";
+import { getSession } from "next-auth/react";
 
-import User from '@models/UserModel';
+import createConnection from "@utils/mongoDBConnection";
+import User from "@models/UserModel";
 
 async function handler(req, res) {
-  // Create connection to database
-  await createConnection();
+	// Create connection to database
+	await createConnection();
 
-  // Unpack the request
-  const {
-    query: { email },
-    method,
-  } = req;
+	// Get session
+	const session = await getSession({ req });
 
-  switch (method) {
-    // Update user
-    case 'PUT':
-      try {
-        // Find user
-        const user = await User.findOne({ email: email }, { __v: false, cart: false });
-        if (!user) return res.status(404).json({ success: false, msg: 'User not found.' });
+	// Unpack the request
+	const {
+		query: { email },
+		method,
+	} = req;
 
-        // Check to see if password was changed, re-hash if changed
-        const samePassword = await compare(req.body.password, user.password);
-        if (!samePassword) user.password = await hash(req.body.password, 12);
+	switch (method) {
+		// Update user (PROTECTED)
+		case "PUT":
+			if (session) {
+				if (session.user.email === email) {
+					try {
+						// Find user
+						const user = await User.findOne({ email: email });
+						if (!user) return res.status(404).json({ success: false, msg: "User not found." });
 
-        // Update user
-        const updatedUser = await User.findOneAndUpdate({ email: email }, user, {
-          new: true,
-          runValidators: true,
-        });
+						// Check to see if password was changed, re-hash if changed
+						const samePassword = await compare(req.body.password, user.password);
+						if (!samePassword) user.password = await hash(req.body.password, 12);
 
-        res.status(200).json({
-          success: true,
-          msg: 'User account updated successfully.',
-          data: updatedUser,
-        });
-      } catch (err) {
-        res.status(400).json({ success: false, msg: err });
-      }
-      break;
+						// Update user
+						await User.findOneAndUpdate({ email: email }, user, {
+							new: true,
+							runValidators: true,
+						});
 
-    // Get user
-    case 'GET':
-      try {
-        const user = await User.findOne({ email: email }, { __v: false, cart: false });
-        if (!user) return res.status(404).json({ success: false, msg: 'User not found.' });
+						res.status(200).json({
+							success: true,
+							msg: "User account updated successfully.",
+						});
+					} catch (err) {
+						res.status(400).json({ success: false, msg: `Error updating user: ${err.message}` });
+					}
+				} else {
+					res.status(401).json({ success: false, msg: "Unauthorized user." });
+				}
+			} else {
+				res.status(401).json({ success: false, msg: "User not signed in." });
+			}
+			break;
 
-        res.status(200).json({ success: true, data: user });
-      } catch (err) {
-        res.status(400).json({ success: false, msg: err });
-      }
-      break;
+		// Get user (PUBLIC - UNPROTECTED)
+		case "GET":
+			try {
+				const user = await User.findOne({ email: email }, { _id: false, __v: false, isAdmin: false, isDelete: false, cart: false });
+				if (!user) return res.status(404).json({ success: false, msg: "User not found." });
 
-    // Delete user
-    case 'DELETE':
-      try {
-        const deletedUser = await User.findOneAndDelete({ email: email });
-        if (!deletedUser) return res.status(404).json({ success: false, msg: 'User not found.' });
+				res.status(200).json({ success: true, data: user });
+			} catch (err) {
+				res.status(400).json({ success: false, msg: `Error getting user: ${err.message}` });
+			}
+			break;
 
-        res.status(200).json({
-          success: true,
-          msg: 'User account deleted successfully.',
-          data: deletedUser,
-        });
-      } catch (err) {
-        res.status(400).json({ success: false, msg: err });
-      }
-      break;
+		// Delete user (PROTECTED)
+		case "DELETE":
+			if (session) {
+				if (session.user.email === email) {
+					try {
+						const deletedUser = await User.findOneAndDelete({ email: email });
+						if (!deletedUser) return res.status(404).json({ success: false, msg: "User not found." });
 
-    default:
-      res.status(500).json({ success: false, msg: 'Route is not valid.' });
-      break;
-  }
+						res.status(200).json({
+							success: true,
+							msg: "User account deleted successfully.",
+						});
+					} catch (err) {
+						res.status(400).json({ success: false, msg: `Error deleting user: ${err.message}` });
+					}
+				} else {
+					res.status(401).json({ success: false, msg: "Unauthorized user." });
+				}
+			} else {
+				res.status(401).json({ success: false, msg: "User not signed in." });
+			}
+			break;
+
+		default:
+			res.status(500).json({ success: false, msg: "Route is not valid." });
+			break;
+	}
 }
 
 export default handler;

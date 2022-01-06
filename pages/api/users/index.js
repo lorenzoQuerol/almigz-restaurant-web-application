@@ -10,25 +10,37 @@ async function handler(req, res) {
 	await createConnection();
 
 	// Get session
+	const session = await getSession({ req });
+
 	// Unpack the request to get method
 	const { method } = req;
 
 	switch (method) {
+		// Get all users (ADMIN-PROTECTED)
 		case "GET":
-			try {
-				const users = await User.find({}, { __v: false, cart: false });
+			if (session) {
+				if (session.user.isAdmin) {
+					try {
+						const users = await User.find({}, { __v: false, cart: false });
+						if (!users) return res.status(404).json({ success: false, msg: `Users not found.` });
 
-				res.status(200).json({ success: true, data: users });
-			} catch (err) {
-				res.status(400).json({ success: false, msg: err });
+						res.status(200).json({ success: true, data: users });
+					} catch (err) {
+						res.status(400).json({ success: false, msg: `Error getting all users: ${err.message}` });
+					}
+				} else {
+					res.status(401).json({ success: false, msg: "Unauthorized user." });
+				}
+			} else {
+				res.status(401).json({ success: false, msg: "User not signed in." });
 			}
 			break;
 
+		// Create new user (UNPROTECTED)
 		case "POST":
 			try {
-				const duplicate = await User.findOne({ email: req.body.email });
-
 				// Check if there is a duplicate account in the system
+				const duplicate = await User.findOne({ email: req.body.email });
 				if (duplicate)
 					return res.status(400).json({
 						success: false,
