@@ -73,6 +73,12 @@ const TransactionSchema = new mongoose.Schema({
 		required: false,
 	},
 
+	reasonForCancel: {
+		type: String,
+		required: false,
+		default: "",
+	},
+
 	totalPrice: {
 		type: Double,
 		required: true,
