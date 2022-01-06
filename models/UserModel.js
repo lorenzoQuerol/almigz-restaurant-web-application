@@ -52,6 +52,12 @@ const CartItemSchema = new mongoose.Schema({
 });
 
 const UserSchema = new mongoose.Schema({
+	isDelete: {
+		type: Boolean,
+		required: true,
+		default: true,
+	},
+
 	isAdmin: {
 		type: Boolean,
 		required: true,
