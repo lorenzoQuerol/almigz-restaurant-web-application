@@ -12,12 +12,7 @@ export default function MenuPage() {
     const { data, error } = useSWR('api/foodItems', fetcher);
     const { data: session, status } = useSession();
     console.log(data);
-    
-    
-    
-    
-    
-    
+
     /*
       DESIGNERS: You can now use the session to conditionally render components for 
       authenticated or unauthenticated users. Session will return null if user is not
@@ -41,7 +36,7 @@ export default function MenuPage() {
     return (
         <>
             DASHBOARD: <br/>
-            <a className="bg-red-400 h-10 text-black" href="/orders/1" target="_blank">
+            <a className="h-10 text-black bg-red-400" href="/orders/1" target="_blank">
                 <btn>ORDER#0000</btn>
             </a>
         </>
