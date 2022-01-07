@@ -1,22 +1,24 @@
-import { data } from "autoprefixer";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from "swr";
+
 import pushToCart from "@utils/foodCart/pushToCart";
+import Cart from "@components/Cart";
+
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function FoodItemPage() {
 	const router = useRouter();
 	const { data, error } = useSWR(`/api/foodItems/${router.query.food_slug}`, fetcher);
 	const { data: session, status } = useSession();
+
+	// Page variables
 	const [quantity, setquantity] = useState(1);
 	const [total, setTotal] = useState("");
-
-	if (error) return <div>failed to load</div>;
-	if (!data) return <div>loading</div>;
+	const [open, setOpen] = useState(false);
 
 	const updateTotal = async (num) => {
 		num = Number(num);
@@ -26,6 +28,7 @@ export default function FoodItemPage() {
 		}
 	};
 
+	// Add to cart
 	const addToCart = async (event) => {
 		event.preventDefault();
 
@@ -34,22 +37,17 @@ export default function FoodItemPage() {
 				menuItem: data.data,
 				quantity: quantity,
 			};
+
 			pushToCart(item);
-			router.replace(
-				{
-					pathname: "/cart",
-					// query: {item: JSON.stringify(item)},
-				},
-				`/menu/${router.query.food_slug}`,
-				{ shallow: true }
-			);
+			setOpen(!open);
 		} else {
 			alert("Please login before adding to cart.");
 			router.push("/auth/signIn");
 		}
 	};
 
-	//food item does not exist
+	if (!data) return <h1>Loading...</h1>;
+
 	if (!data.data) {
 		return (
 			<div className="flex-col text-center self-top">
@@ -61,11 +59,8 @@ export default function FoodItemPage() {
 				</Link>
 			</div>
 		);
-	}
-
-	//render food item page
-	else {
-		var pic = data.data.productImagesCollection.items[0].url;
+	} else {
+		const pic = data.data.productImagesCollection.items[0].url;
 
 		return (
 			<>
@@ -90,6 +85,7 @@ export default function FoodItemPage() {
 						<button className="p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300">Add to Cart</button>
 					</form>
 				</div>
+				<Cart open={open} setOpen={setOpen} />
 			</>
 		);
 	}
