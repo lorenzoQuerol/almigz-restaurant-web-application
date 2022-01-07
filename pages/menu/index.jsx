@@ -4,7 +4,7 @@ import Link from "next/link";
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function MenuPage() {
-	const { data, error } = useSWR("api/foodItems", fetcher);
+	const { data, error } = useSWR("/api/foodItems", fetcher);
 
 	return (
 		<>
