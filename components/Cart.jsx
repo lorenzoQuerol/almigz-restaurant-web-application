@@ -1,53 +1,53 @@
-/* This example requires Tailwind CSS v2.0+ */
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useMemo, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
-import { useRouter } from "next/router";
-import { data } from "autoprefixer";
+
 import getStorageValue from "@utils/localStorage/getStorageValue";
 
-var ctr = 0;
-
-export default function Example() {
-	const router = useRouter();
-	const [products, setProducts] = useState(new Array());
-
-	const [open, setOpen] = useState(true);
+export default function Cart({ open, setOpen }) {
+	const [products, setProducts] = useState([]);
 	const [delfee, setDelFee] = useState(50);
 	const [subtotal, setSubtotal] = useState(0);
 	const [total, setTotal] = useState(delfee + subtotal);
 
+	// Initialize cart
 	useEffect(() => {
-		// Perform localStorage action
-		var cart = getStorageValue("foodCart");
-		setProducts(cart.data);
-		setSubtotal(cart.total + subtotal);
-		setTotal(cart.total + subtotal + delfee);
-	}, []);
-
-	const deleteItem = (name) => {
-		for (var i = 0; i < products.length; i++) {
-			if (products[i].menuItem.productName == name) break;
+		if (open) {
+			let cart = getStorageValue("foodCart");
+			setProducts(cart.data);
+			setSubtotal(cart.total + subtotal);
+			setTotal(cart.total + subtotal + delfee);
+		} else {
+			setSubtotal(0);
+			setTotal(0);
 		}
-		var temp = products;
-		temp.splice(i, 1);
+	}, [open]);
 
-		var temp = 0;
-		for (var i = 0; i < products.length; i++) temp += products[i].quantity * products[i].menuItem.productPrice;
+	// Delete item and update prices
+	const deleteItem = (name) => {
+		const index = products.findIndex((product) => product.menuItem.productName === name);
+		products.splice(index, 1); // Delete item
+
+		let temp = 0;
+		products.forEach((product) => {
+			temp += product.quantity * product.menuItem.productPrice;
+		});
 
 		setSubtotal(temp);
 		setTotal(temp + delfee);
-
 		localStorage.setItem("foodCart", JSON.stringify(products));
 	};
 
+	// Update quantity of item and update prices
 	const updateTotal = async (value, name) => {
-		for (var i = 0; i < products.length; i++) {
-			if (products[i].menuItem.productName == name) break;
-		}
-		products[i].quantity = value;
-		var temp = 0;
-		for (var i = 0; i < products.length; i++) temp += products[i].quantity * products[i].menuItem.productPrice;
+		const index = products.findIndex((product) => product.menuItem.productName === name);
+		products[index].quantity = value; // Update quantity
+
+		let temp = 0;
+		products.forEach((product) => {
+			temp += product.quantity * product.menuItem.productPrice;
+		});
+
 		setSubtotal(temp);
 		setTotal(temp + delfee);
 		localStorage.setItem("foodCart", JSON.stringify(products));
