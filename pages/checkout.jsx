@@ -19,7 +19,7 @@ export default function CheckoutPage() {
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
-			router.push("auth/signIn");
+			router.replace("/auth/signIn");
 		},
 	});
 
@@ -79,7 +79,6 @@ export default function CheckoutPage() {
 
 		// Initialize transaction object
 		const transaction = {
-			invoiceNum: 1, // DEVELOPER TODO: This should increment based on the number of documents in the database
 			dateCreated: new Date(),
 			orderStatus: 0, // Initial "incoming order" status
 			type: type,
@@ -103,7 +102,7 @@ export default function CheckoutPage() {
 		// If successful, set transaction to local storage and redirect to receipt page
 		if (response.success) {
 			setTransaction(response.data);
-			router.push("/receipt");
+			router.replace("/receipt");
 		} else {
 			// DESIGNER TODO: Handle here if unsuccessful checkout (i.e., missing values).
 		}

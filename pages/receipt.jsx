@@ -109,7 +109,7 @@ export default function Receipt() {
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
-			router.push("auth/signIn");
+			router.replace("/auth/signIn");
 		},
 	});
 
@@ -146,7 +146,7 @@ export default function Receipt() {
 
 	// useEffect(() => {
 	// 	// If session is undefined, redirect to sign in page
-	// 	if (!session) router.push("auth/signIn");
+	// 	if (!session) router.replace("auth/signIn");
 	// }, [session]);
 
 	// If 'Proceed to Order Tracker' is clicked:
@@ -155,7 +155,7 @@ export default function Receipt() {
 	const handleTrackerClick = (event) => {
 		removeStorageValue("foodCart");
 		removeStorageValue("transaction");
-		router.push("/tracker");
+		router.replace("/tracker");
 	};
 
 	if (status === "loading") return <h1>Loading...</h1>;

@@ -24,7 +24,7 @@ export default function register() {
 	const [message, setMessage] = useState("");
 
 	useEffect(() => {
-		if (status === "authenticated") router.push("/");
+		if (status === "authenticated") router.replace("/");
 	}, [session, status]);
 
 	const submitRegister = async (event) => {
