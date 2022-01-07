@@ -12,7 +12,7 @@ async function handler(req, res) {
 
 	// Unpack the request
 	const {
-		query: { email },
+		query: { invoiceNum },
 		method,
 	} = req;
 
@@ -20,9 +20,9 @@ async function handler(req, res) {
 		// Get transaction (PROTECTED) - accessible only by authorized users and admins
 		case "GET":
 			if (session) {
-				if (session.user.email === email || session.user.isAdmin) {
+				if (session.user.email || session.user.isAdmin) {
 					try {
-						const transaction = await Transaction.findOne({ email: email });
+						const transaction = await Transaction.findOne({ invoiceNum: invoiceNum });
 						if (!transaction) return res.status(404).json({ success: false, msg: "Transaction does not exist." });
 
 						res.status(200).json({ success: true, data: transaction });
@@ -42,7 +42,7 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.isAdmin) {
 					try {
-						const updatedTransaction = await Transaction.findOneAndUpdate({ email: email }, req.body, {
+						const updatedTransaction = await Transaction.findOneAndUpdate({ invoiceNum: invoiceNum }, req.body, {
 							new: true,
 							runValidators: true,
 						});
