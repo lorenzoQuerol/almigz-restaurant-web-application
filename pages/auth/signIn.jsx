@@ -17,7 +17,7 @@ export default function signInPage() {
 	const [message, setErrorMessage] = useState("");
 
 	useEffect(() => {
-		if (status === "authenticated") router.push("/");
+		if (status === "authenticated") router.replace("/");
 	}, [status]);
 
 	const submitLogin = async (event) => {
@@ -37,7 +37,7 @@ export default function signInPage() {
 				});
 
 				// SUCCESS: Redirect to home page if sign in successful
-				if (status.ok) router.push("/");
+				if (status.ok) router.replace("/");
 				else setErrorMessage("Email and password do not match.");
 			} else setErrorMessage(emailExists.msg);
 		} else setErrorMessage("Email or password is missing.");
