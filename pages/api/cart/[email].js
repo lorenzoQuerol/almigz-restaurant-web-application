@@ -24,10 +24,9 @@ async function handler(req, res) {
 				res.status(200).json({
 					success: true,
 					msg: "Cart updated successfully.",
-					data: cart,
 				});
 			} catch (err) {
-				res.status(400).json({ success: false, msg: err });
+				res.status(400).json({ success: false, msg: `Error updating cart: ${err.message}` });
 			}
 			break;
 

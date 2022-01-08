@@ -26,8 +26,12 @@ export default async function confirmTransaction(newTransaction) {
 			newTransaction.deliverTime = null;
 		}
 
+		// Add a new invoice number property to the transaction
+		const count = await axios.get(`${process.env.NEXTAUTH_URL}/api/count`);
+		const invoiceNum = count.data.data;
+		newTransaction.invoiceNum = invoiceNum + 1;
+
 		const response = await axios.post(`${process.env.NEXTAUTH_URL}/api/transactions`, newTransaction);
-		delete response.data.data;
 		const success = response.data;
 		return success;
 	} catch (err) {

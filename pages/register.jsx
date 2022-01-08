@@ -1,11 +1,15 @@
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import registerUser from "@utils/registerUser";
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+
+import registerUser from "@utils/registerUser";
 
 export default function register() {
 	const router = useRouter();
 
+	// Get session
+	const { data: session, status } = useSession();
+	console.log(session);
 	// User information
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
@@ -18,6 +22,10 @@ export default function register() {
 
 	// API response message
 	const [message, setMessage] = useState("");
+
+	useEffect(() => {
+		if (status === "authenticated") router.replace("/");
+	}, [session, status]);
 
 	const submitRegister = async (event) => {
 		event.preventDefault(); // Prevent page from refreshing for errors in input
@@ -51,6 +59,9 @@ export default function register() {
 			} else setMessage("Passwords do not match."); // ERROR: Passwords do not match
 		} else setMessage("Please fill out all fields."); // ERROR: Empty Fields
 	};
+
+	// If page is stil in loading or authenticated (already signed in)
+	if (status === "loading" || status === "authenticated") return <h1>Loading...</h1>;
 
 	return (
 		<div className="flex-col w-1/2 text-center">

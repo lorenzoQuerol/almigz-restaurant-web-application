@@ -3,6 +3,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 import { compare } from "bcryptjs";
 
+import createConnection from "@utils/mongoDBConnection";
+import User from "@models/UserModel";
+
 export default NextAuth({
 	// Random string for hashing tokens
 	secret: process.env.SECRET,
@@ -21,10 +24,10 @@ export default NextAuth({
 				// Unpack the credentials
 				const { email, password } = credentials;
 
-				// Get user via email
 				try {
-					const res = await axios.get(`${process.env.NEXTAUTH_URL}/api/users/${email}`);
-					let user = res.data.data;
+					// Get user via email
+					await createConnection();
+					let user = await User.findOne({ email: email }, { _id: false, __v: false, cart: false });
 					if (!user) return null;
 
 					// Check hashed password with database password
@@ -32,7 +35,7 @@ export default NextAuth({
 					if (!checkPassword) return null;
 
 					// Return user object
-					user = { name: `${user.firstName} ${user.lastName}`, email: user.email };
+					user = { name: `${user.firstName} ${user.lastName}`, email: user.email, isAdmin: user.isAdmin };
 					return user;
 				} catch (err) {
 					return null;
@@ -43,5 +46,24 @@ export default NextAuth({
 
 	pages: {
 		signIn: "/auth/signIn",
+	},
+
+	// Check if the user logging in is an administrator. Fields returned in session:
+	// Admin: user, email, isAdmin (Boolean)
+	// User: user, email
+	callbacks: {
+		jwt: async ({ token, user }) => {
+			if (user) token.isAdmin = user.isAdmin;
+			return token;
+		},
+
+		session: async ({ session, token }) => {
+			if (token.isAdmin) session.user.isAdmin = token.isAdmin;
+			else delete session.user.isAdmin;
+
+			delete session.user.image;
+
+			return session;
+		},
 	},
 });
