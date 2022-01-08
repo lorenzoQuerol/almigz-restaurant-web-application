@@ -1,16 +1,21 @@
 export default async function pushToCart(data) {
 	if (typeof window !== "undefined") {
-		let foodCart = new Array();
-		if (localStorage.getItem("foodCart")) foodCart = JSON.parse(localStorage.getItem("foodCart"));
+		// Get cart from local storage
+		let foodCart = JSON.parse(localStorage.getItem("foodCart"));
 
-		for (var i = 0; i < foodCart.length; i++) {
-			if (foodCart[i].menuItem.productName == data.productName) {
-				foodCart[i].menuItem.quantity = foodCart[i].menuItem.quantity + data.quantity;
-				break;
+		// Check if product already exists in cart; update quantity if found.
+		let exists = false;
+		foodCart.forEach((product) => {
+			if (product.menuItem.productName === data.menuItem.productName) {
+				product.quantity = product.quantity + data.quantity;
+				exists = true;
 			}
-		}
+		});
 
-		if (i == foodCart.length) foodCart.push(data);
+		// Else, push to cart
+		if (!exists) foodCart.push(data);
+
+		// Set updated cart to local storage
 		localStorage.setItem("foodCart", JSON.stringify(foodCart));
 	}
 }
