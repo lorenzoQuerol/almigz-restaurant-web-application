@@ -18,8 +18,10 @@ export default function Cart({ open, setOpen }) {
 			setSubtotal(cart.total + subtotal);
 			setTotal(cart.total + subtotal + delfee);
 		} else {
-			setSubtotal(0);
-			setTotal(0);
+			setTimeout(() => {
+				setSubtotal(0);
+				setTotal(0);
+			}, 400);
 		}
 	}, [open]);
 
