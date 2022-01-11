@@ -8,7 +8,7 @@ export default async function pushToCart(data) {
 		let exists = false;
 		foodCart.forEach((product) => {
 			if (product.menuItem.productName === data.menuItem.productName) {
-				product.quantity = product.quantity + data.quantity;
+				product.quantity = Number(product.quantity) + Number(data.quantity);
 				exists = true;
 			}
 		});
