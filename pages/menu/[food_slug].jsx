@@ -26,6 +26,10 @@ export default function FoodItemPage() {
 			setTotal(data.data.productPrice * num);
 			setquantity(num);
 		}
+		else {
+			setTotal(data.data.productPrice);
+			setquantity(1);
+		}
 	};
 
 	// Add to cart
