@@ -120,7 +120,7 @@ export default function Cart({ open, setOpen }) {
 																	</div>
 																	<div className="flex items-end justify-between flex-1 text-sm">
 																		<p className="text-gray-500">
-																			quantity:
+																			Quantity:
 																			<input
 																				className="mx-2 rounded-md input font-black-100 text-normal w-14 input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 																				type="number"
@@ -179,9 +179,11 @@ export default function Cart({ open, setOpen }) {
 											<div className="flex justify-center mt-6 text-sm text-center text-gray-500">
 												<p>
 													or{" "}
-													<button type="button" className="font-medium text-green-600 hover:text-green-500" onClick={() => setOpen(false)}>
+													<a
+														href="/menu"
+														className="font-medium text-green-600 hover:text-green-500">
 														Add more items<span aria-hidden="true"> &rarr;</span>
-													</button>
+													</a>
 												</p>
 											</div>
 										</div>
@@ -267,9 +269,11 @@ export default function Cart({ open, setOpen }) {
 											<div className="flex justify-center mt-6 text-sm text-center text-gray-500">
 												<p>
 													or{" "}
-													<button type="button" className="font-medium text-green-600 hover:text-green-500" onClick={() => setOpen(false)}>
-														Add more items<span aria-hidden="true"> &rarr;</span>
-													</button>
+													<a
+														href="/menu"
+														className="font-medium text-green-600 hover:text-green-500">
+														Add items<span aria-hidden="true"> &rarr;</span>
+													</a>
 												</p>
 											</div>
 										</div>
