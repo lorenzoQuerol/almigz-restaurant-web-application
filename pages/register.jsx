@@ -9,7 +9,7 @@ export default function register() {
 
 	// Get session
 	const { data: session, status } = useSession();
-	console.log(session);
+
 	// User information
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");

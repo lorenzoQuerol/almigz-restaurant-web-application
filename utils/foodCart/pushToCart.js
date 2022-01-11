@@ -2,6 +2,7 @@ export default async function pushToCart(data) {
 	if (typeof window !== "undefined") {
 		// Get cart from local storage
 		let foodCart = JSON.parse(localStorage.getItem("foodCart"));
+		if (!foodCart) foodCart = new Array();
 
 		// Check if product already exists in cart; update quantity if found.
 		let exists = false;
