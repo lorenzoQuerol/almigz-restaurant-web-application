@@ -1,25 +1,15 @@
-
-
 module.exports = {
-    mode: 'jit',
-    purge: ['./pages/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}'],
-    darkMode: false, // or 'media' or 'class'
-    theme: {
-        extend: {
-            fontFamily: {
-                'rale': ['Raleway', 'sans-serif'],
-              },
-        },
-    },
-    variants: {
-        extend: {},
-    },
-    plugins: [
-        require('daisyui'),
-    ],
-    daisyui: {
-        themes: [
-            'lofi',
-        ],
-    }
+	mode: "jit",
+	content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
+	theme: {
+		extend: {
+			fontFamily: {
+				rale: ["Raleway", "sans-serif"],
+			},
+		},
+	},
+	plugins: [require("daisyui")],
+	daisyui: {
+		themes: ["lofi"],
+	},
 };
