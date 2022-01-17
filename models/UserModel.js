@@ -1,52 +1,118 @@
 import mongoose from "mongoose";
 import Double from "@mongoosejs/double";
 
-const ImageSchema = new mongoose.Schema({
-	imgUrl: {
-		type: String,
-		required: false,
-	},
-});
-
-// Schema is modelled after the content model from the Contentful headless CMS
 const MenuItemSchema = new mongoose.Schema({
 	productName: {
 		type: String,
-		required: false,
+		required: true,
 	},
 
-	category: {
-		type: String,
-		required: false,
-	},
-
-	description: {
-		type: String,
-		required: false,
-	},
-
-	price: {
+	productPrice: {
 		type: Double,
-		required: false,
+		required: true,
 	},
-
-	isAvailable: {
-		type: Boolean,
-		required: false,
-	},
-
-	// Array of images (in case there are multiple images)
-	imgUrls: [ImageSchema],
 });
 
 const CartItemSchema = new mongoose.Schema({
 	quantity: {
 		type: Number,
-		required: false,
+		required: true,
 	},
 
 	menuItem: {
 		type: MenuItemSchema,
+		required: true,
+	},
+});
+
+const TransactionSchema = new mongoose.Schema({
+	invoiceNum: {
+		type: Number,
+		required: true,
+	},
+
+	dateCreated: {
+		type: Date,
+		required: true,
+	},
+
+	orderStatus: {
+		type: Number,
+		required: true,
+	},
+
+	// DELIVERY or PICKUP
+	type: {
+		type: String,
+		required: true,
+	},
+
+	// BASIC DETAILS
+	fullName: {
+		type: String,
+		required: true,
+	},
+
+	email: {
+		type: String,
+		required: true,
+	},
+
+	contactNum: {
+		type: Array,
+		required: true,
+	},
+
+	order: {
+		type: [CartItemSchema],
+		required: true,
+	},
+
+	specialInstructions: {
+		type: String,
+		required: false,
+	},
+
+	reasonForCancel: {
+		type: String,
+		required: false,
+		default: "",
+	},
+
+	totalPrice: {
+		type: Double,
+		required: true,
+	},
+
+	// FOR DELIVERY
+	address: {
+		type: String,
+		required: false,
+	},
+
+	payMethod: {
+		type: String,
+		required: false,
+	},
+
+	change: {
+		type: String,
+		required: false,
+	},
+
+	deliverTime: {
+		type: String,
+		required: false,
+	},
+
+	// FOR PICKUP
+	storeLocation: {
+		type: String,
+		required: false,
+	},
+
+	pickupTime: {
+		type: String,
 		required: false,
 	},
 });
@@ -99,7 +165,7 @@ const UserSchema = new mongoose.Schema({
 		required: false,
 	},
 
-	cart: { type: [CartItemSchema], required: false, default: [] },
+	transactions: { type: [TransactionSchema], required: false, default: [] },
 });
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);
