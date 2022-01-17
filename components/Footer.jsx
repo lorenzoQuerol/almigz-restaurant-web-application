@@ -1,47 +1,39 @@
 import Link from "next/link";
+import Logo from "/public/Logo.png";
+import Image from "next/image";
 
 const Footer = () => {
-    return (
-      <>
-        <footer className="absolute bottom border-b-8 border-green-800 shadow-xl flex-col text-center w-screen pb-5 pb-5 bg-yellow-100">
-          <div className="flex flex-col justify-center m-5">
-            <p>Al Migz Special Binalot</p>
-            <p>Since 2010</p>
-          </div> 
-            
-          <div>
-            <nav>
-              <ul className="flex flex-row justify-center">
-                <li className="self-center ml-5 mr-5 font-normal rounded-btn hover:font-medium hover:text-green-700">
-                  <Link href="/contact">
-                    <a>Contact Us</a>
-                  </Link>
-                </li>
-                <li className="self-center ml-5 mr-5 font-normal rounded-btn hover:font-medium hover:text-green-700">
-                  <Link href="/termsandconditions">
-                    <a>Terms and Conditions</a>
-                  </Link>
-                </li>
-                <li className="self-center ml-5 mr-5 font-normal rounded-btn hover:font-medium hover:text-green-700">
-                <Link href="/privacy">
-                    <a>Privacy Policy</a>
-                  </Link>
-                </li>
-                <li>
-                <Link href="https://www.facebook.com/pages/Almigz-Special-Binalot-Restaurant/386760148076911" className="hover:">
-                  <a>
-                    <svg xmlns="http://www.w3.org/2000/svg" width={25} height={25} className="fill-blue" viewBox="0 0 16 16">
-                      <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
-                    </svg>
-                  </a>
-                </Link>
-              </li>
-              </ul>
-            </nav>
-          </div>
-        </footer>
-      </>
-    );
-  }
-   
-  export default Footer;
+	return (
+		<footer className="bg-yellow-100 p-7 footer font-rale text-slate-900 footer-center">
+			<div>
+				<Image className="inline-block fill-current" src={Logo} width={200} height={40} />
+				<p className="font-bold">
+					<Link href="/#">
+						<a className="mx-3">Contact Us</a>
+					</Link>
+					<Link href="/#">
+						<a className="mx-3">Terms and Conditions</a>
+					</Link>
+					<Link href="/#">
+						<a className="mx-3">Privacy Policy</a>
+					</Link>
+					<br />
+				</p>
+				<p>Copyright © 2010 - All rights reserved</p>
+			</div>
+			<div>
+				<div className="grid grid-flow-col">
+					<Link href="https://www.facebook.com/AlmigzSpecialBinalot">
+						<a target="_blank" rel="noopener noreferrer">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="fill-current">
+								<path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
+							</svg>
+						</a>
+					</Link>
+				</div>
+			</div>
+		</footer>
+	);
+};
+
+export default Footer;
