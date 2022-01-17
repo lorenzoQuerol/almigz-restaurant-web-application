@@ -1,10 +1,10 @@
 import { Fragment, useState, useEffect, useMemo, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
-
+import Link from "next/link";
 import getStorageValue from "@utils/localStorage/getStorageValue";
 
-export default function Cart({ open, setOpen }) {
+const Cart = ({ open, handleOpen }) => {
 	const [products, setProducts] = useState([]);
 	const [delfee, setDelFee] = useState(50);
 	const [subtotal, setSubtotal] = useState(0);
@@ -58,7 +58,7 @@ export default function Cart({ open, setOpen }) {
 	if (products) {
 		return (
 			<Transition.Root show={open} as={Fragment}>
-				<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={setOpen}>
+				<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={handleOpen}>
 					<div className="absolute inset-0 overflow-hidden">
 						<Transition.Child
 							as={Fragment}
@@ -88,7 +88,7 @@ export default function Cart({ open, setOpen }) {
 											<div className="flex items-start justify-between">
 												<Dialog.Title className="text-lg font-medium text-gray-900">My Food Cart</Dialog.Title>
 												<div className="flex items-center ml-3 h-7">
-													<button type="button" className="p-2 -m-2 text-gray-400 hover:text-gray-500" onClick={() => setOpen(false)}>
+													<button type="button" className="p-2 -m-2 text-gray-400 hover:text-gray-500" onClick={handleOpen}>
 														<span className="sr-only">Close panel</span>
 														<XIcon className="w-6 h-6" aria-hidden="true" />
 													</button>
@@ -176,14 +176,14 @@ export default function Cart({ open, setOpen }) {
 													Proceed to Checkout
 												</a>
 											</div>
-											<div className="flex justify-center mt-6 text-sm text-center text-gray-500">
+											<div className="flex justify-center mt-6 text-sm text-center">
 												<p>
 													or{" "}
-													<a
-														href="/menu"
-														className="font-medium text-green-600 hover:text-green-500">
-														Add more items<span aria-hidden="true"> &rarr;</span>
-													</a>
+													<Link href="/menu" onClick={handleOpen}>
+														<a className="font-medium text-green-600 hover:text-green-500">
+															Add more items<span aria-hidden="true"> &rarr;</span>
+														</a>
+													</Link>
 												</p>
 											</div>
 										</div>
@@ -198,7 +198,7 @@ export default function Cart({ open, setOpen }) {
 	} else {
 		return (
 			<Transition.Root show={open} as={Fragment}>
-				<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={setOpen}>
+				<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={handleOpen}>
 					<div className="absolute inset-0 overflow-hidden">
 						<Transition.Child
 							as={Fragment}
@@ -228,7 +228,7 @@ export default function Cart({ open, setOpen }) {
 											<div className="flex items-start justify-between">
 												<Dialog.Title className="text-lg font-medium text-gray-900">My Food Cart</Dialog.Title>
 												<div className="flex items-center ml-3 h-7">
-													<button type="button" className="p-2 -m-2 text-gray-400 hover:text-gray-500" onClick={() => setOpen(false)}>
+													<button type="button" className="p-2 -m-2 text-gray-400 hover:text-gray-500" onClick={handleOpen}>
 														<span className="sr-only">Close panel</span>
 														<XIcon className="w-6 h-6" aria-hidden="true" />
 													</button>
@@ -269,9 +269,7 @@ export default function Cart({ open, setOpen }) {
 											<div className="flex justify-center mt-6 text-sm text-center text-gray-500">
 												<p>
 													or{" "}
-													<a
-														href="/menu"
-														className="font-medium text-green-600 hover:text-green-500">
+													<a href="/menu" className="font-medium text-green-600 hover:text-green-500">
 														Add items<span aria-hidden="true"> &rarr;</span>
 													</a>
 												</p>
@@ -286,4 +284,6 @@ export default function Cart({ open, setOpen }) {
 			</Transition.Root>
 		);
 	}
-}
+};
+
+export default Cart;
