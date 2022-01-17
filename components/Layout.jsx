@@ -3,21 +3,21 @@ import Footer from "./Footer";
 import Navbar from "./Navbar";
 
 const Layout = ({ children }) => {
-    return (
-        <>
-        {/* <html > */}
-            <div className="w-full">
-                <Head>
-                    <title>Al Migz Special Binalot</title>
-                    <link rel="icon" href="/logo.ico" />
-                </Head>
-                <Navbar/>
-                <main className="flex justify-center w-screen min-h-screen">{children}</main>
-                <Footer/>
-            </div>
-        {/* </html> */}
-        </>
-    );
+	return (
+		<>
+			{/* <html > */}
+			<div className="w-full">
+				<Head>
+					<title>Al Migz Special Binalot</title>
+					<link rel="icon" href="/logo.ico" />
+				</Head>
+				<Navbar />
+				<div className="justify-center min-h-screen overflow-x-hidden">{children}</div>
+				<Footer />
+			</div>
+			{/* </html> */}
+		</>
+	);
 };
 
 export default Layout;
