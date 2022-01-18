@@ -3,6 +3,8 @@ import { getSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import useSWR from "swr";
+import { Disclosure } from "@headlessui/react";
+import { ChevronUpIcon } from "@heroicons/react/solid";
 
 import DeleteDialog from "@components/DeleteDialog";
 import createConnection from "@utils/mongoDBConnection";
@@ -46,6 +48,7 @@ export default function Account(user) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [currentTab, setCurrentTab] = useState("User Settings");
 	const [isEditable, setIsEditable] = useState(false);
+	const [openTransaction, setOpenTransaction] = useState(false);
 	const navigationBar = [
 		{ id: "1", name: "User Settings", current: true },
 		{ id: "2", name: "Transactions", current: false },
@@ -89,6 +92,10 @@ export default function Account(user) {
 
 	const handleOpenDeleteDialog = () => {
 		setOpenDeleteDialog(!openDeleteDialog);
+	};
+
+	const handleOpenTransaction = () => {
+		setOpenTransaction(!openTransaction);
 	};
 
 	// Delete user account
@@ -183,7 +190,7 @@ export default function Account(user) {
 
 			{/* User settings card */}
 			{currentTab === "User Settings" && (
-				<div className="bg-gray-200 rounded-md card drop-shadow-lg">
+				<div className="rounded-md bg-zinc-100 card drop-shadow-lg">
 					<div className="text-sm md:text-lg card-body">
 						{isLoading === true ? (
 							<Loading />
@@ -367,48 +374,90 @@ export default function Account(user) {
 
 			{/* Transaction history card */}
 			{currentTab === "Transactions" && (
-				<div className="text-gray-500 bg-gray-200 rounded-md card drop-shadow-lg">
-					<div className="text-sm md:text-lg card-body">
+				<div className="text-gray-500 rounded-md bg-zinc-100 card drop-shadow-lg">
+					<div className="text-sm md:text-md card-body">
 						<div className="w-full">
 							{transactions.map((item) => {
 								let date = new Date(item.dateCreated);
 								let formattedDate = `${date.getMonth() + 1}/${date.getDay() + 1}/${date.getFullYear()} @ ${date.getHours()}:${date.getMinutes()}`;
 
 								return (
-									<div className="flex justify-between p-2 my-3 rounded-md cursor-pointer hover:bg-gray-300">
-										<div className="text-left">
-											<div className="text-xl font-bold text-slate-900">Completed Order</div>
-											<div>
-												Ordered On: <a className="font-semibold text-slate-900">{formattedDate}</a>
-											</div>
-											<div className="flex">
-												<div className="mr-1">Items:</div>
-												{item.order.map((food, index) => {
-													if (item.order.length - 1 === index) {
-														return (
-															<div className="font-semibold text-slate-900">
-																{food.quantity} x {food.menuItem.productName}
+									<Disclosure>
+										{({ open }) => (
+											<>
+												<div className="flex justify-between p-2 rounded-md">
+													<div className="flex">
+														<Disclosure.Button className="mr-2">
+															<ChevronUpIcon
+																className={`rounded-md transition duration-200 ${
+																	open ? "transform rotate-0" : "transform rotate-180"
+																} w-10 h-10 text-green-700`}
+															/>
+														</Disclosure.Button>
+														<div className="text-left">
+															<div className="text-xl font-bold text-slate-900">Completed Order</div>
+															<div>
+																Ordered On: <a className="font-semibold text-slate-900">{formattedDate}</a>
 															</div>
-														);
-													} else {
-														return (
-															<div className="ml-1 font-semibold text-slate-900">
-																{food.quantity} x {food.menuItem.productName},
+															<div className="flex">
+																<div className="mr-1">Items:</div>
+																{item.order.map((food, index) => {
+																	if (item.order.length - 1 === index) {
+																		return (
+																			<div className="w-3/4 font-semibold truncate text-slate-900">
+																				{food.quantity}x {food.menuItem.productName}
+																			</div>
+																		);
+																	} else {
+																		return (
+																			<div className="w-3/4 ml-1 font-semibold truncate text-slate-900">
+																				{food.quantity} x {food.menuItem.productName},
+																			</div>
+																		);
+																	}
+																})}
 															</div>
-														);
-													}
-												})}
-											</div>
-										</div>
-										<div className="text-right">
-											<div>
-												Total Price: <a className="font-semibold text-slate-900">₱{item.totalPrice}</a>
-											</div>
-											<div>
-												Method: <a className="font-semibold text-slate-900">{item.payMethod}</a>
-											</div>
-										</div>
-									</div>
+														</div>
+													</div>
+													<div className="text-right">
+														<div>
+															Total Price: <a className="font-semibold text-slate-900">₱{item.totalPrice}</a>
+														</div>
+														<div>
+															Method: <a className="font-semibold text-slate-900">{item.payMethod}</a>
+														</div>
+													</div>
+												</div>
+												<Disclosure.Panel>
+													<div className="p-2 font-semibold bg-gray-300 rounded-b-lg text-slate-900">
+														<div>{item.address}</div>
+														<div>Order Summary:</div>
+														{item.order.map((food) => {
+															return (
+																<div className="w-3/4 font-semibold truncate text-slate-900">
+																	<a className="mr-10">{food.quantity}x</a> {food.menuItem.productName}
+																</div>
+															);
+														})}
+														<div className="w-1/3">
+															<div className="flex justify-between text-right">
+																<div className="text-left">Subtotal:</div>
+																<div> {item.totalPrice}</div>
+															</div>
+															<div className="flex justify-between text-right">
+																<div className="text-left">Delivery Fee:</div>
+																<div> DEL_FEE</div>
+															</div>
+															<div className="flex justify-between text-right">
+																<div className="text-left">Total:</div>
+																<div> {item.totalPrice}</div>
+															</div>
+														</div>
+													</div>
+												</Disclosure.Panel>
+											</>
+										)}
+									</Disclosure>
 								);
 							})}
 						</div>
