@@ -100,11 +100,6 @@ const TransactionSchema = new mongoose.Schema({
 		required: false,
 	},
 
-	deliveryFee: {
-		type: Number,
-		required: false,
-	},
-
 	deliverTime: {
 		type: String,
 		required: false,
