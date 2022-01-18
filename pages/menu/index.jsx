@@ -30,15 +30,21 @@ export default function MenuPage() {
 				<div className="flex flex-wrap -m-4">
 					{filtered.map((foodItem) => {
 						return (
-							<Link href={`/menu/${encodeURIComponent(foodItem.slug)}`}>
-								<div className="w-full p-4 transition-transform cursor-pointer hover:scale-105 lg:w-1/4 md:w-1/2" key={foodItem.slug}>
+							<Link href={foodItem.available ? `/menu/${encodeURIComponent(foodItem.slug)}` : ""}>
+								<div
+									className={`${foodItem.available ? "" : "grayscale"} w-full p-4 transition-transform cursor-pointer hover:scale-105 lg:w-1/4 md:w-1/2`}
+									key={foodItem.slug}
+								>
 									<div className="pb-2 rounded bg-gray-50 drop-shadow-md">
 										<a className="relative block overflow-hidden rounded-t">
 											<Image width={420} height={260} src={foodItem.productImagesCollection.items[0].url} />
 										</a>
 										<div className="mt-3 ml-2">
 											<h3 className="mb-1 text-xs font-bold tracking-widest text-green-700">{foodItem.category}</h3>
-											<h2 className="text-lg font-semibold">{foodItem.productName}</h2>
+											<h2 className="text-lg font-semibold">
+												{foodItem.productName}
+												{foodItem.available ? "" : <a className="self-center ml-2 text-xs">UNAVAILABLE</a>}
+											</h2>
 											<p className="mt-1">₱{foodItem.productPrice}</p>
 										</div>
 									</div>
