@@ -28,11 +28,11 @@ async function handler(req, res) {
 						if (!user) return res.status(404).json({ success: false, msg: "User not found." });
 
 						// Check to see if password was changed, re-hash if changed
-						const samePassword = await compare(req.body.password, user.password);
-						if (!samePassword) user.password = await hash(req.body.password, 12);
+						const samePassword = req.body.password === user.password ? true : false;
+						if (!samePassword) req.body.password = await hash(req.body.password, 12);
 
-						// Update user
-						await User.findOneAndUpdate({ email: email }, user, {
+						// Update user request
+						await User.findOneAndUpdate({ email: email }, req.body, {
 							new: true,
 							runValidators: true,
 						});

@@ -16,6 +16,7 @@ export default async function confirmTransaction(newTransaction) {
 		if (newTransaction.type === "Delivery") {
 			newTransaction.storeLocation = null;
 			newTransaction.pickupTime = null;
+			if (newTransaction.payMethod === "GCash") newTransaction.change = null;
 		}
 
 		// Set to null for fields not required in PICKUP type
@@ -31,7 +32,10 @@ export default async function confirmTransaction(newTransaction) {
 		const invoiceNum = count.data.data;
 		newTransaction.invoiceNum = invoiceNum + 1;
 
+		// Add new transaction to database and push into user transaction history
 		const response = await axios.post(`${process.env.NEXTAUTH_URL}/api/transactions`, newTransaction);
+		await axios.put(`${process.env.NEXTAUTH_URL}/api/history/${newTransaction.email}`, newTransaction);
+
 		const success = response.data;
 		return success;
 	} catch (err) {

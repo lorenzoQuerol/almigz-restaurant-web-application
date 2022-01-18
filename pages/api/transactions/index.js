@@ -41,7 +41,7 @@ async function handler(req, res) {
 		// Create new transaction document (PROTECTED)
 		case "POST":
 			if (session) {
-				if (user.session.email === email) {
+				if (session.user.email === req.body.email) {
 					try {
 						const transaction = await Transaction.create(req.body);
 						res.status(201).json({
