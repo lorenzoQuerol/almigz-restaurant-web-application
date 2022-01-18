@@ -3,6 +3,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import registerUser from "@utils/registerUser";
+import toTitleCase from "@utils/toTitleCase";
 
 export default function register() {
 	const router = useRouter();
@@ -32,8 +33,8 @@ export default function register() {
 
 		// New user object
 		var userData = {
-			firstName: firstName,
-			lastName: lastName,
+			firstName: toTitleCase(firstName),
+			lastName: toTitleCase(lastName),
 			email: email,
 			password: password,
 			homeAddress: homeAddress,
