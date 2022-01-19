@@ -311,7 +311,7 @@ export default function CheckoutPage() {
 					leaveFrom="translate-x-0 opacity-100"
 					leaveTo={`opacity-0 ${forward ? "-translate-x-full" : "translate-x-full"}`}
 				>
-					<div className="absolute w-full mt-5 rounded-md text-md sm:text-lg card bg-zinc-100 drop-shadow-lg">
+					<div className="w-full mt-5 rounded-md text-md sm:text-lg card bg-zinc-100 drop-shadow-lg">
 						<div className="card-body">
 							{/* Delivery or pickup radio buttons */}
 							<div className="flex mb-5 space-x-4 cursor-pointer">
@@ -345,58 +345,86 @@ export default function CheckoutPage() {
 									{/* Basic details for mobile */}
 									<div className="pb-4 mb-5 border-b-2 sm:hidden">
 										<div>
-											<div className="font-bold">Full Name: </div>
+											<div className="font-bold">Full Name </div>
 											<div>{`${user.firstName} ${user.lastName}`}</div>
-											<div className="font-bold">Email Address: </div>
+											<div className="mt-2 font-bold">Email Address </div>
 											<div>{user.email}</div>
-											<div className="font-bold">Contact Information:</div>
+											<div className="mt-2 font-bold">Contact Information</div>
 											<div>
 												{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
 											</div>
-											<div className="font-bold">Address: </div>
-											<div>{user.homeAddress}</div>
+											<div className="mt-2 font-bold">Address </div>
+											<div className="flex items-center mt-1">
+												<div className="flex mr-2">
+													<input
+														type="radio"
+														checked={`${chooseAddress ? "" : "checked"}`}
+														className="self-center mr-2 radio radio-xs radio-accent"
+														onClick={(e) => {
+															setChooseAddress(false);
+															setAddress(user.homeAddress);
+														}}
+													/>
+													<span className={`text-xs ${chooseAddress ? "font-medium" : "text-green-700 font-semibold"}`}>Use Home Address</span>
+												</div>
+
+												{/* Use different address */}
+												<div className="flex">
+													<input
+														type="radio"
+														checked={`${chooseAddress ? "checked" : ""}`}
+														className="self-center mr-2 radio radio-xs radio-accent"
+														onClick={(e) => setChooseAddress(true)}
+													/>
+													<span className={`text-xs ${chooseAddress ? "text-green-700 font-semibold" : "font-medium"}`}>Use Different Address</span>
+												</div>
+											</div>
+											{chooseAddress && (
+												<textarea
+													onChange={(e) => setAddress(e.target.value)}
+													className="w-full h-20 mt-2 rounded-md input-bordered textarea focus:ring focus:outline-none focus:ring-green-700"
+													placeholder="Use a different address!"
+												></textarea>
+											)}
+											{!chooseAddress && <div className="mt-2">{user.homeAddress}</div>}
 										</div>
 									</div>
 
 									{/* Basic details for desktop/tablet */}
 									<div className="hidden grid-cols-2 grid-rows-1 pb-4 mb-5 border-b-2 sm:grid">
 										<div className="font-bold">
-											<div>Full Name:</div>
-											<div>Email Address:</div>
-											<div>Contact Information:</div>
-											<div>Address:</div>
+											<div>Full Name</div>
+											<div>Email Address</div>
+											<div>Contact Information</div>
+											<div>Address</div>
 											{/* Use home address */}
 											<div className="flex">
 												<input
 													type="radio"
-													name="Use Home Address"
 													checked={`${chooseAddress ? "" : "checked"}`}
 													className="self-center mr-2 radio radio-xs radio-accent"
 													onClick={(e) => {
 														setChooseAddress(false);
 														setAddress(user.homeAddress);
 													}}
-													value="Use Home Address"
 												/>
-												<span className={`${chooseAddress ? "" : "text-green-700 font-semibold"}`}>Use Home Address</span>
+												<span className={`text-sm ${chooseAddress ? "font-medium" : "text-green-700 font-semibold"}`}>Use Home Address</span>
 											</div>
 
 											{/* Use different address */}
-											<div className="flex">
+											<div className="flex mt-1">
 												<input
 													type="radio"
-													name="Use Different Address"
 													checked={`${chooseAddress ? "checked" : ""}`}
 													className="self-center mr-2 radio radio-xs radio-accent"
 													onClick={(e) => setChooseAddress(true)}
-													value="Use Different Address"
 												/>
-												<span className={`${chooseAddress ? "text-green-700 font-semibold" : ""}`}>Use Different Address</span>
+												<span className={`text-sm ${chooseAddress ? "text-green-700 font-semibold" : "font-medium"}`}>Use Different Address</span>
 											</div>
 											{chooseAddress && (
 												<textarea
 													onChange={(e) => setAddress(e.target.value)}
-													className="w-full h-20 rounded-md input-bordered textarea focus:ring focus:outline-none focus:ring-green-700"
+													className="w-full h-20 mt-2 rounded-md input-bordered textarea focus:ring focus:outline-none focus:ring-green-700"
 													placeholder="Use a different address!"
 												></textarea>
 											)}
@@ -411,7 +439,7 @@ export default function CheckoutPage() {
 										</div>
 									</div>
 
-									<div className="mb-2 font-bold">Payment Method: </div>
+									<div className="mb-2 font-bold">Payment Method </div>
 									<div className="flex-col pb-5 mb-5 space-y-2 border-b-2 cursor-pointer">
 										<div className="flex">
 											<input
@@ -426,7 +454,7 @@ export default function CheckoutPage() {
 										</div>
 										{payMethod === "COD" && (
 											<div className="font-semibold">
-												Change For:
+												Change For
 												<input
 													type="number"
 													onChange={(e) => setChange(e.target.value)}
@@ -451,7 +479,7 @@ export default function CheckoutPage() {
 									</div>
 
 									{/* Delivery time */}
-									<div className="mb-2 font-bold">Delivery Time:</div>
+									<div className="mb-2 font-bold">Delivery Time</div>
 									<div className="flex-col pb-5 mb-2 space-y-2 cursor-pointer">
 										<div className="flex">
 											<input
@@ -496,20 +524,20 @@ export default function CheckoutPage() {
 							{type === "Pickup" && user && (
 								<div>
 									{/* Basic details for mobile */}
-									<div className="pb-4 mb-5 border-b-2 sm:hidden b-4">
-										<div className="font-bold">Full Name:</div>
+									<div className="pb-4 mb-5 font-medium border-b-2 sm:hidden b-4">
+										<div className="font-bold">Full Name</div>
 										<div>{`${user.firstName} ${user.lastName}`}</div>
-										<div className="font-bold">Contact Information:</div>
+										<div className="mt-2 font-bold">Contact Information</div>
 										<div>
 											{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
 										</div>
 									</div>
 
 									{/* Basic details for desktop/tablet */}
-									<div className="hidden grid-cols-2 grid-rows-1 pb-4 mb-5 border-b-2 sm:grid">
+									<div className="hidden grid-cols-2 grid-rows-1 pb-4 mb-5 font-medium border-b-2 sm:grid">
 										<div className="font-bold">
-											<div>Full Name:</div>
-											<div>Contact Information:</div>
+											<div>Full Name</div>
+											<div>Contact Information</div>
 										</div>
 										<div>
 											<div>{`${user.firstName} ${user.lastName}`}</div>
@@ -521,7 +549,7 @@ export default function CheckoutPage() {
 
 									{/* Choose branch */}
 									<div className="font-bold">
-										Choose Store:
+										Choose Store
 										<select
 											onChange={(e) => setStoreLocation(e.target.value)}
 											className="w-full max-w-xs mb-3 rounded-md input-bordered sm:ml-2 select select-sm focus:ring focus:outline-none focus:ring-green-700"
@@ -534,7 +562,7 @@ export default function CheckoutPage() {
 									</div>
 
 									{/* Pickup time */}
-									<div className="mb-2 font-bold">Pickup Time:</div>
+									<div className="mb-2 font-bold">Pickup Time</div>
 									<div className="flex-col pb-5 mb-2 space-y-2 cursor-pointer">
 										<div className="flex">
 											<input
@@ -611,23 +639,23 @@ export default function CheckoutPage() {
 						<div className="card-body">
 							{/* Basic details for mobile */}
 							{user && (
-								<div className="grid pb-4 border-b-2 sm:hidden">
+								<div className="grid pb-4 font-medium border-b-2 sm:hidden">
 									<div className="font-bold">Full Name:</div>
 									<div>{`${user.firstName} ${user.lastName}`}</div>
-									{type === "Delivery" && <div className="font-bold">Email Address:</div>}
+									{type === "Delivery" && <div className="mt-2 font-bold">Email Address:</div>}
 									{type === "Delivery" && <div>{address}</div>}
-									<div className="font-bold">Contact Information:</div>
+									<div className="mt-2 font-bold">Contact Information:</div>
 									<div>
 										{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
 									</div>
-									{type === "Delivery" && <div className="font-bold">Address:</div>}
+									{type === "Delivery" && <div className="mt-2 font-bold">Address:</div>}
 									{type === "Delivery" && <div>{address}</div>}
 								</div>
 							)}
 
 							{/* Basic details for desktop/tablet */}
 							{user && (
-								<div className="hidden grid-cols-2 grid-rows-1 pb-4 border-b-2 sm:grid">
+								<div className="hidden grid-cols-2 grid-rows-1 pb-4 font-medium border-b-2 sm:grid">
 									<div className="font-bold">
 										<div>Full Name:</div>
 										{type === "Delivery" && <div>Email Address:</div>}
@@ -646,7 +674,7 @@ export default function CheckoutPage() {
 							)}
 
 							{/* Delivery details */}
-							<div className="grid grid-cols-2 grid-rows-1 py-4 mb-4 border-b-2">
+							<div className="grid grid-cols-2 grid-rows-1 py-4 mb-4 font-medium border-b-2">
 								<div className="font-bold">
 									<div>Type:</div>
 									{type === "Delivery" ? (
@@ -687,7 +715,7 @@ export default function CheckoutPage() {
 
 							{/* Food order */}
 							<div className="flex justify-between font-bold">
-								<div>Order:</div>
+								<div>Order</div>
 								<div>Qty.</div>
 								<div className="hidden sm:flex"></div>
 							</div>
@@ -747,7 +775,7 @@ export default function CheckoutPage() {
 
 								{/* Total */}
 								<div className="flex justify-between text-base font-medium text-gray-900">
-									<p className="font-semibold">Total</p>
+									<p className="font-bold">Total</p>
 									{type === "Delivery" ? <p className="font-bold">₱{totalPrice}</p> : <p className="font-bold">₱{subTotal}</p>}
 								</div>
 							</div>
