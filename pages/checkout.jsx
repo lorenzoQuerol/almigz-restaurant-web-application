@@ -524,7 +524,7 @@ export default function CheckoutPage() {
 										Choose Store:
 										<select
 											onChange={(e) => setStoreLocation(e.target.value)}
-											className="w-full max-w-xs mb-5 rounded-md input-bordered sm:ml-2 select select-sm focus:ring focus:outline-none focus:ring-green-700"
+											className="w-full max-w-xs mb-3 rounded-md input-bordered sm:ml-2 select select-sm focus:ring focus:outline-none focus:ring-green-700"
 										>
 											<option>Branch 1</option>
 											<option>Branch 2</option>
@@ -535,7 +535,7 @@ export default function CheckoutPage() {
 
 									{/* Pickup time */}
 									<div className="mb-2 font-bold">Pickup Time:</div>
-									<div className="flex-col pb-5 mb-2 space-y-4 cursor-pointer">
+									<div className="flex-col pb-5 mb-2 space-y-2 cursor-pointer">
 										<div className="flex">
 											<input
 												type="radio"
