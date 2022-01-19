@@ -3,10 +3,13 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import { Transition } from "@headlessui/react";
+import Image from "next/image";
 
 import getStorageValue from "@utils/localStorage/getStorageValue";
 import confirmTransaction from "@utils/confirmTransaction";
 import useLocalStorage from "@utils/localStorage/useLocalStorage";
+
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -32,6 +35,8 @@ export default function CheckoutPage() {
 	const [subTotal, setSubtotal] = useState(0);
 	const [chooseDeliveryTime, setChooseDeliveryTime] = useState(false);
 	const [choosePickupTime, setChoosePickupTime] = useState(false);
+	const [chooseAddress, setChooseAddress] = useState(false);
+
 	const steps = ["Review Cart", "Additional Details", "Review Order"];
 
 	// User
@@ -137,17 +142,16 @@ export default function CheckoutPage() {
 			pickupTime: pickupTime,
 		};
 
-		// console.log(transaction);
 		// Send transaction object
 		const response = await confirmTransaction(transaction);
-		console.log(response);
+
 		// If successful, set transaction to local storage and redirect to receipt page
-		// if (response.success) {
-		// 	setTransaction(response.data);
-		// 	router.replace("/receipt");
-		// } else {
-		// 	// DESIGNER TODO: Handle here if unsuccessful checkout (i.e., missing values).
-		// }
+		if (response.success) {
+			setTransaction(response.data);
+			router.replace("/receipt");
+		} else {
+			// DESIGNER TODO: Handle here if unsuccessful checkout (i.e., missing values).
+		}
 	};
 
 	const handleDeliveryType = (event) => {
@@ -166,6 +170,25 @@ export default function CheckoutPage() {
 
 	const handlePickupTime = (event) => {
 		setPickupTime(event.target.value);
+	};
+
+	const formatDate = (date) => {
+		date = new Date(date).toLocaleString("en-US", {
+			weekday: "short", // long, short, narrow
+			day: "numeric", // numeric, 2-digit
+			year: "numeric", // numeric, 2-digit
+			month: "long", // numeric, 2-digit, long, short, narrow
+			hour: "numeric", // numeric, 2-digit
+			minute: "numeric", // numeric, 2-digit
+		});
+		const tempDate = new Date(date);
+
+		// Get formatted date and time
+		const formatDate = `${months[tempDate.getMonth()]} ${tempDate.getDay()}, ${tempDate.getFullYear()}`;
+		const time = date.slice(23);
+
+		// Return formatted date
+		return `${formatDate} @ ${time}`;
 	};
 
 	const handleRefreshTotal = () => {
@@ -188,10 +211,10 @@ export default function CheckoutPage() {
 
 	return (
 		<div className="flex justify-center">
-			<div className="relative w-1/3 min-h-screen my-10 font-rale text-slate-900">
-				<div className="flex justify-between text-green-700">
+			<div className="relative w-full mx-5 my-10 sm:mx-0 sm:w-3/4 xl:w-1/2 font-rale text-slate-900">
+				<div className="flex flex-col text-green-700 sm:justify-between sm:flex-row">
 					<div className="mb-5 text-5xl font-extrabold ">Checkout</div>
-					<div className="self-center text-xl font-bold">{steps[currentStep - 1]}</div>
+					<div className="text-xl font-bold sm:self-center">{steps[currentStep - 1]}</div>
 				</div>
 
 				{/* Review cart */}
@@ -211,10 +234,40 @@ export default function CheckoutPage() {
 								<div className="mb-5 divide-y">
 									{order.map((product) => {
 										return (
-											<li key={product.id} className="flex py-3">
-												<p className="flex items-center mr-2 font-bold text-gray-600">
+											<li key={product.id} className="flex py-3 sm:flex-row">
+												{/* Image */}
+												<div className="flex-shrink-0 w-16 h-16 overflow-hidden border border-gray-200 rounded-md ">
+													<div className="object-cover object-center w-full h-full">
+														<Image src={product.menuItem.productImagesCollection.items[0].url} height={100} width={100} />
+													</div>
+												</div>
+
+												{/* Food item details */}
+												<div className="flex-col flex-1 w-1/4 ml-4 text-sm sm:flex sm:text-md">
+													<div>
+														<div className="flex justify-between font-medium">
+															<p className="font-bold">{product.menuItem.productName}</p>
+														</div>
+														<p className="font-medium">₱ {product.menuItem.productPrice}</p>
+													</div>
+													<div className="flex items-end justify-between flex-1">
+														<div className="flex">
+															<button
+																name={product.menuItem.productName}
+																type="button"
+																className="font-bold text-green-700 transition-colors duration-200 hover:text-green-600"
+																onClick={(e) => deleteItem(e.target.name)}
+															>
+																Remove
+															</button>
+														</div>
+													</div>
+												</div>
+
+												{/* Quantity */}
+												<div className="flex self-center ml-4 sm:flex-1">
 													<input
-														className="pr-2 mr-2 rounded-md input font-black-100 text-normal w-14 input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+														className="pr-2 border rounded-md input font-black-100 text-normal w-14 input-sm input-bordered focus:ring focus:outline-none focus:ring-green-700"
 														type="number"
 														min="1"
 														step="1"
@@ -225,35 +278,11 @@ export default function CheckoutPage() {
 														onLoad={(e) => setTotalPrice(product.quantity)}
 														onChange={(e) => updateTotal(e.target.value, e.target.name)}
 													/>
-													x
+												</div>
+												{/* Total price */}
+												<p className="self-center hidden w-20 font-bold sm:flex text-end">
+													<p className="ml-4 mr-5 font-bold ">₱ {product.menuItem.productPrice * product.quantity}</p>
 												</p>
-												<div className="flex-shrink-0 w-16 h-16 overflow-hidden border border-gray-200 rounded-md">
-													<img src={product.menuItem.productImagesCollection.items[0].url} className="object-cover object-center w-full h-full" />
-												</div>
-
-												<div className="flex flex-col flex-1 ml-4">
-													<div>
-														<div className="flex justify-between text-base font-medium text-gray-900">
-															<h3>
-																<a className="font-bold">{product.menuItem.productName}</a>
-															</h3>
-															<p className="ml-4 font-bold">₱ {product.menuItem.productPrice * product.quantity}</p>
-														</div>
-														<p className="text-sm font-medium text-gray-600">₱ {product.menuItem.productPrice}</p>
-													</div>
-													<div className="flex items-end justify-between flex-1 text-sm">
-														<div className="flex">
-															<button
-																name={product.menuItem.productName}
-																type="button"
-																className="font-medium text-green-600 hover:text-green-500"
-																onClick={(e) => deleteItem(e.target.name)}
-															>
-																Remove
-															</button>
-														</div>
-													</div>
-												</div>
 											</li>
 										);
 									})}
@@ -261,7 +290,11 @@ export default function CheckoutPage() {
 							)}
 
 							{/* Step button */}
-							<button id="next" onClick={(e) => handleAnimation(e)} className="p-2 font-semibold text-white bg-green-700 rounded-md">
+							<button
+								id="next"
+								onClick={(e) => handleAnimation(e)}
+								className="p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
+							>
 								Next
 							</button>
 						</div>
@@ -278,7 +311,7 @@ export default function CheckoutPage() {
 					leaveFrom="translate-x-0 opacity-100"
 					leaveTo={`opacity-0 ${forward ? "-translate-x-full" : "translate-x-full"}`}
 				>
-					<div className="absolute w-full mt-5 rounded-md card bg-zinc-100 drop-shadow-lg">
+					<div className="absolute w-full mt-5 rounded-md text-md sm:text-lg card bg-zinc-100 drop-shadow-lg">
 						<div className="card-body">
 							{/* Delivery or pickup radio buttons */}
 							<div className="flex mb-5 space-x-4 cursor-pointer">
@@ -287,7 +320,7 @@ export default function CheckoutPage() {
 										type="radio"
 										name="Delivery"
 										checked={`${type === "Delivery" ? "checked" : ""}`}
-										className="mr-2 radio radio-accent"
+										className="self-center mr-2 radio radio-xs radio-accent"
 										onClick={(e) => handleDeliveryType(e)}
 										value="Delivery"
 									/>
@@ -298,7 +331,7 @@ export default function CheckoutPage() {
 										type="radio"
 										name="Pickup"
 										checked={`${type === "Pickup" ? "checked" : ""}`}
-										className="mr-2 radio radio-accent"
+										className="self-center mr-2 radio-xs radio radio-accent"
 										onClick={(e) => handleDeliveryType(e)}
 										value="Pickup"
 									/>
@@ -309,13 +342,64 @@ export default function CheckoutPage() {
 							{/* Delivery */}
 							{type === "Delivery" && user && (
 								<div className="font-medium">
-									{/* Basic details */}
-									<div className="grid grid-cols-2 grid-rows-1 pb-4 mb-5 border-b-2">
+									{/* Basic details for mobile */}
+									<div className="pb-4 mb-5 border-b-2 sm:hidden">
+										<div>
+											<div className="font-bold">Full Name: </div>
+											<div>{`${user.firstName} ${user.lastName}`}</div>
+											<div className="font-bold">Email Address: </div>
+											<div>{user.email}</div>
+											<div className="font-bold">Contact Information:</div>
+											<div>
+												{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+											</div>
+											<div className="font-bold">Address: </div>
+											<div>{user.homeAddress}</div>
+										</div>
+									</div>
+
+									{/* Basic details for desktop/tablet */}
+									<div className="hidden grid-cols-2 grid-rows-1 pb-4 mb-5 border-b-2 sm:grid">
 										<div className="font-bold">
 											<div>Full Name:</div>
 											<div>Email Address:</div>
 											<div>Contact Information:</div>
 											<div>Address:</div>
+											{/* Use home address */}
+											<div className="flex">
+												<input
+													type="radio"
+													name="Use Home Address"
+													checked={`${chooseAddress ? "" : "checked"}`}
+													className="self-center mr-2 radio radio-xs radio-accent"
+													onClick={(e) => {
+														setChooseAddress(false);
+														setAddress(user.homeAddress);
+													}}
+													value="Use Home Address"
+												/>
+												<span className={`${chooseAddress ? "" : "text-green-700 font-semibold"}`}>Use Home Address</span>
+											</div>
+
+											{/* Use different address */}
+											<div className="flex">
+												<input
+													type="radio"
+													name="Use Different Address"
+													checked={`${chooseAddress ? "checked" : ""}`}
+													className="self-center mr-2 radio radio-xs radio-accent"
+													onClick={(e) => setChooseAddress(true)}
+													value="Use Different Address"
+												/>
+												<span className={`${chooseAddress ? "text-green-700 font-semibold" : ""}`}>Use Different Address</span>
+											</div>
+											{chooseAddress && (
+												<textarea
+													onChange={(e) => setAddress(e.target.value)}
+													className="w-full h-20 rounded-md input-bordered textarea focus:ring focus:outline-none focus:ring-green-700"
+													placeholder="Use a different address!"
+												></textarea>
+											)}
 										</div>
 										<div>
 											<div>{`${user.firstName} ${user.lastName}`}</div>
@@ -323,18 +407,18 @@ export default function CheckoutPage() {
 											<div>
 												{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
 											</div>
-											<div>{user.homeAddress}</div>
+											{!chooseAddress && <div>{user.homeAddress}</div>}
 										</div>
 									</div>
 
 									<div className="mb-2 font-bold">Payment Method: </div>
-									<div className="flex-col pb-5 mb-5 space-y-4 border-b-2 cursor-pointer">
+									<div className="flex-col pb-5 mb-5 space-y-2 border-b-2 cursor-pointer">
 										<div className="flex">
 											<input
 												type="radio"
 												name="COD"
 												checked={`${payMethod === "COD" ? "checked" : ""}`}
-												className="mr-2 radio radio-accent"
+												className="self-center mr-2 radio radio-xs radio-accent"
 												onClick={(e) => handlePayMethod(e)}
 												value="COD"
 											/>
@@ -348,7 +432,7 @@ export default function CheckoutPage() {
 													onChange={(e) => setChange(e.target.value)}
 													min="1"
 													value={change}
-													className="w-32 ml-2 rounded-md input input-sm"
+													className="w-32 ml-2 rounded-md input-bordered input input-sm focus:ring focus:outline-none focus:ring-green-700"
 													required
 												/>
 											</div>
@@ -358,7 +442,7 @@ export default function CheckoutPage() {
 												type="radio"
 												name="GCash"
 												checked={`${payMethod === "GCash" ? "checked" : ""}`}
-												className="mr-2 radio radio-accent"
+												className="self-center mr-2 radio radio-xs radio-accent"
 												onClick={(e) => handlePayMethod(e)}
 												value="GCash"
 											/>
@@ -368,13 +452,13 @@ export default function CheckoutPage() {
 
 									{/* Delivery time */}
 									<div className="mb-2 font-bold">Delivery Time:</div>
-									<div className="flex-col pb-5 mb-2 space-y-4 cursor-pointer">
+									<div className="flex-col pb-5 mb-2 space-y-2 cursor-pointer">
 										<div className="flex">
 											<input
 												type="radio"
 												name="Now"
 												checked={`${!chooseDeliveryTime ? "checked" : ""}`}
-												className="mr-2 radio radio-accent"
+												className="self-center mr-2 radio radio-xs radio-accent"
 												onClick={(e) => {
 													handleDeliverTime(e);
 													setChooseDeliveryTime(false);
@@ -388,7 +472,7 @@ export default function CheckoutPage() {
 												type="radio"
 												name="chooseTime"
 												checked={`${chooseDeliveryTime ? "checked" : ""}`}
-												className="mr-2 radio radio-accent"
+												className="self-center mr-2 radio radio-xs radio-accent"
 												onClick={(e) => setChooseDeliveryTime(true)}
 												value="chooseTime"
 											/>
@@ -397,7 +481,7 @@ export default function CheckoutPage() {
 										{chooseDeliveryTime && (
 											<input
 												type="datetime-local"
-												className="p-1 border rounded-md focus:ring focus:outline-none focus:ring-green-700"
+												className="p-1 rounded-md input-bordered focus:ring focus:outline-none focus:ring-green-700"
 												id="deliverTime"
 												onChange={handleDeliverTime}
 												min={dateToday}
@@ -411,7 +495,18 @@ export default function CheckoutPage() {
 							{/* Pickup */}
 							{type === "Pickup" && user && (
 								<div>
-									<div className="grid grid-cols-2 grid-rows-1 pb-4 mb-5 border-b-2">
+									{/* Basic details for mobile */}
+									<div className="pb-4 mb-5 border-b-2 sm:hidden b-4">
+										<div className="font-bold">Full Name:</div>
+										<div>{`${user.firstName} ${user.lastName}`}</div>
+										<div className="font-bold">Contact Information:</div>
+										<div>
+											{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+										</div>
+									</div>
+
+									{/* Basic details for desktop/tablet */}
+									<div className="hidden grid-cols-2 grid-rows-1 pb-4 mb-5 border-b-2 sm:grid">
 										<div className="font-bold">
 											<div>Full Name:</div>
 											<div>Contact Information:</div>
@@ -423,9 +518,14 @@ export default function CheckoutPage() {
 											</div>
 										</div>
 									</div>
+
+									{/* Choose branch */}
 									<div className="font-bold">
 										Choose Store:
-										<select onChange={(e) => setStoreLocation(e.target.value)} className="w-full max-w-xs mb-5 ml-2 rounded-md select select-sm">
+										<select
+											onChange={(e) => setStoreLocation(e.target.value)}
+											className="w-full max-w-xs mb-5 rounded-md input-bordered sm:ml-2 select select-sm focus:ring focus:outline-none focus:ring-green-700"
+										>
 											<option>Branch 1</option>
 											<option>Branch 2</option>
 											<option>Branch 3</option>
@@ -441,7 +541,7 @@ export default function CheckoutPage() {
 												type="radio"
 												name="Now"
 												checked={`${!choosePickupTime ? "checked" : ""}`}
-												className="mr-2 radio radio-accent"
+												className="self-center mr-2 radio radio-xs radio-accent"
 												onClick={(e) => {
 													handleDeliverTime(e);
 													setChoosePickupTime(false);
@@ -455,7 +555,7 @@ export default function CheckoutPage() {
 												type="radio"
 												name="chooseTime"
 												checked={`${choosePickupTime ? "checked" : ""}`}
-												className="mr-2 radio radio-accent"
+												className="self-center mr-2 radio radio-xs radio-accent"
 												onClick={(e) => setChoosePickupTime(true)}
 												value="chooseTime"
 											/>
@@ -464,7 +564,7 @@ export default function CheckoutPage() {
 										{choosePickupTime && (
 											<input
 												type="datetime-local"
-												className="p-1 border rounded-md focus:ring focus:outline-none focus:ring-green-700"
+												className="p-1 rounded-md input-bordered focus:ring focus:outline-none focus:ring-green-700"
 												id="pickupTime"
 												onChange={handlePickupTime}
 												min={dateToday}
@@ -477,10 +577,18 @@ export default function CheckoutPage() {
 
 							{/* Step buttons */}
 							<div className="flex w-full space-x-4">
-								<button id="prev" onClick={(e) => handleAnimation(e)} className="w-full p-2 font-semibold text-white bg-green-700 rounded-md">
+								<button
+									id="prev"
+									onClick={(e) => handleAnimation(e)}
+									className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
+								>
 									Go Back
 								</button>
-								<button id="next" onClick={(e) => handleAnimation(e)} className="w-full p-2 font-semibold text-white bg-green-700 rounded-md">
+								<button
+									id="next"
+									onClick={(e) => handleAnimation(e)}
+									className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
+								>
 									Next
 								</button>
 							</div>
@@ -499,11 +607,27 @@ export default function CheckoutPage() {
 					leaveTo={`opacity-0 ${forward ? "-translate-x-full" : "translate-x-full"}`}
 					afterEnter={handleRefreshTotal}
 				>
-					<div className="absolute w-full mt-5 rounded-md card bg-zinc-100 drop-shadow-lg">
+					<div className="w-full mt-5 rounded-md card bg-zinc-100 drop-shadow-lg">
 						<div className="card-body">
-							{/* Basic details */}
+							{/* Basic details for mobile */}
 							{user && (
-								<div className="grid grid-cols-2 grid-rows-1 pb-4 border-b-2">
+								<div className="grid pb-4 border-b-2 sm:hidden">
+									<div className="font-bold">Full Name:</div>
+									<div>{`${user.firstName} ${user.lastName}`}</div>
+									{type === "Delivery" && <div className="font-bold">Email Address:</div>}
+									{type === "Delivery" && <div>{address}</div>}
+									<div className="font-bold">Contact Information:</div>
+									<div>
+										{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+									</div>
+									{type === "Delivery" && <div className="font-bold">Address:</div>}
+									{type === "Delivery" && <div>{address}</div>}
+								</div>
+							)}
+
+							{/* Basic details for desktop/tablet */}
+							{user && (
+								<div className="hidden grid-cols-2 grid-rows-1 pb-4 border-b-2 sm:grid">
 									<div className="font-bold">
 										<div>Full Name:</div>
 										{type === "Delivery" && <div>Email Address:</div>}
@@ -516,7 +640,7 @@ export default function CheckoutPage() {
 										<div>
 											{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
 										</div>
-										{type === "Delivery" && <div>{user.homeAddress}</div>}
+										{type === "Delivery" && <div>{address}</div>}
 									</div>
 								</div>
 							)}
@@ -542,14 +666,14 @@ export default function CheckoutPage() {
 									{type === "Delivery" ? (
 										// Delivery
 										<>
-											<div>{chooseDeliveryTime ? deliverTime : "NOW"}</div>
+											<div>{chooseDeliveryTime ? formatDate(deliverTime) : "NOW"}</div>
 											<div>{payMethod.toUpperCase()}</div>
 										</>
 									) : (
 										// Pickup
 										<>
 											<div>{storeLocation}</div>
-											<div>{pickupTime}</div>
+											<div>{choosePickupTime ? formatDate(pickupTime) : "NOW"}</div>
 										</>
 									)}
 
@@ -562,29 +686,38 @@ export default function CheckoutPage() {
 							</div>
 
 							{/* Food order */}
-							<div className="font-bold">Order:</div>
+							<div className="flex justify-between font-bold">
+								<div>Order:</div>
+								<div>Qty.</div>
+								<div className="hidden sm:flex"></div>
+							</div>
 							<div className="border-b-2 divide-y">
 								{order.map((product) => {
 									return (
-										<li key={product.id} className="flex py-3">
-											<p className="flex items-center mr-2 font-bold text-gray-600">
-												<a className="mr-4">{product.quantity}</a> x
-											</p>
-											<div className="flex-shrink-0 w-16 h-16 ml-3 overflow-hidden border border-gray-200 rounded-md">
-												<img src={product.menuItem.productImagesCollection.items[0].url} className="object-cover object-center w-full h-full" />
-											</div>
-
-											<div className="flex flex-col flex-1 ml-4">
-												<div>
-													<div className="flex justify-between text-base font-medium text-gray-900">
-														<h3>
-															<a className="font-bold">{product.menuItem.productName}</a>
-														</h3>
-														<p className="ml-4 font-bold">₱ {product.menuItem.productPrice * product.quantity}</p>
-													</div>
-													<p className="text-sm font-medium text-gray-600">₱ {product.menuItem.productPrice}</p>
+										<li key={product.id} className="flex py-3 sm:flex-row">
+											{/* Image */}
+											<div className="flex-shrink-0 w-16 h-16 overflow-hidden border border-gray-200 rounded-md">
+												<div className="object-cover object-center w-full h-full">
+													<Image src={product.menuItem.productImagesCollection.items[0].url} height={100} width={100} />
 												</div>
 											</div>
+
+											{/* Food item details */}
+											<div className="flex-col flex-1 w-1/4 ml-4 text-sm sm:flex sm:text-md">
+												<div>
+													<div className="flex justify-between font-medium text-gray-900">
+														<p className="font-bold">{product.menuItem.productName}</p>
+													</div>
+													<p className="font-medium">₱ {product.menuItem.productPrice}</p>
+												</div>
+											</div>
+
+											{/* Quantity */}
+											<div className="flex self-center ml-4 font-medium sm:flex-1">x {product.quantity}</div>
+											{/* Total price */}
+											<p className="self-center hidden w-20 font-bold sm:flex text-end">
+												<p className="ml-4 mr-5 font-bold ">₱ {product.menuItem.productPrice * product.quantity}</p>
+											</p>
 										</li>
 									);
 								})}
@@ -619,12 +752,29 @@ export default function CheckoutPage() {
 								</div>
 							</div>
 
+							{/* Special instructions */}
+							<div className="mb-5">
+								<p className="mb-2 font-bold">Special Instructions</p>
+								<textarea
+									onChange={(e) => setSpecialInstructions(e.target.value)}
+									className="w-full h-20 border rounded-md textarea focus:ring focus:outline-none focus:ring-green-700"
+									placeholder="Place it here!"
+								></textarea>
+							</div>
+
 							{/* Place order button */}
 							<div className="flex w-full space-x-4">
-								<button id="prev" onClick={(e) => handleAnimation(e)} className="w-full p-2 font-semibold text-white bg-green-700 rounded-md">
+								<button
+									id="prev"
+									onClick={(e) => handleAnimation(e)}
+									className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
+								>
 									Go Back
 								</button>
-								<button onClick={submitTransaction} className="w-full p-2 font-semibold text-white bg-green-700 rounded-md">
+								<button
+									onClick={submitTransaction}
+									className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
+								>
 									Place Order
 								</button>
 							</div>
