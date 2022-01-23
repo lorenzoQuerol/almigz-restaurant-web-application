@@ -12,7 +12,7 @@ async function handler(req, res) {
 
 	// Unpack the request
 	const {
-		query: { invoiceNum },
+		query: { invoice },
 		method,
 	} = req;
 
@@ -22,7 +22,7 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.email || session.user.isAdmin) {
 					try {
-						const transaction = await Transaction.findOne({ invoiceNum: invoiceNum });
+						const transaction = await Transaction.findOne({ invoice: invoice });
 						if (!transaction) return res.status(404).json({ success: false, msg: "Transaction does not exist." });
 
 						res.status(200).json({ success: true, data: transaction });
@@ -42,7 +42,7 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.isAdmin) {
 					try {
-						const updatedTransaction = await Transaction.findOneAndUpdate({ invoiceNum: invoiceNum }, req.body, {
+						const updatedTransaction = await Transaction.findOneAndUpdate({ invoice: invoice }, req.body, {
 							new: true,
 							runValidators: true,
 						});

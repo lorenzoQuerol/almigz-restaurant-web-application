@@ -36,6 +36,7 @@ export default function CheckoutPage() {
 	const [chooseDeliveryTime, setChooseDeliveryTime] = useState(false);
 	const [choosePickupTime, setChoosePickupTime] = useState(false);
 	const [chooseAddress, setChooseAddress] = useState(false);
+	const [changeError, setChangeError] = useState(null);
 
 	const steps = ["Review Cart", "Additional Details", "Review Order"];
 
@@ -61,6 +62,10 @@ export default function CheckoutPage() {
 		return date;
 	});
 
+	// Gcash details
+	const [gcashProof, setGcashProof] = useState(null);
+	const [gcashError, setGcashError] = useState("");
+
 	// Pickup details
 	const [storeLocation, setStoreLocation] = useState("Branch 1");
 	const [pickupTime, setPickupTime] = useState("Now");
@@ -82,6 +87,7 @@ export default function CheckoutPage() {
 			setOrder(cart.data);
 			setSubtotal(cart.total);
 			setTotalPrice(cart.total + delFee);
+			setChange(totalPrice);
 		}
 		if (user) {
 			setFullName(`${user.firstName} ${user.lastName}`);
@@ -122,7 +128,8 @@ export default function CheckoutPage() {
 	};
 
 	// Handle submit transaction
-	const submitTransaction = async () => {
+	const submitTransaction = async (event) => {
+		event.preventDefault();
 		// Initialize transaction object
 		const transaction = {
 			dateCreated: new Date(),
@@ -136,6 +143,7 @@ export default function CheckoutPage() {
 			totalPrice: totalPrice,
 			address: address,
 			payMethod: payMethod,
+			proofPayment: gcashProof,
 			change: change,
 			deliverTime: deliverTime,
 			storeLocation: storeLocation,
@@ -147,7 +155,7 @@ export default function CheckoutPage() {
 
 		// If successful, set transaction to local storage and redirect to receipt page
 		if (response.success) {
-			setTransaction(response.data);
+			localStorage.setItem("transaction", JSON.stringify(response.data));
 			router.replace("/receipt");
 		} else {
 			// DESIGNER TODO: Handle here if unsuccessful checkout (i.e., missing values).
@@ -174,12 +182,12 @@ export default function CheckoutPage() {
 
 	const formatDate = (date) => {
 		date = new Date(date).toLocaleString("en-US", {
-			weekday: "short", // long, short, narrow
-			day: "numeric", // numeric, 2-digit
-			year: "numeric", // numeric, 2-digit
-			month: "long", // numeric, 2-digit, long, short, narrow
-			hour: "numeric", // numeric, 2-digit
-			minute: "numeric", // numeric, 2-digit
+			weekday: "short",
+			day: "numeric",
+			year: "numeric",
+			month: "long",
+			hour: "numeric",
+			minute: "numeric",
 		});
 		const tempDate = new Date(date);
 
@@ -205,6 +213,10 @@ export default function CheckoutPage() {
 			setCurrentStep(currentStep + 1);
 			setForward(true);
 		}
+	};
+
+	const handleChange = (event) => {
+		setChange(event.target.value);
 	};
 
 	if (status === "loading") return <h1>Loading...</h1>;
@@ -454,15 +466,21 @@ export default function CheckoutPage() {
 										</div>
 										{payMethod === "COD" && (
 											<div className="font-semibold">
-												Change For
-												<input
-													type="number"
-													onChange={(e) => setChange(e.target.value)}
-													min="1"
-													value={change}
-													className="w-32 ml-2 rounded-md input-bordered input input-sm focus:ring focus:outline-none focus:ring-green-700"
-													required
-												/>
+												<div>
+													Change For: ₱
+													<input
+														type="number"
+														onInput={(e) => handleChange(e)}
+														min={totalPrice}
+														value={change}
+														className="w-32 ml-2 rounded-md input-bordered input input-sm focus:ring focus:outline-none focus:ring-green-700"
+														required
+													/>
+													<div className="mt-2 text-sm text-red-700">{changeError}</div>
+												</div>
+												<div className="mt-2 text-sm font-semibold">
+													Order Cost: <a className="font-medium">₱{subTotal + delFee}</a>
+												</div>
 											</div>
 										)}
 										<div className="flex">
@@ -476,6 +494,22 @@ export default function CheckoutPage() {
 											/>
 											<span className={`${payMethod === "GCash" ? "text-green-700 font-semibold" : ""}`}>GCash</span>
 										</div>
+										{payMethod === "GCash" && (
+											<>
+												<div className="text-sm font-bold">
+													<div>
+														Name: <a className="font-medium">NAME</a>
+													</div>
+													<div>
+														Number: <a className="font-medium">GCASH_CONTACT</a>
+													</div>
+												</div>
+												<div className="text-sm font-bold">Upload proof of payment below.</div>
+
+												<input className="text-xs" type="file" onChange={(e) => setGcashProof(e.target.files[0])} />
+												{gcashError && <div className="mt-2 text-sm text-red-700">{gcashError}</div>}
+											</>
+										)}
 									</div>
 
 									{/* Delivery time */}
@@ -607,14 +641,33 @@ export default function CheckoutPage() {
 							<div className="flex w-full space-x-4">
 								<button
 									id="prev"
-									onClick={(e) => handleAnimation(e)}
+									onClick={(e) => {
+										if (change >= totalPrice) setChangeError("");
+										handleAnimation(e);
+									}}
 									className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
 								>
 									Go Back
 								</button>
 								<button
 									id="next"
-									onClick={(e) => handleAnimation(e)}
+									onClick={(e) => {
+										if (payMethod === "COD") {
+											if (change < totalPrice) setChangeError("Change must be more than the order cost!");
+											else {
+												setChangeError("");
+												setGcashError("");
+												handleAnimation(e);
+											}
+										} else {
+											if (!gcashProof) setGcashError("Please upload a proof of payment!");
+											else {
+												setChangeError("");
+												setGcashError("");
+												handleAnimation(e);
+											}
+										}
+									}}
 									className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
 								>
 									Next
@@ -800,7 +853,7 @@ export default function CheckoutPage() {
 									Go Back
 								</button>
 								<button
-									onClick={submitTransaction}
+									onClick={(e) => submitTransaction(e)}
 									className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
 								>
 									Place Order

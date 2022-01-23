@@ -21,6 +21,7 @@ export default async function confirmTransaction(newTransaction) {
 
 		// Set to null for fields not required in PICKUP type
 		if (newTransaction.type === "Pickup") {
+			newTransaction.proofPayment = null;
 			newTransaction.address = null;
 			newTransaction.payMethod = null;
 			newTransaction.change = null;
@@ -39,6 +40,7 @@ export default async function confirmTransaction(newTransaction) {
 		const success = response.data;
 		return success;
 	} catch (err) {
+		console.log(err.response.data);
 		const error = err.response.data;
 		return error;
 	}

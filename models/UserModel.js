@@ -95,8 +95,14 @@ const TransactionSchema = new mongoose.Schema({
 		required: false,
 	},
 
+	// If GCash is selected as pay method
+	proofPayment: {
+		type: Buffer,
+		required: false,
+	},
+
 	change: {
-		type: String,
+		type: Number,
 		required: false,
 	},
 
