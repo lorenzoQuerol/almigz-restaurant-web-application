@@ -1,27 +1,25 @@
 import { useState, useEffect } from "react";
-import { getSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import axios from "axios";
-import useSWR from "swr";
+import { supabase } from "@utils/supabaseClient";
 import { Disclosure } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
 
+import axios from "axios";
+import useSWR from "swr";
+
 import DeleteDialog from "@components/DeleteDialog";
-import createConnection from "@utils/mongoDBConnection";
-import User from "@models/UserModel";
 import toTitleCase from "@utils/toTitleCase";
 import removeStorageValue from "@utils/localStorage/removeStorageValue";
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-export async function getServerSideProps(context) {
-	const session = await getSession(context);
+export async function getServerSideProps({ req }) {
+	const { user } = await supabase.auth.api.getUserByCookie(req);
 
-	await createConnection();
-	const response = JSON.stringify(await User.findOne({ email: session.user.email }, { _id: false, __v: false, isAdmin: false, isDelete: false, cart: false }));
+	if (!user) return { props: {}, redirect: { destination: "/signin", permanent: false } };
 
 	return {
-		props: JSON.parse(response),
+		props: JSON.parse(JSON.stringify(user)),
 	};
 }
 
@@ -35,14 +33,11 @@ const Loading = () => {
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function Account(user) {
+export default function account(user) {
 	const router = useRouter();
-	const { data, error } = useSWR(`/api/history/${user.email}`, fetcher);
 
-	useEffect(() => {
-		if (data) setTransactions(data.data.transactions);
-	}, [data]);
-
+	const [initialUser, setInitialUser] = useState({});
+	const [profiles, setProfiles] = useState([]);
 	// Page elements
 	const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
@@ -55,24 +50,26 @@ export default function Account(user) {
 	];
 
 	// Editable user information
-	const [firstName, setFirstName] = useState(user.firstName);
-	const [lastName, setLastName] = useState(user.lastName);
-	const [password, setPassword] = useState("");
-	const [confirmPassword, setConfirmPassword] = useState("");
-	const [homeAddress, setAddress] = useState(user.homeAddress);
-	const [contactNum, setContactNum] = useState(user.contactNum.slice(3));
-	const [altContactNum, setAltContactNum] = useState(user.altContactNum.slice(3));
+	// const [firstName, setFirstName] = useState(user.firstName);
+	// const [lastName, setLastName] = useState(user.lastName);
+	// const [password, setPassword] = useState("");
+	// const [confirmPassword, setConfirmPassword] = useState("");
+	// const [homeAddress, setAddress] = useState(user.homeAddress);
+	// const [contactNum, setContactNum] = useState(user.contactNum.slice(3));
+	// const [altContactNum, setAltContactNum] = useState(user.altContactNum.slice(3));
 
 	// Transactions
 	const [transactions, setTransactions] = useState(null);
 
-	// Format Date object
-
 	// Error message
 	const [errorMessage, setErrorMessage] = useState("");
 
-	useEffect(() => {
-		setIsLoading(false);
+	// useEffect(() => {
+	// 	setIsLoading(false);
+	// }, [user]);
+
+	useEffect(async () => {
+		if (user) setInitialUser(user.user_metadata);
 	}, [user]);
 
 	// Refresh client-side
@@ -102,14 +99,12 @@ export default function Account(user) {
 	const handleDeleteAccount = async () => {
 		handleOpenDeleteDialog();
 
-		// Remove any local storage related to session
-		removeStorageValue("foodCart");
-		removeStorageValue("transaction");
-
 		// Delete account from database and redirect to landing page
-		await axios.delete(`/api/users/${user.email}`);
-		await signOut({ redirect: false, callbackUrl: "/" });
-		router.push(data.url);
+		const response = await axios.delete(`/api/users/${user.id}`);
+		console.log(response.data);
+
+		// const { error } = await supabase.auth.signOut();
+		// if (!error) router.replace("/");
 	};
 
 	// Reset all states if editing was cancelled
@@ -159,6 +154,9 @@ export default function Account(user) {
 		}
 	};
 
+	if (!user) return "Loading";
+
+	// return null;
 	return (
 		<div className="flex flex-col justify-center mx-10 my-10 md:mx-36 xl:mx-72 font-rale text-slate-900">
 			<DeleteDialog openDeleteDialog={openDeleteDialog} handleOpenDeleteDialog={handleOpenDeleteDialog} handleDeleteAccount={handleDeleteAccount} />
@@ -206,23 +204,23 @@ export default function Account(user) {
 									<>
 										<div className="grid grid-flow-row lg:grid-cols-2 lg:grid-rows-4">
 											<div>
-												<a className="font-bold">First Name</a>: {user.firstName}
+												<a className="font-bold">First Name</a>: {initialUser.first_name}
 											</div>
 											<div>
-												<a className="font-bold">Last Name</a>: {user.lastName}
+												<a className="font-bold">Last Name</a>: {initialUser.last_name}
 											</div>
 											<div>
 												<a className="font-bold">Password</a>: ******************
 											</div>
 
 											<div className="row-span-3">
-												<a className="font-bold ">Home Address</a>: {user.homeAddress}
+												<a className="font-bold ">Home Address</a>: {initialUser.address}
 											</div>
 											<div className="row-span-1">
-												<a className="font-bold">Contact Number 1</a>: {user.contactNum}
+												<a className="font-bold">Contact Number 1</a>: {initialUser.contact1}
 											</div>
 											<div>
-												<a className="font-bold">Contact Number 2</a>: {user.altContactNum}
+												<a className="font-bold">Contact Number 2</a>: {initialUser.contact2}
 											</div>
 										</div>
 										<div className="flex flex-col justify-between sm:flex-row md:justify-end card-actions">

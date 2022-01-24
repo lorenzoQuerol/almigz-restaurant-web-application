@@ -1,15 +1,18 @@
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
-import { data } from "autoprefixer";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function Home() {
+export default function homepage() {
 	const { data, error } = useSWR("/api/homepage", fetcher);
 
-	if (!data) return <h1>Loading...</h1>;
-	const banners = data.data;
+	const [banners, setBanners] = useState([]);
+
+	useEffect(() => {
+		if (data) setBanners(data.data);
+	}, [data]);
 
 	return (
 		<>

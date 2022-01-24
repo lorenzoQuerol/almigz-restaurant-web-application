@@ -1,18 +1,39 @@
 import { Fragment, useState, useEffect, useMemo, useRef } from "react";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import { useSession, signOut } from "next-auth/react";
+import { supabase } from "@utils/supabaseClient";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
+import Link from "next/link";
 
 const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 	const router = useRouter();
-	const { data: session, status } = useSession();
+	const user = supabase.auth.user();
 
-	const logOut = () => {
-		signOut({ callbackUrl: "http://localhost:3000/" });
-		localStorage.clear();
+	const [username, setUsername] = useState("");
+
+	const signOut = async () => {
+		const { error } = await supabase.auth.signOut();
+		if (!error) router.replace("/");
 	};
+
+	useEffect(() => {
+		if (user) setUsername(`${user.user_metadata.first_name} ${user.user_metadata.last_name}`);
+
+		const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+			// Send session to /api/auth route to set the auth cookie.
+			// NOTE: this is only needed if you're doing SSR (getServerSideProps)!
+			fetch("/api/auth", {
+				method: "POST",
+				headers: new Headers({ "Content-Type": "application/json" }),
+				credentials: "same-origin",
+				body: JSON.stringify({ event, session }),
+			}).then((res) => res.json());
+		});
+
+		return () => {
+			authListener.unsubscribe();
+		};
+	}, [user]);
 
 	const navigationBar = [
 		{ id: "1", href: "/", name: "HOME", current: true },
@@ -21,13 +42,13 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 	];
 
 	const userBar = [
-		{ id: "1", href: "/auth/signIn", name: "LOGIN", current: false },
+		{ id: "1", href: "/signin", name: "LOGIN", current: false },
 		{ id: "2", href: "/register", name: "REGISTER", current: false },
 		{ id: "3", href: "/account", name: "MY ACCOUNT", current: false },
-		{ id: "4", href: "#", name: "LOGOUT", current: false },
+		{ id: "4", href: "/", name: "LOGOUT", current: false },
 	];
 
-	if (session) {
+	if (user) {
 		return (
 			<Transition.Root show={mobileOpen} as={Fragment}>
 				<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={setMobileOpen}>
@@ -59,7 +80,7 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 										<div className="flex-1 px-4 py-6 overflow-y-auto sm:px-6">
 											{/* Greeting and close panel */}
 											<div className="flex items-end justify-between">
-												<Dialog.Title className="text-xl font-semibold">Hi, {session.user.name}!</Dialog.Title>
+												<Dialog.Title className="text-xl font-semibold">Hi, {username}!</Dialog.Title>
 												<div className="flex items-center ml-3 h-7">
 													<button type="button" className="p-2 -m-2 hover:text-gray-500" onClick={() => setMobileOpen(false)}>
 														<span className="sr-only">Close panel</span>
@@ -81,8 +102,8 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 																			key={tab.id}
 																			className={
 																				tab.current
-																					? "transition-colors duration-200 flex py-3 px-2 rounded-md text-white bg-green-700"
-																					: "transition-colors duration-200 flex py-3 px-2 rounded-md hover:text-white hover:bg-green-700"
+																					? "transition-colors duration-200 flex my-2 py-3 px-2 rounded-md text-white bg-green-700"
+																					: "transition-colors duration-200 flex my-2 py-3 px-2 rounded-md hover:text-white hover:bg-green-700"
 																			}
 																		>
 																			{tab.name}
@@ -96,7 +117,7 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 											</div>
 
 											{/* Logged in navigation */}
-											{session && (
+											{user && (
 												<>
 													<div className="border-b-2"></div>
 													<div className="mt-12">
@@ -108,8 +129,8 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 																		return (
 																			<Link href={tab.href}>
 																				<a
-																					onClick={(e) => {
-																						logOut();
+																					onClick={() => {
+																						signOut();
 																						setMobileOpen(!mobileOpen);
 																					}}
 																				>
@@ -117,8 +138,8 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 																						key={tab.id}
 																						className={
 																							tab.current
-																								? "transition-colors duration-200 flex py-3 px-2 rounded-md text-white bg-green-700"
-																								: "transition-colors duration-200 flex py-3 px-2 rounded-md hover:text-white hover:bg-green-700"
+																								? "transition-colors duration-200 my-2 flex py-3 px-2 rounded-md text-white bg-green-700"
+																								: "transition-colors duration-200 my-2 flex py-3 px-2 rounded-md hover:text-white hover:bg-green-700"
 																						}
 																					>
 																						{tab.name}

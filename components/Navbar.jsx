@@ -1,22 +1,41 @@
-import Link from "next/link";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { useSession, signIn, signOut } from "next-auth/react";
-
+import { supabase } from "@utils/supabaseClient";
+import Image from "next/image";
+import Link from "next/link";
 import Cart from "@components/Cart";
 import MobileNavbar from "@components/MobileNavbar";
 
 const Navbar = () => {
-	const { data: session, status } = useSession();
+	const router = useRouter();
+	const user = supabase.auth.user();
+
+	const [username, setUsername] = useState("");
 	const [open, setOpen] = useState(false);
 	const [mobileOpen, setMobileOpen] = useState(false);
-	const router = useRouter();
 
-	const logOut = () => {
-		signOut({ callbackUrl: "http://localhost:3000/" });
-		localStorage.clear();
+	useEffect(() => {
+		if (user) setUsername(`${user.user_metadata.first_name} ${user.user_metadata.last_name}`);
+
+		const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+			// Send session to /api/auth route to set the auth cookie.
+			// NOTE: this is only needed if you're doing SSR (getServerSideProps)!
+			fetch("/api/auth", {
+				method: "POST",
+				headers: new Headers({ "Content-Type": "application/json" }),
+				credentials: "same-origin",
+				body: JSON.stringify({ event, session }),
+			}).then((res) => res.json());
+		});
+
+		return () => {
+			authListener.unsubscribe();
+		};
+	}, [user]);
+
+	const signOut = async () => {
+		const { error } = await supabase.auth.signOut();
+		if (!error) router.replace("/");
 	};
 
 	const navigationBar = [
@@ -32,8 +51,8 @@ const Navbar = () => {
 	return (
 		<header className="border-t-8 border-green-800 shadow-xl text-slate-900 body-font">
 			<div className="container relative flex flex-col flex-wrap px-5 py-5 mx-auto md:flex-row">
-				<MobileNavbar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 				{/* Mobile menu button */}
+				<MobileNavbar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 				<div className="absolute self-center md:static bottom-8 md:mr-7 left-5 lg:hidden">
 					<button className="border-0" onClick={(e) => setMobileOpen(!mobileOpen)}>
 						<svg
@@ -61,7 +80,7 @@ const Navbar = () => {
 				</a>
 
 				{/* Cart button */}
-				{session && (
+				{user && (
 					<div className="absolute self-center block bottom-8 right-5 sm:hidden">
 						<button className="justify-start" onClick={handleOpen}>
 							<svg
@@ -100,7 +119,7 @@ const Navbar = () => {
 				</nav>
 
 				{/* Desktop menu buttons */}
-				{session ? (
+				{user ? (
 					<>
 						<Cart open={open} handleOpen={handleOpen} />
 						<div className="items-center justify-end flex-1 hidden m-3 sm:flex">
@@ -121,7 +140,7 @@ const Navbar = () => {
 
 							<div className="hidden dropdown lg:block">
 								<div tabIndex="0" className="m-1 font-normal bg-white rounded btn ">
-									Hi, {session.user.name}!
+									Hi, {username}!
 									<svg className="w-4 h-4 ml-2" viewBox="0 -6 524 524" xmlns="http://www.w3.org/2000/svg">
 										<title>Account Options</title>
 										<path d="M64 191L98 157 262 320 426 157 460 191 262 387 64 191Z" />
@@ -132,7 +151,7 @@ const Navbar = () => {
 										<a href="/account">My Account</a>
 									</li>
 									<li>
-										<a href="#" onClick={logOut}>
+										<a href="/" onClick={signOut}>
 											Sign Out
 										</a>
 									</li>
@@ -143,7 +162,7 @@ const Navbar = () => {
 				) : (
 					<div className="items-stretch justify-end flex-1 hidden mr-3 sm:flex">
 						<div className="flex divide-x divide-gray-800">
-							<Link href="/auth/signIn">
+							<Link href="/signin">
 								<a className="self-center p-2 font-normal rounded-btn hover:font-medium hover:text-green-700">LOGIN</a>
 							</Link>
 							<Link href="/register">

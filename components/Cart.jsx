@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useMemo, useRef } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import Link from "next/link";

@@ -1,4 +1,6 @@
 import { getSession } from "next-auth/react";
+import Grid from "gridfs-stream";
+Grid.mongo = mongoose.mongo;
 
 import createConnection from "@utils/mongoDBConnection";
 import Transaction from "@models/TransactionModel";
@@ -7,6 +9,10 @@ import transactionErrorHandler from "@handlers/transactionErrorHandler";
 async function handler(req, res) {
 	// Create connection to database
 	await createConnection();
+
+	// Connect to gridFS
+	const gfs = Grid(conn.db);
+	gfs.collection("uploads");
 
 	// Get session
 	const session = await getSession({ req });
@@ -38,11 +44,19 @@ async function handler(req, res) {
 			}
 			break;
 
-		// Create new transaction document (PROTECTED)
+		// Create new transaction (PROTECTED)
 		case "POST":
 			if (session) {
 				if (session.user.email === req.body.email) {
 					try {
+						// If method of payment is GCASH, create new proof of payment document.
+						// if (req.body.payMethod === "GCash") {
+						// 	const image = await Image.create(req.body.proofPayment);
+						// }
+
+						// delete req.body.proofPayment;
+
+						// Create transaction
 						const transaction = await Transaction.create(req.body);
 						res.status(201).json({
 							success: true,

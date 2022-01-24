@@ -1,9 +1,8 @@
-import { hash } from "bcryptjs";
 import { getSession } from "next-auth/react";
+import { supabase } from "@utils/supabaseClient";
 
 import createConnection from "@utils/mongoDBConnection";
 import User from "@models/UserModel";
-import userErrorHandler from "@handlers/userErrorHandler";
 
 async function handler(req, res) {
 	// Create connection to database
@@ -39,33 +38,34 @@ async function handler(req, res) {
 		// Create new user (UNPROTECTED)
 		case "POST":
 			try {
-				// Check if there is a duplicate account in the system
-				const duplicate = await User.findOne({ email: req.body.email });
-				if (duplicate)
-					return res.status(400).json({
-						success: false,
-						msg: "Email address already exists in the system. Please use a different email address.",
-					});
+				const { email, password, first_name, last_name, address, contact1, contact2 } = req.body;
 
-				// Encrypt password
-				if (req.body.password) req.body.password = await hash(req.body.password, 12);
+				// Register into authentication pool
+				let { user, error } = await supabase.auth.signUp(
+					{
+						email: email,
+						password: password,
+					},
+					{
+						data: { first_name: first_name, last_name: last_name, address: address, contact1: contact1, contact2: contact2 },
+					}
+				);
 
-				// Create new document
-				const user = await User.create(req.body);
+				// Insert record into profiles table
+				await supabase
+					.from("profiles")
+					.insert([
+						{ id: user.id, email: email, password: password, first_name: first_name, last_name: last_name, address: address, contact1: contact1, contact2: contact2 },
+					]);
 
-				res.status(201).json({
-					success: true,
-					msg: "User account created successfully.",
-					data: user,
-				});
-			} catch (err) {
-				const missingFields = userErrorHandler(err);
-				res.status(400).json({ success: false, msg: "User account creation failed.", missingFields: missingFields });
+				res.status(200).json({ user: user, error });
+			} catch (error) {
+				res.status(500).json({ error: error });
 			}
 			break;
 
 		default:
-			res.status(500).json({ success: false, msg: "Route is not valid." });
+			res.status(500).json({ success: false, msg: "Route is not valid" });
 			break;
 	}
 }
