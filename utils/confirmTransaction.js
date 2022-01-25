@@ -29,8 +29,8 @@ export default async function confirmTransaction(newTransaction) {
 		}
 
 		// Add a new invoice number property to the transaction
-		const count = await axios.get(`${process.env.NEXTAUTH_URL}/api/count`);
-		const invoiceNum = count.data.data;
+		const countRes = await axios.get(`${process.env.NEXTAUTH_URL}/api/count`);
+		const invoiceNum = countRes.data.count;
 		newTransaction.invoiceNum = invoiceNum + 1;
 
 		// Add new transaction to database and push into user transaction history
@@ -40,7 +40,6 @@ export default async function confirmTransaction(newTransaction) {
 		const success = response.data;
 		return success;
 	} catch (err) {
-		console.log(err.response.data);
 		const error = err.response.data;
 		return error;
 	}
