@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import useSWR from "swr";
 import { Transition } from "@headlessui/react";
+import useAxios from "axios-hooks";
 import Image from "next/image";
 
 import getStorageValue from "@utils/localStorage/getStorageValue";
@@ -11,18 +11,25 @@ import useLocalStorage from "@utils/localStorage/useLocalStorage";
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
+export async function getServerSideProps(context) {
+	const session = await getSession(context);
 
-export default function CheckoutPage() {
+	if (!session)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/signin",
+			},
+		};
+
+	return {
+		props: session,
+	};
+}
+
+export default function CheckoutPage(session) {
 	const router = useRouter();
-
-	// Get Session
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.replace("/auth/signIn");
-		},
-	});
+	const [{ data, loading, error }, refetch] = useAxios(`/api/users/${session.user.email}`);
 
 	// Page elements
 	const [currentStep, setCurrentStep] = useState(1);
@@ -62,10 +69,6 @@ export default function CheckoutPage() {
 		return date;
 	});
 
-	// Gcash details
-	const [gcashProof, setGcashProof] = useState(null);
-	const [gcashError, setGcashError] = useState("");
-
 	// Pickup details
 	const [storeLocation, setStoreLocation] = useState("Branch 1");
 	const [pickupTime, setPickupTime] = useState("Now");
@@ -73,16 +76,13 @@ export default function CheckoutPage() {
 	// Transaction
 	const [transaction, setTransaction] = useLocalStorage("transaction", null);
 
-	// Get user data
-	const { data, error } = useSWR(`/api/users/${email}`, fetcher);
-
 	// Get cart from local storage
 	const cart = getStorageValue("foodCart");
 
 	useEffect(() => {
 		if (session) setEmail(session.user.email);
 
-		if (data) setUser(data.data);
+		if (data) setUser(data.user);
 		if (cart) {
 			setOrder(cart.data);
 			setSubtotal(cart.total);
@@ -92,10 +92,10 @@ export default function CheckoutPage() {
 		if (user) {
 			setFullName(`${user.firstName} ${user.lastName}`);
 			setEmail(user.email);
-			setContactNum([user.contactNum, user.altContactNum]);
-			setAddress(user.homeAddress);
+			setContactNum([user.contact1, user.contact2]);
+			setAddress(user.address);
 		}
-	}, [session, status, email, data, user]);
+	}, [session, email, data, user]);
 
 	// Delete item and update prices
 	const deleteItem = (name) => {
@@ -127,10 +127,7 @@ export default function CheckoutPage() {
 		localStorage.setItem("foodCart", JSON.stringify(order));
 	};
 
-	// Handle submit transaction
 	const submitTransaction = async (event) => {
-		event.preventDefault();
-		// Initialize transaction object
 		const transaction = {
 			dateCreated: new Date(),
 			orderStatus: 0, // Initial "incoming order" status
@@ -143,23 +140,17 @@ export default function CheckoutPage() {
 			totalPrice: totalPrice,
 			address: address,
 			payMethod: payMethod,
-			proofPayment: gcashProof,
 			change: change,
 			deliverTime: deliverTime,
 			storeLocation: storeLocation,
 			pickupTime: pickupTime,
 		};
 
-		// Send transaction object
 		const response = await confirmTransaction(transaction);
 
-		// If successful, set transaction to local storage and redirect to receipt page
-		if (response.success) {
-			localStorage.setItem("transaction", JSON.stringify(response.data));
-			router.replace("/receipt");
-		} else {
-			// DESIGNER TODO: Handle here if unsuccessful checkout (i.e., missing values).
-		}
+		// Set transaction to local storage and redirect to receipt page
+		localStorage.setItem("transaction", JSON.stringify(response.transaction));
+		router.replace("/receipt");
 	};
 
 	const handleDeliveryType = (event) => {
@@ -219,7 +210,7 @@ export default function CheckoutPage() {
 		setChange(event.target.value);
 	};
 
-	if (status === "loading") return <h1>Loading...</h1>;
+	if (loading) return <h1>Loading...</h1>;
 
 	return (
 		<div className="flex justify-center">
@@ -363,7 +354,7 @@ export default function CheckoutPage() {
 											<div>{user.email}</div>
 											<div className="mt-2 font-bold">Contact Information</div>
 											<div>
-												{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+												{user.contact1} {user.contact2 !== "" ? `, ${user.contact2}` : ""}
 											</div>
 											<div className="mt-2 font-bold">Address </div>
 											<div className="flex items-center mt-1">
@@ -374,7 +365,7 @@ export default function CheckoutPage() {
 														className="self-center mr-2 radio radio-xs radio-accent"
 														onClick={(e) => {
 															setChooseAddress(false);
-															setAddress(user.homeAddress);
+															setAddress(user.address);
 														}}
 													/>
 													<span className={`text-xs ${chooseAddress ? "font-medium" : "text-green-700 font-semibold"}`}>Use Home Address</span>
@@ -398,7 +389,7 @@ export default function CheckoutPage() {
 													placeholder="Use a different address!"
 												></textarea>
 											)}
-											{!chooseAddress && <div className="mt-2">{user.homeAddress}</div>}
+											{!chooseAddress && <div className="mt-2">{user.address}</div>}
 										</div>
 									</div>
 
@@ -408,6 +399,7 @@ export default function CheckoutPage() {
 											<div>Full Name</div>
 											<div>Email Address</div>
 											<div>Contact Information</div>
+											<div className="hidden md:block lg:hidden">-</div>
 											<div>Address</div>
 											{/* Use home address */}
 											<div className="flex">
@@ -417,7 +409,7 @@ export default function CheckoutPage() {
 													className="self-center mr-2 radio radio-xs radio-accent"
 													onClick={(e) => {
 														setChooseAddress(false);
-														setAddress(user.homeAddress);
+														setAddress(user.address);
 													}}
 												/>
 												<span className={`text-sm ${chooseAddress ? "font-medium" : "text-green-700 font-semibold"}`}>Use Home Address</span>
@@ -445,9 +437,9 @@ export default function CheckoutPage() {
 											<div>{`${user.firstName} ${user.lastName}`}</div>
 											<div>{user.email}</div>
 											<div>
-												{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+												{user.contact1} {user.contact2 !== "" ? `, ${user.contact2}` : ""}
 											</div>
-											{!chooseAddress && <div>{user.homeAddress}</div>}
+											{!chooseAddress && <div>{user.address}</div>}
 										</div>
 									</div>
 
@@ -504,10 +496,6 @@ export default function CheckoutPage() {
 														Number: <a className="font-medium">GCASH_CONTACT</a>
 													</div>
 												</div>
-												<div className="text-sm font-bold">Upload proof of payment below.</div>
-
-												<input className="text-xs" type="file" onChange={(e) => setGcashProof(e.target.files[0])} />
-												{gcashError && <div className="mt-2 text-sm text-red-700">{gcashError}</div>}
 											</>
 										)}
 									</div>
@@ -563,7 +551,7 @@ export default function CheckoutPage() {
 										<div>{`${user.firstName} ${user.lastName}`}</div>
 										<div className="mt-2 font-bold">Contact Information</div>
 										<div>
-											{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+											{user.contact1} {user.contact2 !== "" ? `, ${user.contact2}` : ""}
 										</div>
 									</div>
 
@@ -576,7 +564,7 @@ export default function CheckoutPage() {
 										<div>
 											<div>{`${user.firstName} ${user.lastName}`}</div>
 											<div>
-												{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+												{user.contact1} {user.contact2 !== "" ? `, ${user.contact2}` : ""}
 											</div>
 										</div>
 									</div>
@@ -588,10 +576,9 @@ export default function CheckoutPage() {
 											onChange={(e) => setStoreLocation(e.target.value)}
 											className="w-full max-w-xs mb-3 rounded-md input-bordered sm:ml-2 select select-sm focus:ring focus:outline-none focus:ring-green-700"
 										>
-											<option>Branch 1</option>
-											<option>Branch 2</option>
-											<option>Branch 3</option>
-											<option>Branch 4</option>
+											<option>Molino Boulevard</option>
+											<option>V Central Mall</option>
+											<option>Unitop Mall</option>
 										</select>
 									</div>
 
@@ -652,20 +639,10 @@ export default function CheckoutPage() {
 								<button
 									id="next"
 									onClick={(e) => {
-										if (payMethod === "COD") {
-											if (change < totalPrice) setChangeError("Change must be more than the order cost!");
-											else {
-												setChangeError("");
-												setGcashError("");
-												handleAnimation(e);
-											}
-										} else {
-											if (!gcashProof) setGcashError("Please upload a proof of payment!");
-											else {
-												setChangeError("");
-												setGcashError("");
-												handleAnimation(e);
-											}
+										if (change < totalPrice) setChangeError("Change must be more than the order cost!");
+										else {
+											setChangeError("");
+											handleAnimation(e);
 										}
 									}}
 									className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
@@ -699,7 +676,7 @@ export default function CheckoutPage() {
 									{type === "Delivery" && <div>{address}</div>}
 									<div className="mt-2 font-bold">Contact Information:</div>
 									<div>
-										{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+										{user.contact1} {user.contact2 !== "" ? `, ${user.contact2}` : ""}
 									</div>
 									{type === "Delivery" && <div className="mt-2 font-bold">Address:</div>}
 									{type === "Delivery" && <div>{address}</div>}
@@ -718,8 +695,8 @@ export default function CheckoutPage() {
 									<div>
 										<div>{`${user.firstName} ${user.lastName}`}</div>
 										{type === "Delivery" && <div>{user.email}</div>}
-										<div>
-											{user.contactNum} {user.altContactNum !== "" ? `, ${user.altContactNum}` : ""}
+										<div className="text-sm">
+											{user.contact1} {user.contact2 !== "" ? `, ${user.contact2}` : ""}
 										</div>
 										{type === "Delivery" && <div>{address}</div>}
 									</div>
