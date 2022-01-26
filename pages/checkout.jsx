@@ -289,7 +289,7 @@ export default function CheckoutPage(session) {
 													/>
 												</div>
 												{/* Total price */}
-												<p className="self-center hidden w-20 font-bold sm:flex text-end">
+												<p className="self-center hidden font-bold w-22 sm:flex text-end">
 													<p className="ml-4 mr-5 font-bold ">₱ {product.menuItem.productPrice * product.quantity}</p>
 												</p>
 											</li>
