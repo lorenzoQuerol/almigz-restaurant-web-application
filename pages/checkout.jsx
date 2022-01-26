@@ -62,7 +62,7 @@ export default function CheckoutPage(session) {
 
 	const [user, setUser] = useState({});
 	const [details, setDetails] = useState(null);
-	const [transaction, setTransaction] = useLocalStorage("transaction", {});
+	// const [transaction, setTransaction] = useLocalStorage("transaction", {});
 
 	useEffect(() => {
 		if (cart) setOrder(cart);
@@ -109,6 +109,8 @@ export default function CheckoutPage(session) {
 	const [endTime, setEndTime] = useState("19:00");
 
 	const confirmDetails = (data) => {
+		const formattedDate = `${data.deliverDate}T${data.deliverTime}`;
+
 		const temp = {
 			invoiceNum: undefined,
 			dateCreated: undefined,
@@ -124,9 +126,9 @@ export default function CheckoutPage(session) {
 			address: getValues("useHomeAddress") === "true" ? user.address : getValues("address"),
 			payMethod: getValues("payMethod"),
 			change: Number(getValues("change")),
-			deliverTime: getValues("type") === "Delivery" ? getValues("deliverTime") : undefined,
+			deliverTime: getValues("type") === "Delivery" ? formattedDate : undefined,
 			branch: getValues("branch"),
-			pickupTime: getValues("type") === "Pickup" ? getValues("deliverTime") : undefined,
+			pickupTime: getValues("type") === "Pickup" ? formattedDate : undefined,
 		};
 
 		setDetails(temp);
@@ -190,7 +192,7 @@ export default function CheckoutPage(session) {
 		}
 
 		const userRes = await axios.post("/api/transactions", transaction);
-		setTransaction(userRes.data.transaction);
+		window.localStorage.setItem("foodCart", JSON.stringify(userRes.data.transaction));
 		router.replace("/receipt");
 	};
 	// !SECTION
