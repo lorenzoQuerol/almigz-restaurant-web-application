@@ -23,8 +23,10 @@ export default function Home() {
 				</div>
 				{banners.map((pics) => (
 					<div>
-						{pics.announcementsCollection.items.map((pic) => (
-							<Image className="" src={pic.url} alt="announcement" width={1260} height={825} />
+						{pics.announcementsCollection.items.map((pic, index) => (
+							<a key={index}>
+								<Image className="" src={pic.url} alt="announcement" width={1260} height={825} />
+							</a>
 						))}
 					</div>
 				))}
