@@ -106,7 +106,7 @@ const TransactionSchema = new mongoose.Schema({
 	},
 
 	// FOR PICKUP
-	storeLocation: {
+	branch: {
 		type: String,
 		required: false,
 	},
