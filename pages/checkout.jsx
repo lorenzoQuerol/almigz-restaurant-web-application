@@ -126,9 +126,9 @@ export default function CheckoutPage(session) {
 			address: getValues("useHomeAddress") === "true" ? user.address : getValues("address"),
 			payMethod: getValues("payMethod"),
 			change: Number(getValues("change")),
-			deliverTime: getValues("type") === "Delivery" ? formattedDate : undefined,
+			deliverTime: getValues("type") === "Delivery" ? (data.deliverNow ? "Now" : formattedDate) : undefined,
 			branch: getValues("branch"),
-			pickupTime: getValues("type") === "Pickup" ? formattedDate : undefined,
+			pickupTime: getValues("type") === "Pickup" ? (data.deliverNow ? "Now" : formattedDate) : undefined,
 		};
 
 		setDetails(temp);
@@ -627,9 +627,9 @@ export default function CheckoutPage(session) {
 										{details.payMethod} {details.payMethod === "COD" ? `(Change for ₱${details.change})` : ""}
 									</div>
 									{details.type === "Delivery" && <div className="font-bold">Deliver On</div>}
-									{details.type === "Delivery" && <div className="">{details.deliverTime ? formatDate(details.deliverTime) : "Now"}</div>}
+									{details.type === "Delivery" && <div className="">{watch("deliverNow") ? "Now" : formatDate(details.deliverTime)}</div>}
 									{details.type === "Pickup" && <div className="font-bold">Pickup on</div>}
-									{details.type === "Pickup" && <div className="">{details.pickupTime ? formatDate(details.pickupTime) : "Now"}</div>}
+									{details.type === "Pickup" && <div className="">{watch("deliverNow") ? "Now" : formatDate(details.pickupTime)}</div>}
 								</div>
 
 								{/* ANCHOR Food order */}
