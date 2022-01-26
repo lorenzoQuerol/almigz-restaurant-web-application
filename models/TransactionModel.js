@@ -96,7 +96,7 @@ const TransactionSchema = new mongoose.Schema({
 	},
 
 	change: {
-		type: String,
+		type: Number,
 		required: false,
 	},
 
@@ -106,7 +106,7 @@ const TransactionSchema = new mongoose.Schema({
 	},
 
 	// FOR PICKUP
-	storeLocation: {
+	branch: {
 		type: String,
 		required: false,
 	},
