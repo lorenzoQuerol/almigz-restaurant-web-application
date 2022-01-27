@@ -96,7 +96,7 @@ const TransactionSchema = new mongoose.Schema({
 	},
 
 	change: {
-		type: String,
+		type: Number,
 		required: false,
 	},
 
@@ -106,7 +106,7 @@ const TransactionSchema = new mongoose.Schema({
 	},
 
 	// FOR PICKUP
-	storeLocation: {
+	branch: {
 		type: String,
 		required: false,
 	},
@@ -120,13 +120,13 @@ const TransactionSchema = new mongoose.Schema({
 const UserSchema = new mongoose.Schema({
 	isDelete: {
 		type: Boolean,
-		required: true,
+		required: false,
 		default: true,
 	},
 
 	isAdmin: {
 		type: Boolean,
-		required: true,
+		required: false,
 		default: false,
 	},
 
@@ -150,17 +150,17 @@ const UserSchema = new mongoose.Schema({
 		required: true,
 	},
 
-	homeAddress: {
+	address: {
 		type: String,
 		required: true,
 	},
 
-	contactNum: {
+	contact1: {
 		type: String,
 		required: true,
 	},
 
-	altContactNum: {
+	contact2: {
 		type: String,
 		required: false,
 	},

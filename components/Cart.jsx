@@ -14,6 +14,7 @@ const Cart = ({ open, handleOpen }) => {
 	useEffect(() => {
 		if (open) {
 			let cart = getStorageValue("foodCart");
+			console.log(cart);
 			setProducts(cart.data);
 			setSubtotal(cart.total + subtotal);
 			setTotal(cart.total + subtotal + delfee);
@@ -38,6 +39,8 @@ const Cart = ({ open, handleOpen }) => {
 		setSubtotal(temp);
 		setTotal(temp + delfee);
 		localStorage.setItem("foodCart", JSON.stringify(products));
+
+		if (products.length === 0) setProducts(null);
 	};
 
 	// Update quantity of item and update prices
@@ -237,14 +240,23 @@ const Cart = ({ open, handleOpen }) => {
 
 											<div className="mt-8">
 												<div className="flow-root">
-													<ul role="list" className="-my-6 divide-y divide-gray-200">
-														ADD AN ITEM TO CART
+													<ul role="list" className="-my-6 divide-gray-200">
+														<div className="mt-5">
+															<li className="flex justify-center">There are no items in your cart right now!</li>
+															<Link href="/menu">
+																<a onClick={handleOpen}>
+																	<li className="flex justify-center font-semibold text-green-700 underline transition-colors duration-200 cursor-pointer hover:text-green-600 decoration-dotted underline-offset-2">
+																		Click here to add items
+																	</li>
+																</a>
+															</Link>
+														</div>
 													</ul>
 												</div>
 											</div>
 										</div>
 
-										<div className="px-4 py-6 border-t border-gray-200 sm:px-6">
+										{/* <div className="px-4 py-6 border-t border-gray-200 sm:px-6">
 											<div className="flex justify-between text-base font-medium text-gray-900">
 												<p>Subtotal</p>
 												<p>P{subtotal}</p>
@@ -257,7 +269,6 @@ const Cart = ({ open, handleOpen }) => {
 												<p>Total</p>
 												<p>P{total}</p>
 											</div>
-											{/* <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p> */}
 											<div className="mt-6">
 												<a
 													href="/checkout"
@@ -274,7 +285,7 @@ const Cart = ({ open, handleOpen }) => {
 													</a>
 												</p>
 											</div>
-										</div>
+										</div> */}
 									</div>
 								</div>
 							</Transition.Child>

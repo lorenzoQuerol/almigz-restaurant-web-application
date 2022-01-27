@@ -23,10 +23,10 @@ export default function FoodItemPage() {
 	const updateTotal = async (num) => {
 		num = Number(num);
 		if (Number.isInteger(num) && num > 0 && num < 10000) {
-			setTotal(data.data.productPrice * num);
+			setTotal(data.foodItem.productPrice * num);
 			setquantity(num);
 		} else {
-			setTotal(data.data.productPrice);
+			setTotal(data.foodItem.productPrice);
 			setquantity(1);
 		}
 	};
@@ -37,7 +37,7 @@ export default function FoodItemPage() {
 
 		if (session) {
 			const item = {
-				menuItem: data.data,
+				menuItem: data.foodItem,
 				quantity: quantity,
 			};
 
@@ -55,7 +55,7 @@ export default function FoodItemPage() {
 
 	if (!data) return <h1>Loading...</h1>;
 
-	if (!data.data) {
+	if (!data.foodItem) {
 		return (
 			<div className="flex-col text-center self-top">
 				<h1 className="m-4 italic font-light text-gray-500">Menu item not found. </h1>
@@ -67,11 +67,11 @@ export default function FoodItemPage() {
 			</div>
 		);
 	} else {
-		const pic = data.data.productImagesCollection.items[0].url;
+		const pic = data.foodItem.productImagesCollection.items[0].url;
 
 		return (
 			<div className="container px-5 py-8 mx-auto">
-				<div onLoad={(e) => setTotal(data.data.productPrice)} className="overflow-hidden text-gray-600 body-font font-rale">
+				<div onLoad={(e) => setTotal(data.foodItem.productPrice)} className="overflow-hidden text-gray-600 body-font font-rale">
 					<div className="mx-auto mb-8 text-md breadcrumbs xl:w-4/5">
 						<ul>
 							<li>
@@ -81,7 +81,7 @@ export default function FoodItemPage() {
 							</li>
 							<li>
 								<Link href={`/menu/${router.query.food_slug}`}>
-									<a>{data.data.productName}</a>
+									<a>{data.foodItem.productName}</a>
 								</Link>
 							</li>
 						</ul>
@@ -90,10 +90,10 @@ export default function FoodItemPage() {
 						<Image className="object-cover object-center w-full h-64 rounded lg:w-1/2 lg:h-auto" width={400} height={400} layout="fixed" src={pic} />
 
 						<div className="w-full mt-6 lg:w-1/2 lg:pl-10 lg:py-6 lg:mt-0">
-							<h2 className="text-sm tracking-widest text-gray-500 title-font">{data.data.category.toUpperCase()}</h2>
-							<h1 className="mb-1 text-3xl font-semibold text-gray-900 title-font">{data.data.productName}</h1>
+							<h2 className="text-sm tracking-widest text-gray-500 title-font">{data.foodItem.category.toUpperCase()}</h2>
+							<h1 className="mb-1 text-3xl font-semibold text-gray-900 title-font">{data.foodItem.productName}</h1>
 							<div className="flex mb-4"></div>
-							<p className="leading-relaxed">{data.data.productDescription}</p>
+							<p className="leading-relaxed">{data.foodItem.productDescription}</p>
 							<form onSubmit={addToCart}>
 								<div className="flex items-center pb-5 mt-6 mb-5 border-b-2 border-gray-100">
 									<div className="flex items-center">
@@ -106,7 +106,7 @@ export default function FoodItemPage() {
 												step="1"
 												max="9999"
 												placeholder="1"
-												onLoad={(e) => setTotal(data.data.productPrice)}
+												onLoad={(e) => setTotal(data.foodItem.productPrice)}
 												onChange={(e) => updateTotal(e.target.value)}
 											></input>
 										</div>

@@ -1,16 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
-import { data } from "autoprefixer";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function Home() {
-	const { data, error } = useSWR("/api/homepage", fetcher);
+	const { data, error } = useSWR("/api/home", fetcher);
 
 	if (!data) return <h1>Loading...</h1>;
-	const banners = data.data;
 
+	const banners = data.homepageItems;
 	return (
 		<>
 			<div className="flex-col justify-center w-full">
@@ -24,8 +23,10 @@ export default function Home() {
 				</div>
 				{banners.map((pics) => (
 					<div>
-						{pics.announcementsCollection.items.map((pic) => (
-							<Image className="" src={pic.url} alt="announcement" width={1260} height={825} />
+						{pics.announcementsCollection.items.map((pic, index) => (
+							<a key={index}>
+								<Image className="" src={pic.url} alt="announcement" width={1260} height={825} />
+							</a>
 						))}
 					</div>
 				))}

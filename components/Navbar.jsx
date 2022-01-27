@@ -3,19 +3,20 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { getSession, useSession, signIn, signOut } from "next-auth/react";
 
 import Cart from "@components/Cart";
 import MobileNavbar from "@components/MobileNavbar";
 
 const Navbar = () => {
+	const router = useRouter();
 	const { data: session, status } = useSession();
+
 	const [open, setOpen] = useState(false);
 	const [mobileOpen, setMobileOpen] = useState(false);
-	const router = useRouter();
 
 	const logOut = () => {
-		signOut({ callbackUrl: "http://localhost:3000/" });
+		signOut({ callbackUrl: process.env.NEXTAUTH_URL });
 		localStorage.clear();
 	};
 
@@ -23,6 +24,7 @@ const Navbar = () => {
 		{ id: "1", href: "/", name: "HOME", current: true },
 		{ id: "2", href: "/menu", name: "MENU", current: false },
 		{ id: "3", href: "/about", name: "ABOUT US", current: false },
+		{ id: "4", href: "/admin", name: "ADMINISTRATION", current: false },
 	];
 
 	const handleOpen = () => {
@@ -52,13 +54,13 @@ const Navbar = () => {
 				</div>
 
 				{/* Logo */}
-				<a className="flex items-center justify-center mb-4 font-medium title-font md:mb-0">
+				<div className="flex items-center justify-center mb-4 font-medium title-font md:mb-0">
 					<Link href="/">
 						<a>
 							<Image src="/logo.png" alt="store-logo" width={200} height={50} />
 						</a>
 					</Link>
-				</a>
+				</div>
 
 				{/* Cart button */}
 				{session && (
@@ -78,25 +80,42 @@ const Navbar = () => {
 					</div>
 				)}
 
-				{/* Navbar items */}
+				{/* Navbar items for normal users */}
 				<nav className="flex-wrap items-center justify-center hidden text-base lg:flex md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400">
-					{navigationBar.map((tab) => {
+					{navigationBar.map((tab, index) => {
 						tab.current = router.pathname == tab.href ? true : false;
-						return (
-							<Link href={tab.href}>
-								<a
-									key={tab.id}
-									className={
-										tab.current
-											? "self-center bg-green-700 px-3 py-2 mx-3 my-2 font-semibold text-white ease-in-out transition-colors duration-100 rounded-md cursor-pointer"
-											: "self-center px-3 py-2 mx-3 my-2 hover:text-white transition-colors ease-in-out duration-200 hover:bg-green-700 rounded-md cursor-pointer"
-									}
-								>
-									{tab.name}
-								</a>
-							</Link>
-						);
+
+						if (tab.id !== "4") {
+							return (
+								<Link href={tab.href} key={tab.id}>
+									<a
+										className={
+											tab.current
+												? "self-center bg-green-700 px-3 py-2 mx-3 my-2 font-semibold text-white ease-in-out transition-colors duration-100 rounded-md cursor-pointer"
+												: "self-center px-3 py-2 mx-3 my-2 hover:text-white transition-colors ease-in-out duration-200 hover:bg-green-700 rounded-md cursor-pointer"
+										}
+									>
+										{tab.name}
+									</a>
+								</Link>
+							);
+						}
 					})}
+
+					{/* if user is admin, render dashboard */}
+					{session && session.user.isAdmin && (
+						<Link href={navigationBar[3].href} key={navigationBar[3].id}>
+							<a
+								className={
+									navigationBar[3].current
+										? "self-center bg-green-700 px-3 py-2 mx-3 my-2 font-semibold text-white ease-in-out transition-colors duration-100 rounded-md cursor-pointer"
+										: "self-center px-3 py-2 mx-3 my-2 hover:text-white transition-colors ease-in-out duration-200 hover:bg-green-700 rounded-md cursor-pointer"
+								}
+							>
+								{navigationBar[3].name}
+							</a>
+						</Link>
+					)}
 				</nav>
 
 				{/* Desktop menu buttons */}
@@ -132,7 +151,7 @@ const Navbar = () => {
 										<a href="/account">My Account</a>
 									</li>
 									<li>
-										<a href="#" onClick={logOut}>
+										<a href="/" onClick={logOut}>
 											Sign Out
 										</a>
 									</li>
@@ -143,7 +162,7 @@ const Navbar = () => {
 				) : (
 					<div className="items-stretch justify-end flex-1 hidden mr-3 sm:flex">
 						<div className="flex divide-x divide-gray-800">
-							<Link href="/auth/signIn">
+							<Link href="/signin">
 								<a className="self-center p-2 font-normal rounded-btn hover:font-medium hover:text-green-700">LOGIN</a>
 							</Link>
 							<Link href="/register">

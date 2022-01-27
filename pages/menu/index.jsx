@@ -14,7 +14,7 @@ export default function MenuPage() {
 	const [activeCategory, setActiveCategory] = useState("Show all");
 
 	useEffect(() => {
-		if (data) setFoodItems(data.data);
+		if (data) setFoodItems(data.foodItems);
 	}, [data]);
 
 	let filtered = foodItems.filter((foodItem) => foodItem.category === activeCategory);
@@ -37,11 +37,13 @@ export default function MenuPage() {
 								>
 									<div className="pb-2 rounded bg-gray-50 drop-shadow-md">
 										<a className="relative block overflow-hidden rounded-t">
-											<Image width={420} height={260} src={foodItem.productImagesCollection.items[0].url} />
+											{foodItem.productImagesCollection.items[0] && (
+												<Image width={500} height={300} layout="responsive" src={foodItem.productImagesCollection.items[0].url} />
+											)}
 										</a>
 										<div className="mt-3 ml-2">
 											<h3 className="mb-1 text-xs font-bold tracking-widest text-green-700">{foodItem.category}</h3>
-											<h2 className="text-lg font-semibold">
+											<h2 className="text-sm font-semibold">
 												{foodItem.productName}
 												{foodItem.available ? "" : <a className="self-center ml-2 text-xs">UNAVAILABLE</a>}
 											</h2>

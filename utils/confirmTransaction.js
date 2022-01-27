@@ -21,6 +21,7 @@ export default async function confirmTransaction(newTransaction) {
 
 		// Set to null for fields not required in PICKUP type
 		if (newTransaction.type === "Pickup") {
+			newTransaction.proofPayment = null;
 			newTransaction.address = null;
 			newTransaction.payMethod = null;
 			newTransaction.change = null;
@@ -28,8 +29,8 @@ export default async function confirmTransaction(newTransaction) {
 		}
 
 		// Add a new invoice number property to the transaction
-		const count = await axios.get(`${process.env.NEXTAUTH_URL}/api/count`);
-		const invoiceNum = count.data.data;
+		const countRes = await axios.get(`${process.env.NEXTAUTH_URL}/api/count`);
+		const invoiceNum = countRes.data.count;
 		newTransaction.invoiceNum = invoiceNum + 1;
 
 		// Add new transaction to database and push into user transaction history

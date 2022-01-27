@@ -4,13 +4,8 @@ import createConnection from "@utils/mongoDBConnection";
 import Transaction from "@models/TransactionModel";
 
 async function handler(req, res) {
-	// Create connection to database
 	await createConnection();
-
-	// Get session
 	const session = await getSession({ req });
-
-	// Unpack the request
 	const {
 		query: { email },
 		method,
@@ -23,19 +18,18 @@ async function handler(req, res) {
 				try {
 					// Get count of transactions in the database
 					const count = await Transaction.count({});
-					if (!count) return res.status(404).json({ success: false, msg: `Could not find transactions.` });
 
-					res.status(200).json({ success: true, data: count });
+					res.status(200).json({ success: true, message: "Successful query", count });
 				} catch (err) {
-					res.status(400).json({ success: false, msg: `Error getting transactions count: ${err.message}` });
+					res.status(400).json({ success: false, message: "An error occurred" });
 				}
 			} else {
-				res.status(401).json({ success: false, msg: "User not signed in." });
+				res.status(401).json({ success: false, message: "User not logged in" });
 			}
 			break;
 
 		default:
-			res.status(500).json({ success: false, msg: "Route is not valid." });
+			res.status(500).json({ success: false, message: "Route is not valid" });
 			break;
 	}
 }

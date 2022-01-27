@@ -2,13 +2,9 @@ import { getSession } from "next-auth/react";
 
 import createConnection from "@utils/mongoDBConnection";
 import Transaction from "@models/TransactionModel";
-import transactionErrorHandler from "@handlers/transactionErrorHandler";
 
 async function handler(req, res) {
-	// Create connection to database
 	await createConnection();
-
-	// Get session
 	const session = await getSession({ req });
 
 	// Unpack the request
@@ -24,21 +20,21 @@ async function handler(req, res) {
 				if (session.user.isAdmin) {
 					try {
 						const transactions = await Transaction.find({}, { _id: false, __v: false });
-						if (!transactions) return res.status(404).json({ success: false, msg: "Transactions cannot be found." });
+						if (!transactions) return res.status(404).json({ success: false, message: "Transactions not found" });
 
-						res.status(200).json({ success: true, data: transactions });
+						res.status(200).json({ success: true, message: "Successful query", transactions });
 					} catch (err) {
-						res.status(400).json({ success: false, msg: `Error getting transactions: ${err.message}` });
+						res.status(400).json({ success: false, message: `An error occurred` });
 					}
 				} else {
-					res.status(401).json({ success: false, msg: "Unauthorized user." });
+					res.status(401).json({ success: false, message: "User not allowed" });
 				}
 			} else {
-				res.status(401).json({ success: false, msg: "User not signed in." });
+				res.status(401).json({ success: false, message: "User not logged in" });
 			}
 			break;
 
-		// Create new transaction document (PROTECTED)
+		// Create new transaction (PROTECTED)
 		case "POST":
 			if (session) {
 				if (session.user.email === req.body.email) {
@@ -46,27 +42,25 @@ async function handler(req, res) {
 						const transaction = await Transaction.create(req.body);
 						res.status(201).json({
 							success: true,
-							msg: "Transaction made sucessfully.",
-							data: transaction,
+							message: "Transaction made sucessfully",
+							transaction,
 						});
 					} catch (err) {
-						const missingFields = transactionErrorHandler(err);
 						res.status(400).json({
 							success: false,
-							msg: "Transaction creation failed.",
-							missingFields: missingFields,
+							message: "An error occurred",
 						});
 					}
 				} else {
-					res.status(401).json({ success: false, msg: "Unauthorized user." });
+					res.status(401).json({ success: false, message: "User not allowed" });
 				}
 			} else {
-				res.status(401).json({ success: false, msg: "User not signed in." });
+				res.status(401).json({ success: false, message: "User not logged in" });
 			}
 			break;
 
 		default:
-			res.status(500).json({ success: false, msg: "Route is not valid." });
+			res.status(500).json({ success: false, message: "Route is not valid." });
 			break;
 	}
 }

@@ -30,29 +30,29 @@ function getQuery(food_slug) {
 }
 
 async function handler(req, res) {
-	// Unpack the request
 	const {
 		method,
 		query: { food_slug },
 	} = req;
 
 	switch (method) {
-		// Get single food item (UNPROTECTED)
 		case "GET":
+			// Place food_slug filter into query
 			const query = getQuery(food_slug);
 
 			try {
 				const response = await connectToContentful(query);
-				const foodItem = response.data.foodItemCollection.items[0];
+				if (!response) res.status(404).json({ success: false, message: "Food item not found" });
 
-				res.status(200).json({ success: true, data: foodItem });
+				const foodItem = response.data.foodItemCollection.items[0];
+				res.status(200).json({ success: true, message: "Successful query", foodItem });
 			} catch (err) {
-				res.status(400).json({ success: false, msg: `Error getting food item: ${err.message}` });
+				res.status(400).json({ success: false, message: `An error occurred` });
 			}
 			break;
 
 		default:
-			res.status(500).json({ success: false, msg: "Route is not valid." });
+			res.status(500).json({ success: false, message: "Route is not valid" });
 			break;
 	}
 }

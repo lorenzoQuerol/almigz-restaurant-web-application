@@ -18,13 +18,14 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 		{ id: "1", href: "/", name: "HOME", current: true },
 		{ id: "2", href: "/menu", name: "MENU", current: false },
 		{ id: "3", href: "/about", name: "ABOUT US", current: false },
+		{ id: "4", href: "/admin", name: "DASHBOARD", current: false },
 	];
 
 	const userBar = [
-		{ id: "1", href: "/auth/signIn", name: "LOGIN", current: false },
+		{ id: "1", href: "/signin", name: "LOGIN", current: false },
 		{ id: "2", href: "/register", name: "REGISTER", current: false },
 		{ id: "3", href: "/account", name: "MY ACCOUNT", current: false },
-		{ id: "4", href: "#", name: "LOGOUT", current: false },
+		{ id: "4", href: "/", name: "LOGOUT", current: false },
 	];
 
 	if (session) {
@@ -75,10 +76,9 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 														{navigationBar.map((tab) => {
 															tab.current = router.pathname == tab.href ? true : false;
 															return (
-																<Link href={tab.href}>
+																<Link href={tab.href} key={tab.id}>
 																	<a onClick={(e) => setMobileOpen(!mobileOpen)}>
 																		<li
-																			key={tab.id}
 																			className={
 																				tab.current
 																					? "transition-colors duration-200 flex py-3 px-2 rounded-md text-white bg-green-700"
@@ -106,7 +106,7 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 																	tab.current = router.pathname == tab.href ? true : false;
 																	if (tab.name === "LOGOUT") {
 																		return (
-																			<Link href={tab.href}>
+																			<Link href={tab.href} key={tab.id}>
 																				<a
 																					onClick={(e) => {
 																						logOut();
@@ -114,7 +114,6 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 																					}}
 																				>
 																					<li
-																						key={tab.id}
 																						className={
 																							tab.current
 																								? "transition-colors duration-200 flex py-3 px-2 rounded-md text-white bg-green-700"
@@ -129,10 +128,9 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 																	} else {
 																		if (tab.name === "MY ACCOUNT" || tab.name === "LOGOUT") {
 																			return (
-																				<Link href={tab.href}>
+																				<Link href={tab.href} key={tab.id}>
 																					<a onClick={(e) => setMobileOpen(!mobileOpen)}>
 																						<li
-																							key={tab.id}
 																							className={
 																								tab.current
 																									? "transition-colors duration-200 flex py-3 px-2 rounded-md text-white bg-green-700"
@@ -210,10 +208,9 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 															tab.current = router.pathname == tab.href ? true : false;
 
 															return (
-																<Link href={tab.href}>
+																<Link href={tab.href} key={tab.id}>
 																	<a onClick={(e) => setMobileOpen(!mobileOpen)}>
 																		<li
-																			key={tab.id}
 																			className={
 																				tab.current
 																					? "transition-colors duration-200 flex py-3 px-2 rounded-md text-white bg-green-700"
@@ -237,10 +234,9 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 															tab.current = router.pathname == tab.href ? true : false;
 															if (tab.name === "LOGIN" || tab.name === "REGISTER") {
 																return (
-																	<Link href={tab.href}>
+																	<Link href={tab.href} key={tab.id}>
 																		<a onClick={(e) => setMobileOpen(!mobileOpen)}>
 																			<li
-																				key={tab.id}
 																				className={
 																					tab.current
 																						? "transition-colors duration-200 flex py-3 px-2 rounded-md text-white bg-green-700"

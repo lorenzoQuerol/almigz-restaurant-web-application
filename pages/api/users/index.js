@@ -1,18 +1,11 @@
 import { hash } from "bcryptjs";
 import { getSession } from "next-auth/react";
-
 import createConnection from "@utils/mongoDBConnection";
 import User from "@models/UserModel";
-import userErrorHandler from "@handlers/userErrorHandler";
 
 async function handler(req, res) {
-	// Create connection to database
 	await createConnection();
-
-	// Get session
 	const session = await getSession({ req });
-
-	// Unpack the request to get method
 	const { method } = req;
 
 	switch (method) {
@@ -21,51 +14,48 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.isAdmin) {
 					try {
-						const users = await User.find({}, { __v: false, cart: false });
-						if (!users) return res.status(404).json({ success: false, msg: `Users not found.` });
+						const users = await User.find({}, { __v: false, _id: false, transactions: false });
+						if (!users) return res.status(404).json({ success: false, message: "Cannot get users" });
 
-						res.status(200).json({ success: true, data: users });
+						res.status(200).json({ success: true, message: "Successful query", users });
 					} catch (err) {
-						res.status(400).json({ success: false, msg: `Error getting all users: ${err.message}` });
+						res.status(400).json({ success: false, message: "An error occurred" });
 					}
 				} else {
-					res.status(401).json({ success: false, msg: "Unauthorized user." });
+					res.status(401).json({ success: false, message: "User not allowed" });
 				}
 			} else {
-				res.status(401).json({ success: false, msg: "User not signed in." });
+				res.status(401).json({ success: false, message: "User not logged in" });
 			}
 			break;
 
 		// Create new user (UNPROTECTED)
 		case "POST":
 			try {
-				// Check if there is a duplicate account in the system
+				// Check for duplicates
 				const duplicate = await User.findOne({ email: req.body.email });
 				if (duplicate)
 					return res.status(400).json({
 						success: false,
-						msg: "Email address already exists in the system. Please use a different email address.",
+						message: "User already registered",
 					});
 
-				// Encrypt password
 				if (req.body.password) req.body.password = await hash(req.body.password, 12);
 
-				// Create new document
 				const user = await User.create(req.body);
 
 				res.status(201).json({
 					success: true,
-					msg: "User account created successfully.",
-					data: user,
+					message: "User account created",
+					user,
 				});
 			} catch (err) {
-				const missingFields = userErrorHandler(err);
-				res.status(400).json({ success: false, msg: "User account creation failed.", missingFields: missingFields });
+				res.status(400).json({ success: false, message: "An error occurred" });
 			}
 			break;
 
 		default:
-			res.status(500).json({ success: false, msg: "Route is not valid." });
+			res.status(500).json({ success: false, message: "Route is not valid" });
 			break;
 	}
 }

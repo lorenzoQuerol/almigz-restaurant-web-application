@@ -1,118 +1,29 @@
 import router from "next/router";
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 
 import getStorageValue from "@utils/localStorage/getStorageValue";
 import removeStorageValue from "@utils/localStorage/removeStorageValue";
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// MOCK DATA
-//sample order array (R)
-const products = [
-	{
-		quantity: 3,
-		menuItem: {
-			productName: "Pork Binagoongan",
-			productPrice: 80.0,
-		},
-	},
-	{
-		quantity: 1,
-		menuItem: {
-			productName: "Malabon (Small)",
-			productPrice: 380.0,
-		},
-	},
-	{
-		quantity: 2,
-		menuItem: {
-			productName: "Malabon Medium",
-			productPrice: 80.0,
-		},
-	},
-	{
-		quantity: 4,
-		menuItem: {
-			productName: "Sizzling Sisig",
-			productPrice: 90.0,
-		},
-	},
-];
+export async function getServerSideProps(context) {
+	const session = await getSession(context);
 
-//SAMPLE: DEL-COD (R)
-let transaction = {
-	invoiceNum: 1,
-	dateCreated: "01/05/2022 06:40:40",
-	orderStatus: 0,
-	type: "Delivery",
-	fullName: "John Doe",
-	email: "johndoe@gmail.com",
-	contactNum: ["+639123456789", "+639012345678"],
-	order: products,
-	specialInstructions:
-		"Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
-	totalPrice: 1190.0,
-	address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
-	payMethod: "Cash on Delivery",
-	change: "810",
-	deliverTime: "Now",
-	storeLocation: "",
-	pickupTime: "",
-	reason: "",
-};
+	if (!session)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/signin",
+			},
+		};
 
-//SAMPLE: DEL-GCASH (R)
-let transactionSample2 = {
-	invoiceNum: 1,
-	dateCreated: "01/05/2022 06:40:40",
-	orderStatus: 0,
-	type: "Delivery",
-	fullName: "John Doe",
-	email: "johndoe@gmail.com",
-	contactNum: ["+639123456789", "+639012345678"],
-	order: products,
-	specialInstructions:
-		"Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
-	totalPrice: 1190.0,
-	address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
-	payMethod: "GCash",
-	change: "",
-	deliverTime: "11:00 AM",
-	storeLocation: "",
-	pickupTime: "",
-};
+	return {
+		props: session,
+	};
+}
 
-//SAMPLE: PICKUP (R)
-let transactionSample3 = {
-	invoiceNum: 1,
-	dateCreated: "01/05/2022 06:40:40",
-	orderStatus: 0,
-	type: "Pickup",
-	fullName: "John Doe",
-	email: "johndoe@gmail.com",
-	contactNum: ["+639123456789", "+639012345678"],
-	order: products,
-	specialInstructions:
-		"Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
-	totalPrice: 1190.0,
-	address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
-	payMethod: "",
-	change: "",
-	deliverTime: "",
-	storeLocation: "Branch 1",
-	pickupTime: "12:00 PM",
-};
-
-export default function Receipt() {
-	// Get session
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.replace("/auth/signIn");
-		},
-	});
-
+export default function Receipt(session) {
 	// Retrieve transaction from local storage
 	const [transaction, setTransaction] = useState(() => {
 		const initialValue = getStorageValue("transaction", undefined);
@@ -158,7 +69,8 @@ export default function Receipt() {
 		router.replace("/tracker");
 	};
 
-	if (status === "loading") return <h1>Loading...</h1>;
+	console.log(transaction);
+	if (!transaction) return <h1>Loading...</h1>;
 
 	return (
 		<div className="flex flex-col w-1/2 mt-5">
