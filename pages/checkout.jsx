@@ -192,7 +192,7 @@ export default function CheckoutPage(session) {
 		}
 
 		const userRes = await axios.post("/api/transactions", transaction);
-		window.localStorage.setItem("foodCart", JSON.stringify(userRes.data.transaction));
+		window.localStorage.setItem("transaction", JSON.stringify(userRes.data.transaction));
 		router.replace("/receipt");
 	};
 	// !SECTION
