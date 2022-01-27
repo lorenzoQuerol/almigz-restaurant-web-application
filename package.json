@@ -12,6 +12,7 @@
     "@heroicons/react": "^1.0.5",
     "@mongoosejs/double": "^0.2.0",
     "axios": "^0.24.0",
+    "axios-hooks": "^3.0.0",
     "bcrypt": "^5.0.1",
     "bcryptjs": "^2.4.3",
     "daisyui": "^1.16.2",
