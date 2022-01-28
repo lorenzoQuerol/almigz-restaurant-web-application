@@ -24,7 +24,7 @@ const Navbar = () => {
 		{ id: "1", href: "/", name: "HOME", current: true },
 		{ id: "2", href: "/menu", name: "MENU", current: false },
 		{ id: "3", href: "/about", name: "ABOUT US", current: false },
-		{ id: "4", href: "/admin", name: "ADMINISTRATION", current: false },
+		{ id: "4", href: "/admin", name: "ADMIN", current: false },
 	];
 
 	const handleOpen = () => {
@@ -151,7 +151,7 @@ const Navbar = () => {
 										<a href="/account">My Account</a>
 									</li>
 									<li>
-										<a href="/" onClick={logOut}>
+										<a href="/" onClick={() => signOut()}>
 											Sign Out
 										</a>
 									</li>
