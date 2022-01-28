@@ -2,8 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { getSession, useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 import Cart from "@components/Cart";
 import MobileNavbar from "@components/MobileNavbar";
@@ -15,9 +14,11 @@ const Navbar = () => {
 	const [open, setOpen] = useState(false);
 	const [mobileOpen, setMobileOpen] = useState(false);
 
-	const logOut = () => {
-		signOut({ callbackUrl: process.env.NEXTAUTH_URL });
+	const handleSignOut = async (event) => {
+		event.preventDefault();
+		const data = await signOut({ redirect: true, callbackUrl: "/" });
 		localStorage.clear();
+		router.push(data.url);
 	};
 
 	const navigationBar = [
@@ -151,7 +152,7 @@ const Navbar = () => {
 										<a href="/account">My Account</a>
 									</li>
 									<li>
-										<a href="/" onClick={() => signOut()}>
+										<a href="/" onClick={(e) => handleSignOut(e)}>
 											Sign Out
 										</a>
 									</li>
