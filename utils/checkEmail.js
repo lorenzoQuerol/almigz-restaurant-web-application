@@ -6,7 +6,7 @@ async function checkEmail(email) {
 		const success = { success: response.data.success, email: response.data.email };
 		return success;
 	} catch (err) {
-		const error = { success: err.response.data.success, msg: err.response.data.msg };
+		const error = { success: err.response.data.success, message: err.response.data.message };
 		return error;
 	}
 }
