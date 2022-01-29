@@ -3,24 +3,25 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import Link from "next/link";
 import getStorageValue from "@utils/localStorage/getStorageValue";
+import removeStorageValue from "@utils/localStorage/removeStorageValue";
 
 const Cart = ({ open, handleOpen }) => {
-	const [products, setProducts] = useState([]);
-	const [delfee, setDelFee] = useState(50);
-	const [subtotal, setSubtotal] = useState(0);
-	const [total, setTotal] = useState(delfee + subtotal);
+	const [cart, setCart] = useState(undefined); // WHOLE CART
+	const [products, setProducts] = useState([]); // FOOD ITEMS ARRAY
+
+	const [total, setTotal] = useState();
 
 	// Initialize cart
 	useEffect(() => {
 		if (open) {
-			let cart = getStorageValue("foodCart");
-			console.log(cart);
-			setProducts(cart.data);
-			setSubtotal(cart.total + subtotal);
-			setTotal(cart.total + subtotal + delfee);
+			let data = getStorageValue("foodCart");
+			if (data) {
+				setCart(data); // Contains food items and total price
+				setProducts(data.products); // Contains food items only (w/o total price)
+				setTotal(data.total);
+			}
 		} else {
 			setTimeout(() => {
-				setSubtotal(0);
 				setTotal(0);
 			}, 400);
 		}
@@ -36,15 +37,21 @@ const Cart = ({ open, handleOpen }) => {
 			temp += product.quantity * product.menuItem.productPrice;
 		});
 
-		setSubtotal(temp);
-		setTotal(temp + delfee);
-		localStorage.setItem("foodCart", JSON.stringify(products));
+		setTotal(temp);
 
-		if (products.length === 0) setProducts(null);
+		cart.products = products;
+		cart.total = total;
+		window.localStorage.setItem("foodCart", JSON.stringify(cart));
+
+		if (products.length === 0) {
+			setCart(null);
+			setProducts(null);
+			removeStorageValue("foodCart");
+		}
 	};
 
 	// Update quantity of item and update prices
-	const updateTotal = async (value, name) => {
+	const updateTotal = (value, name) => {
 		const index = products.findIndex((product) => product.menuItem.productName === name);
 		products[index].quantity = value; // Update quantity
 
@@ -53,12 +60,14 @@ const Cart = ({ open, handleOpen }) => {
 			temp += product.quantity * product.menuItem.productPrice;
 		});
 
-		setSubtotal(temp);
-		setTotal(temp + delfee);
-		localStorage.setItem("foodCart", JSON.stringify(products));
+		setTotal(temp);
+
+		cart.products = products;
+		cart.total = temp;
+		window.localStorage.setItem("foodCart", JSON.stringify(cart));
 	};
 
-	if (products) {
+	if (cart && products.length !== 0) {
 		return (
 			<Transition.Root show={open} as={Fragment}>
 				<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={handleOpen}>
@@ -159,14 +168,6 @@ const Cart = ({ open, handleOpen }) => {
 
 										<div className="px-4 py-6 border-t border-gray-200 sm:px-6">
 											<div className="flex justify-between text-base font-medium text-gray-900">
-												<p>Subtotal</p>
-												<p>P{subtotal}</p>
-											</div>
-											<div className="flex justify-between my-3 text-base text-gray-500 text-medium">
-												<p>Delivery Fee</p>
-												<p>P{delfee}</p>
-											</div>
-											<div className="flex justify-between text-base font-medium text-gray-900">
 												<p>Total</p>
 												<p>P{total}</p>
 											</div>
@@ -255,37 +256,6 @@ const Cart = ({ open, handleOpen }) => {
 												</div>
 											</div>
 										</div>
-
-										{/* <div className="px-4 py-6 border-t border-gray-200 sm:px-6">
-											<div className="flex justify-between text-base font-medium text-gray-900">
-												<p>Subtotal</p>
-												<p>P{subtotal}</p>
-											</div>
-											<div className="flex justify-between my-3 text-base text-gray-500 text-medium">
-												<p>Delivery Fee</p>
-												<p>P{delfee}</p>
-											</div>
-											<div className="flex justify-between text-base font-medium text-gray-900">
-												<p>Total</p>
-												<p>P{total}</p>
-											</div>
-											<div className="mt-6">
-												<a
-													href="/checkout"
-													className="flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700"
-												>
-													Proceed to Checkout
-												</a>
-											</div>
-											<div className="flex justify-center mt-6 text-sm text-center text-gray-500">
-												<p>
-													or{" "}
-													<a href="/menu" className="font-medium text-green-600 hover:text-green-500">
-														Add items<span aria-hidden="true"> &rarr;</span>
-													</a>
-												</p>
-											</div>
-										</div> */}
 									</div>
 								</div>
 							</Transition.Child>

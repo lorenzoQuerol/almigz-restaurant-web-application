@@ -32,6 +32,7 @@ const Navbar = () => {
 		setOpen(!open);
 	};
 
+	console.log(router.pathname);
 	return (
 		<header className="border-t-8 border-green-800 shadow-xl text-slate-900 body-font">
 			<div className="container relative flex flex-col flex-wrap px-5 py-5 mx-auto md:flex-row">
@@ -64,7 +65,7 @@ const Navbar = () => {
 				</div>
 
 				{/* Cart button */}
-				{session && (
+				{session && router.pathname !== "/checkout" && (
 					<div className="absolute self-center block bottom-8 right-5 sm:hidden">
 						<button className="justify-start" onClick={handleOpen}>
 							<svg
@@ -124,20 +125,22 @@ const Navbar = () => {
 					<>
 						<Cart open={open} handleOpen={handleOpen} />
 						<div className="items-center justify-end flex-1 hidden m-3 sm:flex">
-							<a onClick={handleOpen}>
-								<div className="m-4 hover:cursor-pointer">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										alt="View Cart"
-										className="w-10 h-10 p-1 transition-colors duration-200 ease-in-out bg-white rounded hover:bg-green-100"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-									</svg>
-								</div>
-							</a>
+							{router.pathname !== "/checkout" && (
+								<a onClick={handleOpen}>
+									<div className="m-4 hover:cursor-pointer">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											alt="View Cart"
+											className="w-10 h-10 p-1 transition-colors duration-200 ease-in-out bg-white rounded hover:bg-green-100"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+										</svg>
+									</div>
+								</a>
+							)}
 
 							<div className="hidden dropdown lg:block">
 								<div tabIndex="0" className="m-1 font-normal bg-white rounded btn ">
