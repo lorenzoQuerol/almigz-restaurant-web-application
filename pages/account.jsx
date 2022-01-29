@@ -37,8 +37,8 @@ const historyAxios = makeUseAxios({
 
 export default function Account(session) {
 	const router = useRouter();
-	const [{ data: userRes, loading: userLoading, error: userError }, { refetch: userRefetch }] = userAxios(`/api/users/${session.user.email}`);
-	const [{ data: historyRes, loading: historyLoading, error: historyError }, { refetch: historyRefetch }] = historyAxios(`/api/history/${session.user.email}`);
+	const [{ data: userRes, loading: userLoading, error: userError }, userRefetch] = userAxios(`/api/users/${session.user.email}`);
+	const [{ data: historyRes, loading: historyLoading, error: historyError }, historyRefetch] = historyAxios(`/api/history/${session.user.email}`);
 
 	const [user, setUser] = useState({});
 	const [transactions, setTransactions] = useState([]);
@@ -55,8 +55,14 @@ export default function Account(session) {
 	// For setting user and transaction states
 	useEffect(() => {
 		if (userRes) setUser(userRes.user);
-		if (historyRes) setTransactions(historyRes.transactions.transactions);
+		if (historyRes) setTransactions(historyRes.transactions);
 	}, [userRes, historyRes]);
+
+	// Refetch if path changes
+	useEffect(() => {
+		userRefetch();
+		historyRefetch();
+	}, [router.pathname]);
 
 	// For refreshing client-side
 	useEffect(() => {
@@ -73,45 +79,45 @@ export default function Account(session) {
 		setCurrentTab(name);
 	};
 
-	const handleOpenTransaction = () => {
-		setOpenTransaction(!openTransaction);
-	};
-	console.log(transactions);
-	if (userLoading || historyLoading) return <h1>Loading...</h1>;
-	else
-		return (
-			<div className="flex flex-col justify-center mx-10 my-10 md:mx-36 xl:mx-72 font-rale text-slate-900">
-				<div className="flex flex-col justify-between mb-5 lg:flex-row">
-					<div className="text-3xl font-bold text-green-700 lg:text-4xl">{currentTab}</div>
-					<ul className="flex flex-row self-center mt-5 lg:mt-0">
-						<li>
-							{navigationBar.map((tab) => {
-								tab.current = tab.name == currentTab ? true : false;
-								return (
-									<a
-										onClick={(e) => {
-											handleCurrentTab(tab.name);
-										}}
-										key={tab.id}
-										className={
-											tab.current
-												? "self-center bg-green-700 px-3 py-2 mx-3 my-2 font-semibold text-white ease-in-out transition-colors duration-100 rounded-md cursor-pointer"
-												: "self-center px-3 py-2 mx-3 my-2 hover:text-white transition-colors ease-in-out duration-200 hover:bg-green-700 rounded-md cursor-pointer"
-										}
-									>
-										{tab.name}
-									</a>
-								);
-							})}
-						</li>
-					</ul>
+	return (
+		<>
+			{userLoading ^ historyLoading ? (
+				<Loading />
+			) : (
+				<div className="flex flex-col justify-center mx-10 my-10 md:mx-36 xl:mx-72 font-rale text-slate-900">
+					<div className="flex flex-col justify-between mb-5 lg:flex-row">
+						<div className="text-3xl font-bold text-green-700 lg:text-4xl">{currentTab}</div>
+						<ul className="flex flex-row self-center mt-5 lg:mt-0">
+							<li>
+								{navigationBar.map((tab) => {
+									tab.current = tab.name == currentTab ? true : false;
+									return (
+										<a
+											onClick={(e) => {
+												handleCurrentTab(tab.name);
+											}}
+											key={tab.id}
+											className={
+												tab.current
+													? "self-center bg-green-700 px-3 py-2 mx-3 my-2 font-semibold text-white ease-in-out transition-colors duration-100 rounded-md cursor-pointer"
+													: "self-center px-3 py-2 mx-3 my-2 hover:text-white transition-colors ease-in-out duration-200 hover:bg-green-700 rounded-md cursor-pointer"
+											}
+										>
+											{tab.name}
+										</a>
+									);
+								})}
+							</li>
+						</ul>
+					</div>
+
+					{/* User settings card */}
+					{currentTab === "User Settings" && <UserSettings user={user} setUser={setUser} userRefetch={userRefetch} />}
+
+					{/* Transaction history card */}
+					{currentTab === "Transactions" && <TransactionHistory transactions={transactions} />}
 				</div>
-
-				{/* User settings card */}
-				{currentTab === "User Settings" && (isLoading ? <Loading /> : <UserSettings user={user} setUser={setUser} refreshData={refreshData} />)}
-
-				{/* Transaction history card */}
-				{currentTab === "Transactions" && <TransactionHistory transactions={transactions} />}
-			</div>
-		);
+			)}
+		</>
+	);
 }
