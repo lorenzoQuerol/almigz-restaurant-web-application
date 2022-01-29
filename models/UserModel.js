@@ -11,6 +11,11 @@ const MenuItemSchema = new mongoose.Schema({
 		type: Double,
 		required: true,
 	},
+
+	productImagesCollection: {
+		type: Array,
+		required: true,
+	},
 });
 
 const CartItemSchema = new mongoose.Schema({
@@ -26,6 +31,11 @@ const CartItemSchema = new mongoose.Schema({
 });
 
 const TransactionSchema = new mongoose.Schema({
+	lastUpdated: {
+		type: Date,
+		required: true,
+	},
+
 	invoiceNum: {
 		type: Number,
 		required: true,

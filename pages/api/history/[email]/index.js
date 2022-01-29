@@ -46,7 +46,7 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.email === email) {
 					try {
-						const transactions = await User.findOne({ email: email }, "transactions");
+						let { transactions } = await User.findOne({ email: email }, "transactions");
 						if (!transactions) return res.status(404).json({ success: false, message: "User not found" });
 
 						res.status(200).json({ success: true, message: "Successful query", transactions });

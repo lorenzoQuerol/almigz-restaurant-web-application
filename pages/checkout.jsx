@@ -126,6 +126,7 @@ export default function CheckoutPage(session) {
 		const formattedDate = `${data.deliverDate}T${data.deliverTime}`;
 
 		const temp = {
+			lastUpdated: undefined,
 			invoiceNum: undefined,
 			dateCreated: undefined,
 			orderStatus: 0,
@@ -133,7 +134,7 @@ export default function CheckoutPage(session) {
 			fullName: `${user.firstName} ${user.lastName}`,
 			email: user.email,
 			contactNum: [user.contact1, user.contact2],
-			order: cart.data,
+			order: order.data,
 			specialInstructions: data.specialInstructions,
 			reasonForCancel: "",
 			totalPrice: getValues("type") === "Delivery" ? cart.total + 50 : cart.total,
@@ -179,6 +180,7 @@ export default function CheckoutPage(session) {
 
 		const response = await axios.get("/api/count");
 
+		transaction.lastUpdated = new Date();
 		transaction.dateCreated = new Date();
 		transaction.invoiceNum = response.data.count;
 
@@ -187,7 +189,6 @@ export default function CheckoutPage(session) {
 			delete item.menuItem.category;
 			delete item.menuItem.productDescription;
 			delete item.menuItem.isAvailable;
-			delete item.menuItem.productImagesCollection;
 			delete item.menuItem.slug;
 			delete item.menuItem.available;
 		});
@@ -205,8 +206,11 @@ export default function CheckoutPage(session) {
 			transaction.deliverTime = undefined;
 		}
 
-		const userRes = await axios.post("/api/transactions", transaction);
-		window.localStorage.setItem("transaction", JSON.stringify(userRes.data.transaction));
+		// Place transaction into user history and transactions
+		const transRes = await axios.post("/api/transactions", transaction);
+		const userRes = await axios.put(`/api/history/${session.user.email}`, transaction);
+
+		window.localStorage.setItem("transaction", JSON.stringify(transRes.data.transaction));
 		router.replace("/receipt");
 	};
 	// !SECTION
