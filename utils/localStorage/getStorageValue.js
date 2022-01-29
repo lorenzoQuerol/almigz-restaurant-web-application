@@ -2,15 +2,12 @@ export default function getStorageValue(key) {
 	if (typeof window !== "undefined") {
 		if (key === "foodCart") {
 			let foodCart = JSON.parse(localStorage.getItem("foodCart"));
-			let total = 0;
-			if (foodCart) foodCart.data.forEach((item) => (total += item.menuItem.productPrice * item.quantity));
-
-			return { data: foodCart.data, total: total };
+			return foodCart;
 		}
 
 		if (key === "transaction") {
-			const item = JSON.parse(localStorage.getItem(key));
-			return item;
+			const transaction = JSON.parse(localStorage.getItem("transaction"));
+			return transaction;
 		}
 	}
 }

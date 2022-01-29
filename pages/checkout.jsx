@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import useAxios from "axios-hooks";
 import axios from "axios";
 import Image from "next/image";
-import useLocalStorage from "@utils/localStorage/useLocalStorage";
 import getStorageValue from "@utils/localStorage/getStorageValue";
+import removeStorageValue from "@utils/localStorage/removeStorageValue";
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const timeValid = (time) => time >= "10:00" && time <= "19:00";
@@ -31,8 +31,8 @@ export async function getServerSideProps(context) {
 export default function CheckoutPage(session) {
 	const router = useRouter();
 	const [{ data, loading, error }, refetch] = useAxios(`/api/users/${session.user.email}`);
-
 	const cart = getStorageValue("foodCart");
+
 	const {
 		register,
 		watch,
@@ -58,6 +58,7 @@ export default function CheckoutPage(session) {
 	const steps = ["Review Cart", "Additional Details", "Review Order"];
 
 	const [order, setOrder] = useState({}); // Contains cart and total price
+	const [products, setProducts] = useState(undefined); // Contains food products only (w/o total price)
 	const [delFee, setDelFee] = useState(50); // NOTE Delivery fee
 	const [subTotal, setSubtotal] = useState(0);
 	const [totalPrice, setTotalPrice] = useState(0);
@@ -67,36 +68,48 @@ export default function CheckoutPage(session) {
 
 	useEffect(() => {
 		if (cart) setOrder(cart);
+		if (order) setProducts(order.products);
 		if (data) setUser(data.user);
 	}, [data]);
 
 	// ANCHOR Cart functions
 	const deleteItem = (name) => {
-		const index = cart.data.findIndex((product) => product.menuItem.productName === name);
-		cart.data.splice(index, 1); // Delete item
+		const index = products.findIndex((product) => product.menuItem.productName === name);
+		products.splice(index, 1); // Delete item
 
 		let temp = 0;
-		cart.data.forEach((product) => {
+		products.forEach((product) => {
 			temp += product.quantity * product.menuItem.productPrice;
 		});
 
-		setSubtotal(temp);
-		setTotalPrice(temp + delFee);
-		localStorage.setItem("foodCart", JSON.stringify(cart));
+		setTotalPrice(temp);
+
+		cart.products = products;
+		cart.total = temp;
+		window.localStorage.setItem("foodCart", JSON.stringify(cart));
+
+		if (products.length === 0) {
+			setOrder(null);
+			setProducts(null);
+			removeStorageValue("foodCart");
+			router.replace("/menu");
+		}
 	};
 
-	const updateTotal = async (value, name) => {
-		const index = cart.data.findIndex((product) => product.menuItem.productName === name);
-		cart.data[index].quantity = value; // Update quantity
+	const updateTotal = (value, name) => {
+		const index = products.findIndex((product) => product.menuItem.productName === name);
+		products[index].quantity = value; // Update quantity
 
 		let temp = 0;
-		cart.data.forEach((product) => {
+		products.forEach((product) => {
 			temp += product.quantity * product.menuItem.productPrice;
 		});
 
-		setSubtotal(temp);
-		setTotalPrice(temp + delFee);
-		localStorage.setItem("foodCart", JSON.stringify(cart));
+		setTotalPrice(temp);
+
+		cart.products = products;
+		cart.total = temp;
+		window.localStorage.setItem("foodCart", JSON.stringify(cart));
 	};
 
 	// SECTION Additional details functions
@@ -246,7 +259,7 @@ export default function CheckoutPage(session) {
 							{/* Cart details */}
 							{cart && (
 								<div className="mb-5 divide-y">
-									{cart.data.map((product) => {
+									{cart.products.map((product) => {
 										return (
 											<li key={product.id} className="flex py-3 sm:flex-row">
 												{/* Image */}
@@ -646,7 +659,7 @@ export default function CheckoutPage(session) {
 										<div className="hidden sm:flex"></div>
 									</div>
 									<div className="divide-y">
-										{order.data.map((product) => {
+										{order.products.map((product) => {
 											return (
 												<li key={product.id} className="flex py-3 sm:flex-row">
 													{/* Image */}

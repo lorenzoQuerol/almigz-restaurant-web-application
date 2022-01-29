@@ -1,5 +1,3 @@
 export default function removeStorageValue(key) {
-	if (typeof window !== "undefined") {
-		if (localStorage.getItem(key)) localStorage.removeItem(key);
-	}
+	if (typeof window !== "undefined") localStorage.removeItem(key);
 }
