@@ -14,6 +14,7 @@ const Cart = ({ open, handleOpen }) => {
 	useEffect(() => {
 		if (open) {
 			let cart = getStorageValue("foodCart");
+			console.log(cart);
 			setProducts(cart.data);
 			setSubtotal(cart.total + subtotal);
 			setTotal(cart.total + subtotal + delfee);

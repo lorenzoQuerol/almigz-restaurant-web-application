@@ -62,7 +62,7 @@ export default function CheckoutPage(session) {
 
 	const [user, setUser] = useState({});
 	const [details, setDetails] = useState(null);
-	const [transaction, setTransaction] = useLocalStorage("transaction", {});
+	// const [transaction, setTransaction] = useLocalStorage("transaction", {});
 
 	useEffect(() => {
 		if (cart) setOrder(cart);
@@ -110,6 +110,7 @@ export default function CheckoutPage(session) {
 
 	const confirmDetails = (data) => {
 		const formattedDate = `${data.deliverDate}T${data.deliverTime}`;
+
 		const temp = {
 			lastUpdated: undefined,
 			invoiceNum: undefined,
@@ -126,9 +127,9 @@ export default function CheckoutPage(session) {
 			address: getValues("useHomeAddress") === "true" ? user.address : getValues("address"),
 			payMethod: getValues("payMethod"),
 			change: Number(getValues("change")),
-			deliverTime: getValues("type") === "Delivery" ? getValues("deliverTime") : undefined,
+			deliverTime: getValues("type") === "Delivery" ? (data.deliverNow ? "Now" : formattedDate) : undefined,
 			branch: getValues("branch"),
-			pickupTime: getValues("type") === "Pickup" ? getValues("deliverTime") : undefined,
+			pickupTime: getValues("type") === "Pickup" ? (data.deliverNow ? "Now" : formattedDate) : undefined,
 		};
 
 		setDetails(temp);
@@ -292,7 +293,7 @@ export default function CheckoutPage(session) {
 													/>
 												</div>
 												{/* Total price */}
-												<p className="self-center hidden w-20 font-bold sm:flex text-end">
+												<p className="self-center hidden font-bold w-22 sm:flex text-end">
 													<p className="ml-4 mr-5 font-bold ">₱ {product.menuItem.productPrice * product.quantity}</p>
 												</p>
 											</li>
@@ -630,9 +631,9 @@ export default function CheckoutPage(session) {
 										{details.payMethod} {details.payMethod === "COD" ? `(Change for ₱${details.change})` : ""}
 									</div>
 									{details.type === "Delivery" && <div className="font-bold">Deliver On</div>}
-									{details.type === "Delivery" && <div className="">{details.deliverTime ? formatDate(details.deliverTime) : "Now"}</div>}
+									{details.type === "Delivery" && <div className="">{watch("deliverNow") ? "Now" : formatDate(details.deliverTime)}</div>}
 									{details.type === "Pickup" && <div className="font-bold">Pickup on</div>}
-									{details.type === "Pickup" && <div className="">{details.pickupTime ? formatDate(details.pickupTime) : "Now"}</div>}
+									{details.type === "Pickup" && <div className="">{watch("deliverNow") ? "Now" : formatDate(details.pickupTime)}</div>}
 								</div>
 
 								{/* ANCHOR Food order */}

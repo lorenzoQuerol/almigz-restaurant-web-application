@@ -9,16 +9,18 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 	const router = useRouter();
 	const { data: session, status } = useSession();
 
-	const logOut = () => {
-		signOut({ callbackUrl: "http://localhost:3000/" });
+	const handleSignOut = async (event) => {
+		event.preventDefault();
+		const data = await signOut({ redirect: true, callbackUrl: "/" });
 		localStorage.clear();
+		router.push(data.url);
 	};
 
 	const navigationBar = [
 		{ id: "1", href: "/", name: "HOME", current: true },
 		{ id: "2", href: "/menu", name: "MENU", current: false },
 		{ id: "3", href: "/about", name: "ABOUT US", current: false },
-		{ id: "4", href: "/admin", name: "DASHBOARD", current: false },
+		{ id: "4", href: "/admin", name: "ADMIN", current: false },
 	];
 
 	const userBar = [
@@ -107,12 +109,7 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 																	if (tab.name === "LOGOUT") {
 																		return (
 																			<Link href={tab.href} key={tab.id}>
-																				<a
-																					onClick={(e) => {
-																						logOut();
-																						setMobileOpen(!mobileOpen);
-																					}}
-																				>
+																				<a href="/" onClick={(e) => handleSignOut(e)}>
 																					<li
 																						className={
 																							tab.current

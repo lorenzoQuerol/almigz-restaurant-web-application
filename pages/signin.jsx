@@ -38,7 +38,7 @@ export default function Signin() {
 			if (status.ok) router.replace("/");
 			else setErrorMessage("Email and password do not match");
 		} else {
-			setErrorMessage(emailExists.msg);
+			setErrorMessage(emailExists.message);
 		}
 	};
 

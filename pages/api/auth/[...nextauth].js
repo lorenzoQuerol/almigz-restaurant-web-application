@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import axios from "axios";
 import { compare } from "bcryptjs";
 
 import createConnection from "@utils/mongoDBConnection";
@@ -45,7 +44,7 @@ export default NextAuth({
 	],
 
 	pages: {
-		signIn: "/auth/signIn",
+		signIn: "/signin",
 	},
 
 	// Check if the user logging in is an administrator. Fields returned in session:
