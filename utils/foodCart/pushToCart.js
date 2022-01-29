@@ -1,12 +1,12 @@
 export default async function pushToCart(data) {
 	if (typeof window !== "undefined") {
 		// Get cart from local storage
-		let foodCart = JSON.parse(localStorage.getItem("foodCart"));
-		if (!foodCart) foodCart = new Array();
+		let cart = JSON.parse(localStorage.getItem("foodCart"));
+		if (!cart) cart = { products: [], total: 0 };
 
 		// Check if product already exists in cart; update quantity if found.
 		let exists = false;
-		foodCart.forEach((product) => {
+		cart.products.forEach((product) => {
 			if (product.menuItem.productName === data.menuItem.productName) {
 				product.quantity = Number(product.quantity) + Number(data.quantity);
 				exists = true;
@@ -14,9 +14,18 @@ export default async function pushToCart(data) {
 		});
 
 		// Else, push to cart
-		if (!exists) foodCart.push(data);
+		if (!exists) cart.products.push(data);
+
+		// Put the total into the array
+		let total = 0;
+		cart.products.forEach((product) => {
+			total += Number(product.quantity) * Number(product.menuItem.productPrice);
+		});
+
+		let products = cart.products;
+		const finalCart = { products, total };
 
 		// Set updated cart to local storage
-		localStorage.setItem("foodCart", JSON.stringify(foodCart));
+		localStorage.setItem("foodCart", JSON.stringify(finalCart));
 	}
 }
