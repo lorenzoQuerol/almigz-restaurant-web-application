@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 		// Update user (PROTECTED)
 		case "PUT":
 			if (session) {
-				if (session.user.email === email) {
+				if (session.user.isAdmin || session.user.email === email) {
 					try {
 						const user = await User.findOne({ email: email });
 						if (!user) return res.status(404).json({ success: false, message: "User not found" });
