@@ -65,7 +65,7 @@ const Navbar = () => {
 				</div>
 
 				{/* Cart button */}
-				{session && router.pathname !== "/checkout" && (
+				{session && router.pathname !== "/checkout" && !session.user.isAdmin && (
 					<div className="absolute self-center block bottom-8 right-5 sm:hidden">
 						<button className="justify-start" onClick={handleOpen}>
 							<svg
@@ -125,7 +125,7 @@ const Navbar = () => {
 					<>
 						<Cart open={open} handleOpen={handleOpen} />
 						<div className="items-center justify-end flex-1 hidden m-3 sm:flex">
-							{router.pathname !== "/checkout" && (
+							{router.pathname !== "/checkout" && !session.user.isAdmin && (
 								<a onClick={handleOpen}>
 									<div className="m-4 hover:cursor-pointer">
 										<svg
