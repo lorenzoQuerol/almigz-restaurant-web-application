@@ -59,10 +59,11 @@ export default function CheckoutPage(session) {
 
 	const [order, setOrder] = useState({}); // Contains cart and total price
 	const [delFee, setDelFee] = useState(50); // NOTE Delivery fee
+	const [subTotal, setSubtotal] = useState(0);
+	const [totalPrice, setTotalPrice] = useState(0);
 
 	const [user, setUser] = useState({});
 	const [details, setDetails] = useState(null);
-	// const [transaction, setTransaction] = useLocalStorage("transaction", {});
 
 	useEffect(() => {
 		if (cart) setOrder(cart);
