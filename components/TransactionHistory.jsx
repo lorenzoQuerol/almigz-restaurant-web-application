@@ -1,5 +1,9 @@
+import Link from "next/link";
 import { Disclosure } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
+
+const statusTextDelivery = ["Order Received", "Order Processed", "In Preparation", "In Transit", "Order Complete", "Order Cancelled"];
+const statusTextPickup = ["Order Received", "Order Processed", "In Preparation", "Ready for Pickup", "Order Complete", "Order Cancelled"];
 
 const TransactionHistory = ({ transactions }) => {
 	return (
@@ -9,15 +13,15 @@ const TransactionHistory = ({ transactions }) => {
 					<div className="w-full">
 						{transactions.map((item) => {
 							let date = new Date(item.dateCreated);
-
 							let formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} @ ${date.getHours()}:${date.getMinutes()}`;
+							let link = `/tracker/${encodeURIComponent(item.invoiceNum)}`;
 
 							return (
 								<Disclosure>
 									{({ open }) => (
 										<>
-											<div className="flex justify-between p-2 rounded-md">
-												<div className="flex">
+											<div className="flex justify-between rounded-md">
+												<div className="flex p-2 bg-white rounded-l-md">
 													<Disclosure.Button className="mr-2">
 														<ChevronUpIcon
 															className={`rounded-md transition duration-200 ${
@@ -26,7 +30,9 @@ const TransactionHistory = ({ transactions }) => {
 														/>
 													</Disclosure.Button>
 													<div className="text-left">
-														<div className="text-xl font-bold text-slate-900">Completed Order</div>
+														<div className="text-xl font-bold text-slate-900">
+															{item.type === "Delivery" ? statusTextDelivery[item.orderStatus] : statusTextPickup[item.orderStatus]}
+														</div>
 														<div>
 															Ordered On: <a className="font-semibold text-slate-900">{formattedDate}</a>
 														</div>
@@ -52,7 +58,7 @@ const TransactionHistory = ({ transactions }) => {
 														</div>
 													</div>
 												</div>
-												<div className="text-right">
+												<div className="flex-1 p-2 text-right bg-white">
 													<div>
 														Total Price: <a className="font-semibold text-slate-900">₱{item.totalPrice}</a>
 													</div>
@@ -60,11 +66,17 @@ const TransactionHistory = ({ transactions }) => {
 														Method: <a className="font-semibold text-slate-900">{item.payMethod}</a>
 													</div>
 												</div>
+
+												<div className="flex items-center flex-shrink transition-all bg-green-700 cursor-pointer hover:rounded-r-xl hover:-translate-x-1 hover:bg-green-600">
+													<Link href={`/tracker/${encodeURIComponent(item.invoiceNum)}`}>
+														<a className="px-3 font-semibold text-white">Tracker</a>
+													</Link>
+												</div>
 											</div>
 											<Disclosure.Panel>
-												<div className="p-4 font-semibold bg-white rounded-b-lg shadow-inner text-slate-900">
+												<div className="p-4 m-2 font-semibold bg-white rounded-b-lg shadow-inner text-slate-900">
 													<div className="py-2">
-														<div className="font-bold text-green-700">{item.type === "Delivery" ? "Delivered to" : "Picked up from"}</div>
+														<div className="font-bold text-green-700">{item.type === "Delivery" ? "Delivered to" : "Pickup at"}</div>
 														<div>{item.type === "Delivery" ? item.address : item.storeLocation}</div>
 													</div>
 													<div className="py-2 border-t-2">
@@ -85,7 +97,7 @@ const TransactionHistory = ({ transactions }) => {
 															</div>
 															<div className="flex justify-between text-right">
 																<div className="text-left">Delivery Fee</div>
-																<div>₱ 50</div>
+																<div>{item.type === "Delivery" ? "₱ 50" : "-"}</div>
 															</div>
 															<div className="flex justify-between text-right">
 																<div className="font-bold text-left text-green-700">Total</div>
