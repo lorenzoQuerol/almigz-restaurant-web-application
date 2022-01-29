@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const MenuHeader = ({ activeCategory, setActiveCategory }) => {
-	const categories = ["Show all", "Binalot", "Pancit In Boxes", "House Specialties", "Desserts & Refreshments"];
+	const categories = ["Show all", "Binalot", "Pancit In Boxes", "House Specialties", "Drinks & Desserts"];
 
 	return (
 		<header className="text-slate-900 body-font">
