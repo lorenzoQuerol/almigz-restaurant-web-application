@@ -42,7 +42,7 @@ const products = [
 var transSample1 = {
 	invoiceNum: 1,
 	dateCreated: "01/05/2022 06:40:40",
-	orderStatus: 0,
+	orderStatus: 3,
 	type: "Delivery",
 	fullName: "John Doe",
 	email: "johndoe@gmail.com",
@@ -85,7 +85,7 @@ var transSample2 = {
 var transSample3 = {
 	invoiceNum: 1,
 	dateCreated: "01/05/2022 06:40:40",
-	orderStatus: 0,
+	orderStatus: 4,
 	type: "Pickup",
 	fullName: "John Doe",
 	email: "johndoe@gmail.com",
@@ -125,6 +125,9 @@ export default function Order(props) {
 
 	// Reason for cancellation
 	const [reason, setReason] = useState("");
+
+	// "Changes saved." message for reason text input
+	const [message, setMessage] = useState("");
 
 	// Get session
 	const { data: session, status } = useSession({
@@ -199,26 +202,26 @@ export default function Order(props) {
 	// Page will only render if the user is an admin
 	if (session.user.isAdmin) {
 		return (
-			<div className={`w-full flex flex-col`}>
-				<div className="flex flex-row items-start justify-center m-5">
-					<div className="flex flex-col w-1/2 self-left">
+			<div className={`w-screen flex flex-col`}>
+				<div className="flex flex-wrap flex-row w-auto items-start justify-center m-5">
+					<div className="flex flex-col w-full lg:w-1/2">
 						<div className="flex flex-col border rounded-md">
-							<div className="flex items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
+							<div className="flex flex-wrap items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
 								<div className="">
 									<h1 className="text-4xl font-bold text-black font-rale">Order #{transaction.invoiceNum.toString().padStart(4, "0")}</h1>
 									<p className="mt-1 ml-1 text-sm text-gray-500">Date: {transaction.dateCreated}</p>
 								</div>
-								{statFlags[0] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-red-500 rounded-lg">INCOMING ORDER</div>}
-								{statFlags[1] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-yellow-500 rounded-lg">ORDER PROCESSED</div>}
-								{statFlags[2] && <div className="px-1 bg-[#9a37c4] text-white font-semibold text-lg flex items-center rounded-lg">ORDER IN PREPARATION</div>}
+								{statFlags[0] && <div className="flex mt-1 md:w-max text-center items-center px-1 text-lg font-semibold text-white bg-red-500 rounded-lg">INCOMING ORDER</div>}
+								{statFlags[1] && <div className="flex mt-1 md:w-max text-center items-center px-1 text-lg font-semibold text-white bg-yellow-500 rounded-lg">ORDER PROCESSED</div>}
+								{statFlags[2] && <div className="px-1 mt-1 md:w-max text-center bg-[#9a37c4] text-white font-semibold text-lg flex items-center rounded-lg">ORDER IN PREPARATION</div>}
 								{statFlags[3] && (
-									<div className="flex items-center px-1 text-lg font-semibold text-white bg-blue-500 rounded-lg">
-										{delpickFlag && <p>ORDER IN DELIVERY</p>}
-										{!delpickFlag && <p>READY FOR PICK UP</p>}
+									<div className="flex md:w-max text-center items-center px-1 mt-2 text-lg font-semibold text-white bg-blue-500 rounded-lg">
+										{delpickFlag && <p className="w-max">ORDER IN DELIVERY</p>}
+										{!delpickFlag && <p className="w-max">READY FOR PICK UP</p>}
 									</div>
 								)}
-								{statFlags[4] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-green-500 rounded-lg">COMPLETED ORDER</div>}
-								{statFlags[5] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-gray-500 rounded-lg">CANCELLED ORDER</div>}
+								{statFlags[4] && <div className="flex mt-1 md:w-max text-center items-center px-1 text-lg font-semibold text-white bg-green-500 rounded-lg">COMPLETED ORDER</div>}
+								{statFlags[5] && <div className="flex mt-1 md:w-max text-center items-center px-1 text-lg font-semibold text-white bg-gray-500 rounded-lg">CANCELLED ORDER</div>}
 							</div>
 							<div className="p-5 pt-4 bg-white rounded-b shadow-lg">
 								<div className="flex justify-between">
@@ -245,8 +248,8 @@ export default function Order(props) {
 								</div>
 							</div>
 						</div>
-						<div className="flex flex-row items-center justify-between mt-2 bg-white border rounded-md shadow-lg">
-							<div className="p-5 px-4 sm:px-6">
+						<div className="flex flex-wrap flex-row mb-2 items-center justify-between mt-2 bg-white border rounded-md shadow-lg">
+							<div className="p-5 px-4 w-full lg:w-1/2 sm:px-6">
 								<h1 className="font-semibold text-gray-900 text-normal">Payment Method: {payMethod}</h1>
 								<div className="flex justify-between mt-3 text-base text-gray-900">
 									<p>Cash</p>
@@ -261,7 +264,7 @@ export default function Order(props) {
 									<p>{change}</p>
 								</div>
 							</div>
-							<div className="w-1/3 p-5 divide-y">
+							<div className="lg:w-1/3 w-full p-5 divide-y">
 								<div className="flex justify-between text-base font-medium text-gray-900">
 									<p>Subtotal</p>
 									<p>P {transaction.totalPrice - delFee}</p>
@@ -277,29 +280,25 @@ export default function Order(props) {
 							</div>
 						</div>
 					</div>
-					<div className="w-1/4 p-3 mx-3 text-black bg-white border divide-y rounded-md shadow-lg">
+					<div className="flex flex-col lg:w-1/4 p-3 w-full lg:mx-3 text-black bg-white border divide-y rounded-md shadow-lg">
 						{/* For DELIVERY */}
 						{delpickFlag && (
-							<div className={`text-center ${statColors[transaction.orderStatus]}`}>
+							<div className={`flex flex-col justify-center text-center ${statColors[transaction.orderStatus]}`}>
 								<b>For DELIVERY</b>
-								<br />
 								Delivery Time: {transaction.deliverTime}
 							</div>
 						)}
 						{!delpickFlag && (
-							<div className={`text-center ${statColors[transaction.orderStatus]}`}>
+							<div className={`flex flex-col justify-center text-center ${statColors[transaction.orderStatus]}`}>
 								<b>For PICK UP</b>
-								<br />
 								Store: {transaction.storeLocation}
 								<br />
 								Pick Up Time: {transaction.pickupTime}
 							</div>
 						)}
-						<div className="py-2 pb-10">
+						<div className="flex flex-col py-2 pb-10">
 							<b> {transaction.fullName}</b>
-							<br />
 							{transaction.email}
-							<br />
 							{transaction.contactNum.map((num) => (
 								<span>
 									{num}
@@ -309,7 +308,7 @@ export default function Order(props) {
 							{transaction.address}
 							<br />
 						</div>
-						<div className="pt-2 text-sm font-light leading-normal text-gray-400">
+						<div className="flex flex-col pt-2 text-sm font-light leading-normal text-gray-400">
 							<span className="italic font-medium">Special Instructions</span>
 							<br />
 							<span>{transaction.specialInstructions}</span>
@@ -319,15 +318,15 @@ export default function Order(props) {
 				{/* <div className={`sticky left-0 bottom-0 bg-white w-full shadow-${col}`}> */}
 				<div className={`flex-col w-full flex justify-center p-3 mb-5`}>
 					{statFlags[0] && (
-						<div className="self-center">
+						<div className="flex self-center align-center flex-wrap justify-center gap-4">
 							<button
-								className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+								className="self-center p-4 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
 								onClick={() => updateStatus(1)}
 							>
 								Accept Order
 							</button>
 							<button
-								className="self-center p-4 m-2 font-normal text-white bg-red-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-red-300"
+								className="self-center p-4 font-normal text-white bg-red-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-red-300"
 								onClick={() => updateStatus(5)}
 							>
 								Cancel Order
@@ -335,9 +334,9 @@ export default function Order(props) {
 						</div>
 					)}
 					{statFlags[1] && (
-						<div className="self-center">
+						<div className="flex self-center align-center flex-wrap justify-center gap-4">
 							<button
-								className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+								className="self-center p-4 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
 								onClick={() => updateStatus(2)}
 							>
 								Prepare Order
@@ -345,9 +344,9 @@ export default function Order(props) {
 						</div>
 					)}
 					{statFlags[2] && (
-						<div className="self-center">
+						<div className="flex self-center align-center flex-wrap justify-center gap-4">
 							<button
-								className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+								className="self-center p-4 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
 								onClick={() => updateStatus(3)}
 							>
 								Ready for Deliver / Pickup
@@ -355,9 +354,9 @@ export default function Order(props) {
 						</div>
 					)}
 					{statFlags[3] && (
-						<div className="self-center">
+						<div className="flex self-center align-center flex-wrap justify-center gap-4">
 							<button
-								className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+								className="self-center p-4 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
 								onClick={() => updateStatus(4)}
 							>
 								Complete Order
@@ -365,15 +364,15 @@ export default function Order(props) {
 						</div>
 					)}
 					{statFlags[4] && (
-						<div className="self-center">
-							<div className="mb-3 text-xl font-bold text-center text-black">
+						<div className="flex self-center align-center flex-wrap justify-center gap-4">
+							<div className="text-xl font-bold text-center text-black">
 								ORDER STATUS: <span className="text-green-600">COMPLETED</span>{" "}
 							</div>
 						</div>
 					)}
 					{statFlags[5] && (
-						<div className="flex flex-col self-center w-1/2 mb-3">
-							<div className="mb-3 text-xl font-bold text-center text-black">
+						<div className="px-4 flex self-center align-center flex-wrap justify-center flex-col w-full lg:w-1/2">
+							<div className="text-xl mb-4 font-bold text-center text-black">
 								ORDER STATUS: <span className="text-red-600">CANCELLED</span>{" "}
 							</div>
 							<label>Remarks/Reason:</label>

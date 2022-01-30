@@ -21,7 +21,7 @@ export default function MenuPage() {
 	if (filtered.length === 0) filtered = foodItems;
 
 	return (
-		<div className="text-gray-900 font-rale">
+		<div className="text-gray-900 font-rale overflow-hidden">
 			<MenuHeader activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
 			<div className="container px-5 py-1 mx-auto">
 				<div className="h-1 mb-6 overflow-hidden bg-gray-200 rounded">

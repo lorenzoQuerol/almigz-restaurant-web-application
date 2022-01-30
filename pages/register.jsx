@@ -92,7 +92,7 @@ export default function Register() {
 						<label className="mt-4 label">Password</label>
 						<input
 							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
-							type="text"
+							type="password"
 							title="Password should have at least 8 characters and should not contain whitespace."
 							placeholder="Password"
 							{...register("password", { required: true, min: 8, pattern: /^\S+$/i })}
@@ -103,7 +103,7 @@ export default function Register() {
 						<label className="mt-4 label">Confirm Password</label>
 						<input
 							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
-							type="text"
+							type="password"
 							placeholder="Confirm Password"
 							{...register("confirmPassword", { required: true, min: 8, pattern: /^\S+$/i })}
 						/>

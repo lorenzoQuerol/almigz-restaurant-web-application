@@ -65,7 +65,7 @@ export default function Signin() {
 						<label className="mt-4 label">Password</label>
 						<input
 							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-green-300"
-							type="text"
+							type="password"
 							title="Password"
 							placeholder="Password"
 							{...register("password", { required: true })}
