@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment } from "react";
-import axios from "axios";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import useAxios from "axios-hooks";
 import Loading from "@components/Loading";
@@ -12,6 +12,7 @@ const headers = ["Invoice #", "Date Created", "Type", "Status", "When to Deliver
 const limit = 10;
 
 const ManageTransactions = () => {
+	const router = useRouter();
 	const [page, setPage] = useState(1);
 	const [filter, setFilter] = useState(null);
 	const [transactions, setTransactions] = useState([]);
@@ -24,6 +25,10 @@ const ManageTransactions = () => {
 			filter: filter === "All" ? undefined : filter,
 		},
 	});
+
+	useEffect(() => {
+		refetch();
+	}, [router.pathname]);
 
 	// ANCHOR Refetch for pagination
 	useEffect(() => {
