@@ -117,25 +117,45 @@ export default function Order(session) {
 				<Loading />
 			) : (
 				<>
-					<div className="flex flex-row items-start justify-center m-5">
-						<div className="flex flex-col w-1/2 self-left">
+					<div className="flex flex-row flex-wrap items-start justify-center w-auto m-5">
+						<div className="flex flex-col w-full lg:w-1/2">
 							<div className="flex flex-col border rounded-md">
-								<div className="flex items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
+								<div className="flex flex-wrap items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
 									<div className="">
-										<h1 className="text-4xl font-bold text-black font-rale">Order #{data.transaction.invoiceNum.toString().padStart(4, "0")}</h1>
-										<p className="mt-1 ml-1 text-sm text-gray-500">Date: {formatDate(transaction.dateCreated)}</p>
+										<h1 className="text-4xl font-bold text-black font-rale">Order #{transaction.invoiceNum.toString().padStart(4, "0")}</h1>
+										<p className="mt-1 ml-1 text-sm text-gray-500">Date: {transaction.dateCreated}</p>
 									</div>
-									{statFlags[0] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-red-500 rounded-lg">INCOMING ORDER</div>}
-									{statFlags[1] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-yellow-500 rounded-lg">ORDER PROCESSED</div>}
-									{statFlags[2] && <div className="px-1 bg-[#9a37c4] text-white font-semibold text-lg flex items-center rounded-lg">ORDER IN PREPARATION</div>}
-									{statFlags[3] && (
-										<div className="flex items-center px-1 text-lg font-semibold text-white bg-blue-500 rounded-lg">
-											{delpickFlag && <p>ORDER IN DELIVERY</p>}
-											{!delpickFlag && <p>READY FOR PICK UP</p>}
+									{statFlags[0] && (
+										<div className="flex items-center px-1 mt-1 text-lg font-semibold text-center text-white bg-red-500 rounded-lg md:w-max">
+											INCOMING ORDER
 										</div>
 									)}
-									{statFlags[4] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-green-500 rounded-lg">COMPLETED ORDER</div>}
-									{statFlags[5] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-gray-500 rounded-lg">CANCELLED ORDER</div>}
+									{statFlags[1] && (
+										<div className="flex items-center px-1 mt-1 text-lg font-semibold text-center text-white bg-yellow-500 rounded-lg md:w-max">
+											ORDER PROCESSED
+										</div>
+									)}
+									{statFlags[2] && (
+										<div className="px-1 mt-1 md:w-max text-center bg-[#9a37c4] text-white font-semibold text-lg flex items-center rounded-lg">
+											ORDER IN PREPARATION
+										</div>
+									)}
+									{statFlags[3] && (
+										<div className="flex items-center px-1 mt-2 text-lg font-semibold text-center text-white bg-blue-500 rounded-lg md:w-max">
+											{delpickFlag && <p className="w-max">ORDER IN DELIVERY</p>}
+											{!delpickFlag && <p className="w-max">READY FOR PICK UP</p>}
+										</div>
+									)}
+									{statFlags[4] && (
+										<div className="flex items-center px-1 mt-1 text-lg font-semibold text-center text-white bg-green-500 rounded-lg md:w-max">
+											COMPLETED ORDER
+										</div>
+									)}
+									{statFlags[5] && (
+										<div className="flex items-center px-1 mt-1 text-lg font-semibold text-center text-white bg-gray-500 rounded-lg md:w-max">
+											CANCELLED ORDER
+										</div>
+									)}
 								</div>
 								<div className="p-5 pt-4 bg-white rounded-b shadow-lg">
 									<div className="flex justify-between">
@@ -149,7 +169,7 @@ export default function Order(session) {
 												</tr>
 											</thead>
 											<tbody className="divide-y divide-gray-200">
-												{data.transaction.order.map((product) => (
+												{transaction.order.map((product) => (
 													<tr key={product.menuItem.productName} className="py-3 text-center">
 														<td className="py-1 font-sans">{product.quantity}</td>
 														<td className="">{product.menuItem.productName}</td>
@@ -162,8 +182,8 @@ export default function Order(session) {
 									</div>
 								</div>
 							</div>
-							<div className="flex flex-row items-center justify-between mt-2 bg-white border rounded-md shadow-lg">
-								<div className="p-5 px-4 sm:px-6">
+							<div className="flex flex-row flex-wrap items-center justify-between mt-2 mb-2 bg-white border rounded-md shadow-lg">
+								<div className="w-full p-5 px-4 lg:w-1/2 sm:px-6">
 									<h1 className="font-semibold text-gray-900 text-normal">Payment Method: {payMethod}</h1>
 									<div className="flex justify-between mt-3 text-base text-gray-900">
 										<p>Cash</p>
@@ -178,7 +198,7 @@ export default function Order(session) {
 										<p>{change}</p>
 									</div>
 								</div>
-								<div className="w-1/3 p-5 divide-y">
+								<div className="w-full p-5 divide-y lg:w-1/3">
 									<div className="flex justify-between text-base font-medium text-gray-900">
 										<p>Subtotal</p>
 										<p>P {transaction.totalPrice - delFee}</p>
@@ -194,30 +214,26 @@ export default function Order(session) {
 								</div>
 							</div>
 						</div>
-						<div className="w-1/4 p-3 mx-3 text-black bg-white border divide-y rounded-md shadow-lg">
+						<div className="flex flex-col w-full p-3 text-black bg-white border divide-y rounded-md shadow-lg lg:w-1/4 lg:mx-3">
 							{/* For DELIVERY */}
 							{delpickFlag && (
-								<div className={`text-center ${statColors[transaction.orderStatus]}`}>
+								<div className={`flex flex-col justify-center text-center ${statColors[transaction.orderStatus]}`}>
 									<b>For DELIVERY</b>
-									<br />
-									Delivery Time: {transaction.deliverTime === "Now" ? "Now" : formatDate(transaction.deliverTime)}
+									Delivery Time: {transaction.deliverTime}
 								</div>
 							)}
 							{!delpickFlag && (
-								<div className={`text-center ${statColors[transaction.orderStatus]}`}>
+								<div className={`flex flex-col justify-center text-center ${statColors[transaction.orderStatus]}`}>
 									<b>For PICK UP</b>
-									<br />
 									Store: {transaction.storeLocation}
 									<br />
 									Pick Up Time: {transaction.pickupTime}
 								</div>
 							)}
-							<div className="py-2 pb-10">
+							<div className="flex flex-col py-2 pb-10">
 								<b> {transaction.fullName}</b>
-								<br />
 								{transaction.email}
-								<br />
-								{data.transaction.contactNum.map((num) => (
+								{transaction.contactNum.map((num) => (
 									<span>
 										{num}
 										<br />
@@ -226,24 +242,25 @@ export default function Order(session) {
 								{transaction.address}
 								<br />
 							</div>
-							<div className="pt-2 text-sm font-light leading-normal text-gray-400">
+							<div className="flex flex-col pt-2 text-sm font-light leading-normal text-gray-400">
 								<span className="italic font-medium">Special Instructions</span>
 								<br />
 								<span>{transaction.specialInstructions}</span>
 							</div>
 						</div>
 					</div>
+					{/* <div className={`sticky left-0 bottom-0 bg-white w-full shadow-${col}`}> */}
 					<div className={`flex-col w-full flex justify-center p-3 mb-5`}>
 						{statFlags[0] && (
-							<div className="self-center">
+							<div className="flex flex-wrap self-center justify-center gap-4 align-center">
 								<button
-									className="self-center p-4 m-5 font-semibold text-white transition-colors bg-green-700 rounded-lg pl-7 pr-7 hover:bg-green-600"
+									className="self-center p-4 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
 									onClick={() => updateStatus(1)}
 								>
 									Accept Order
 								</button>
 								<button
-									className="self-center p-4 m-2 font-semibold text-white transition-colors bg-red-700 rounded-lg pl-7 pr-7 hover:bg-red-600"
+									className="self-center p-4 font-normal text-white bg-red-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-red-300"
 									onClick={() => updateStatus(5)}
 								>
 									Cancel Order
@@ -251,9 +268,9 @@ export default function Order(session) {
 							</div>
 						)}
 						{statFlags[1] && (
-							<div className="self-center">
+							<div className="flex flex-wrap self-center justify-center gap-4 align-center">
 								<button
-									className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+									className="self-center p-4 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
 									onClick={() => updateStatus(2)}
 								>
 									Prepare Order
@@ -261,9 +278,9 @@ export default function Order(session) {
 							</div>
 						)}
 						{statFlags[2] && (
-							<div className="self-center">
+							<div className="flex flex-wrap self-center justify-center gap-4 align-center">
 								<button
-									className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+									className="self-center p-4 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
 									onClick={() => updateStatus(3)}
 								>
 									Ready for Deliver / Pickup
@@ -271,9 +288,9 @@ export default function Order(session) {
 							</div>
 						)}
 						{statFlags[3] && (
-							<div className="self-center">
+							<div className="flex flex-wrap self-center justify-center gap-4 align-center">
 								<button
-									className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+									className="self-center p-4 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
 									onClick={() => updateStatus(4)}
 								>
 									Complete Order
@@ -281,15 +298,15 @@ export default function Order(session) {
 							</div>
 						)}
 						{statFlags[4] && (
-							<div className="self-center">
-								<div className="mb-3 text-xl font-bold text-center text-black">
+							<div className="flex flex-wrap self-center justify-center gap-4 align-center">
+								<div className="text-xl font-bold text-center text-black">
 									ORDER STATUS: <span className="text-green-600">COMPLETED</span>{" "}
 								</div>
 							</div>
 						)}
 						{statFlags[5] && (
-							<div className="flex flex-col self-center w-1/2 mb-3">
-								<div className="mb-3 text-xl font-bold text-center text-black">
+							<div className="flex flex-col flex-wrap self-center justify-center w-full px-4 align-center lg:w-1/2">
+								<div className="mb-4 text-xl font-bold text-center text-black">
 									ORDER STATUS: <span className="text-red-600">CANCELLED</span>{" "}
 								</div>
 								<label>Remarks/Reason:</label>
@@ -308,7 +325,7 @@ export default function Order(session) {
 						<span className="text-center text-black">
 							Go to{" "}
 							<span className="self-center font-semibold underline hover:text-green-700">
-								<Link href="/admin"> DASHBOARD</Link>
+								<Link href="/orders"> DASHBOARD</Link>
 							</span>
 						</span>
 					</div>
