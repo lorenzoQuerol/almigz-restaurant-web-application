@@ -178,12 +178,12 @@ export default function CheckoutPage(session) {
 	const placeOrder = async () => {
 		const transaction = details;
 
-		const response = await axios.get("/api/count");
+		const response = await axios.get("/api/count", { params: { filter: "transactions" } });
 
 		transaction.lastUpdated = new Date();
 		transaction.dateCreated = new Date();
 		transaction.invoiceNum = response.data.count;
-		console.log(transaction);
+
 		// Pre-process cart for transaction
 		transaction.order.forEach((item) => {
 			delete item.menuItem.category;
