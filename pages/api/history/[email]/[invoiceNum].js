@@ -14,16 +14,21 @@ async function handler(req, res) {
 		// Update transaction in user history (PROTECTED)
 		case "PUT":
 			if (session) {
-				if (session.user.email === email) {
+				if (session.user.email === email || session.user.isAdmin) {
 					try {
 						const user = await User.findOneAndUpdate(
-							{ email: email },
-							{ $push: { transactions: req.body } },
+							{ email: email, "transactions.invoiceNum": invoiceNum },
+							{
+								$set: {
+									"transactions.$": req.body,
+								},
+							},
 							{
 								new: true,
 								runValidators: true,
 							}
 						);
+
 						if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
 						res.status(200).json({
@@ -31,6 +36,7 @@ async function handler(req, res) {
 							message: "Transaction history updated",
 						});
 					} catch (err) {
+						console.log(err);
 						res.status(400).json({ success: false, message: "An error occurred" });
 					}
 				} else {

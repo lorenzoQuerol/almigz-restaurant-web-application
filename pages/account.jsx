@@ -46,7 +46,6 @@ export default function Account(session) {
 	// Page elements
 	const [isLoading, setLoading] = useState(false);
 	const [currentTab, setCurrentTab] = useState("User Settings");
-	const [openTransaction, setOpenTransaction] = useState(false);
 	const navigationBar = [
 		{ id: "1", name: "User Settings", current: true },
 		{ id: "2", name: "Transactions", current: false },
@@ -91,6 +90,10 @@ export default function Account(session) {
 							<li>
 								{navigationBar.map((tab) => {
 									tab.current = tab.name == currentTab ? true : false;
+									if (session.user.isAdmin && tab.name === "Transactions") {
+										return;
+									}
+
 									return (
 										<a
 											onClick={(e) => {

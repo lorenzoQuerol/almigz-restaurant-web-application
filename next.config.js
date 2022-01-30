@@ -7,6 +7,7 @@ module.exports = {
 		MONGODB_URI:
 			"mongodb+srv://ALMIGZ:Hc8uo7TYGAgkpZ8N@al-migz-db.rhiuv.mongodb.net/al-migz-restaurant-hauz?authSource=admin&replicaSet=atlas-ous3pp-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
 		CONTENTFUL_SPACE_ID: "4vhelr5l3xmh",
+		CONTENTFUL_URL: `https://app.contentful.com/spaces/${process.env.CONTENTFUL_SPACE_ID}/home`,
 		CONTENTFUL_ACCESS_TOKEN: "zOgM8Qj5VXL9pjyqYuhbFvxvJE0vQzZRL_2Wt7uADZs",
 		CONTENTFUL_PREVIEW_ACCESS_TOKEN: "FeIT2KtX3Sy2GfGj2-b2q4yDISjkABqGTrMl5IqKpJw",
 	},

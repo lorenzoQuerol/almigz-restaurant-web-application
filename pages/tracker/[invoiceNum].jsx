@@ -13,14 +13,15 @@ import CheckIcon from "@public/check.png";
 import CancelIcon from "@public/delete.png";
 import PickupIcon from "@public/location.png";
 import { useRouter } from "next/router";
+import { set } from "@mongoosejs/double";
 
 // Text and icons for delivery
 const statusIconsDelivery = [ReceiveIcon, ProcessIcon, PrepareIcon, TruckIcon, CheckIcon, CancelIcon];
-const statusTextDelivery = ["Order Received!", "Order Processed!", "In Preparation!", "In Transit!", "Order Complete!", "Order Cancelled"];
+const statusTextDelivery = ["Order Submitted!", "Order Processed!", "In Preparation!", "In Transit!", "Order Complete!", "Order Cancelled"];
 
 // Text and icons for pickup
 const statusIconsPickup = [ReceiveIcon, ProcessIcon, PrepareIcon, PickupIcon, CheckIcon, CancelIcon];
-const statusTextPickup = ["Order Received!", "Order Processed!", "In Preparation!", "Ready for Pickup!", "Order Complete!", "Order Cancelled"];
+const statusTextPickup = ["Order Submitted!", "Order Processed!", "In Preparation!", "Ready for Pickup!", "Order Complete!", "Order Cancelled"];
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -116,9 +117,9 @@ export default function Tracker(session) {
 	const [status, setStatus] = useState(0);
 
 	useEffect(() => {
-		setTimeout(function () {
+		setTimeout(() => {
 			refetch();
-		}, 10000); // Refetch every 10 seconds
+		}, 60000); // Refetch every 1 minute
 
 		if (data) {
 			setTransaction(data.transaction);
@@ -152,18 +153,19 @@ export default function Tracker(session) {
 				<Loading />
 			) : (
 				<div className="px-4 2xl:container 2xl:mx-auto py-14 md:px-6 xl:px-20 font-rale text-slate-900">
+					<h3 className="w-full mb-5 text-4xl font-bold leading-7 xl:text-4xl xl:leading-9 md:text-left">Order Tracker</h3>
 					<div className="flex flex-col items-center justify-center space-y-10 xl:flex-row xl:space-y-0 xl:space-x-8">
 						{/* ANCHOR Current status of order */}
+
 						<div className="flex flex-col items-center w-full space-y-5 lg:w-9/12 xl:w-full">
-							<h3 className="w-full text-4xl font-bold leading-7 xl:text-4xl xl:leading-9 md:text-left">Order Tracker</h3>
 							{/* <img className="hidden w-full xl:block" src="https://i.ibb.co/RcMmXKc/Rectangle-19.png" alt="wardrobe " />
 					<img className="hidden w-full md:block xl:hidden" src="https://i.ibb.co/ZhjHb0R/Rectangle-19-2.png" alt="wardrobe " />
 					<img className="w-full md:hidden" src="https://i.ibb.co/sbV9CD2/Rectangle-19.png" alt="wardrobe " /> */}
 							<div className="items-center">
 								{transaction.type === "Delivery" ? (
-									<Image src={statusIconsDelivery[status]} height="300" width="300" />
+									<Image src={statusIconsDelivery[status]} height="250" width="250" />
 								) : (
-									<Image src={statusIconsPickup[status]} height="300" width="300" />
+									<Image src={statusIconsPickup[status]} height="250" width="250" />
 								)}
 							</div>
 
@@ -230,7 +232,9 @@ export default function Tracker(session) {
 									</div>
 									<div className="flex flex-col items-start justify-start space-y-2">
 										<p className="text-base font-semibold leading-4 ">Payment Via</p>
-										<p className="text-sm leading-5 ">{transaction.payMethod}</p>
+										<p className="text-sm leading-5 ">
+											{transaction.type === "Pickup" && transaction.payMethod === "COD" ? "Cash on Pickup" : transaction.payMethod}
+										</p>
 									</div>
 									<div className="flex flex-col items-start justify-start space-y-2">
 										<p className="text-base font-semibold leading-4 ">Method</p>
