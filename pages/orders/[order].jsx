@@ -32,11 +32,9 @@ export default function Order(session) {
 	const router = useRouter();
 	const [{ data, loading, error }, refetch] = useAxios(`/api/transactions/${router.query.order}`);
 
-	// Transaction object
 	const [transaction, setTransaction] = useState({});
-
-	// Reason for cancellation
 	const [reason, setReason] = useState("");
+	const [message, setMessage] = useState("");
 
 	useEffect(() => {
 		if (data) setTransaction(data.transaction);
@@ -122,7 +120,7 @@ export default function Order(session) {
 							<div className="flex flex-col border rounded-md">
 								<div className="flex flex-wrap items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
 									<div className="">
-										<h1 className="text-4xl font-bold text-black font-rale">Order #{transaction.invoiceNum.toString().padStart(4, "0")}</h1>
+										<h1 className="text-4xl font-bold text-black font-rale">Order #{data.transaction.invoiceNum.toString().padStart(4, "0")}</h1>
 										<p className="mt-1 ml-1 text-sm text-gray-500">Date: {transaction.dateCreated}</p>
 									</div>
 									{statFlags[0] && (
@@ -169,7 +167,7 @@ export default function Order(session) {
 												</tr>
 											</thead>
 											<tbody className="divide-y divide-gray-200">
-												{transaction.order.map((product) => (
+												{data.transaction.order.map((product) => (
 													<tr key={product.menuItem.productName} className="py-3 text-center">
 														<td className="py-1 font-sans">{product.quantity}</td>
 														<td className="">{product.menuItem.productName}</td>
@@ -233,7 +231,7 @@ export default function Order(session) {
 							<div className="flex flex-col py-2 pb-10">
 								<b> {transaction.fullName}</b>
 								{transaction.email}
-								{transaction.contactNum.map((num) => (
+								{data.transaction.contactNum.map((num) => (
 									<span>
 										{num}
 										<br />
