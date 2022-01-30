@@ -121,9 +121,9 @@ export default function Tracker(session) {
 		}, 10000); // Refetch every 10 seconds
 
 		if (data) {
-			setTransaction(data.transactions[0]);
-			setOrder(data.transactions[0].order);
-			setStatus(data.transactions[0].orderStatus);
+			setTransaction(data.transaction);
+			setOrder(data.transaction.order);
+			setStatus(data.transaction.orderStatus);
 		}
 	}, [data, transaction]);
 

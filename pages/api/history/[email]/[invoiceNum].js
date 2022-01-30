@@ -49,10 +49,13 @@ async function handler(req, res) {
 						let { transactions } = await User.findOne({ email: email }, "transactions");
 						if (!transactions) return res.status(404).json({ success: false, message: "User not found" });
 
-						transactions.filter((item) => item === invoiceNum);
+						// Find transaction with invoice # query
+						let transaction = transactions.filter((t) => t.invoiceNum == invoiceNum);
+						transaction = transaction[0];
 
-						res.status(200).json({ success: true, message: "Successful query", transactions });
+						res.status(200).json({ success: true, message: "Successful query", transaction });
 					} catch (err) {
+						console.log(err);
 						res.status(400).json({ success: false, message: "An error occurred" });
 					}
 				} else {

@@ -134,7 +134,7 @@ export default function CheckoutPage(session) {
 			fullName: `${user.firstName} ${user.lastName}`,
 			email: user.email,
 			contactNum: [user.contact1, user.contact2],
-			order: order.data,
+			order: order.products,
 			specialInstructions: data.specialInstructions,
 			reasonForCancel: "",
 			totalPrice: getValues("type") === "Delivery" ? cart.total + 50 : cart.total,
@@ -183,7 +183,7 @@ export default function CheckoutPage(session) {
 		transaction.lastUpdated = new Date();
 		transaction.dateCreated = new Date();
 		transaction.invoiceNum = response.data.count;
-
+		console.log(transaction);
 		// Pre-process cart for transaction
 		transaction.order.forEach((item) => {
 			delete item.menuItem.category;
@@ -292,7 +292,7 @@ export default function CheckoutPage(session) {
 												</div>
 
 												{/* Quantity */}
-												<div className="flex self-center ml-4 sm:flex-1">
+												{/* <div className="flex self-center ml-4 sm:flex-1">
 													<input
 														className="pr-2 border rounded-md input font-black-100 text-normal w-14 input-sm input-bordered focus:ring focus:outline-none focus:ring-green-700"
 														type="number"
@@ -305,7 +305,7 @@ export default function CheckoutPage(session) {
 														onLoad={(e) => setTotalPrice(product.quantity)}
 														onChange={(e) => updateTotal(e.target.value, e.target.name)}
 													/>
-												</div>
+												</div> */}
 												{/* Total price */}
 												<p className="self-center hidden font-bold w-22 sm:flex text-end">
 													<p className="ml-4 mr-5 font-bold ">₱ {product.menuItem.productPrice * product.quantity}</p>

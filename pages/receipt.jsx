@@ -66,7 +66,7 @@ export default function Receipt(session) {
 	const handleTrackerClick = (event) => {
 		removeStorageValue("foodCart");
 		removeStorageValue("transaction");
-		router.replace("/tracker");
+		router.replace(`/tracker/${transaction.invoiceNum}`);
 	};
 
 	console.log(transaction);
