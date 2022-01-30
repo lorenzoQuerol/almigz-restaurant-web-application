@@ -1,143 +1,46 @@
-import router from "next/router";
+import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import Link from "next/link";
-
-import Transaction from "@models/TransactionModel";
-import createConnection from "@utils/mongoDBConnection";
-
-//sample order array (R)
-const products = [
-	{
-		quantity: 3,
-		menuItem: {
-			productName: "Pork Binagoongan",
-			productPrice: 80.0,
-		},
-	},
-	{
-		quantity: 1,
-		menuItem: {
-			productName: "Malabon (Small)",
-			productPrice: 380.0,
-		},
-	},
-	{
-		quantity: 2,
-		menuItem: {
-			productName: "Malabon Medium",
-			productPrice: 80.0,
-		},
-	},
-	{
-		quantity: 4,
-		menuItem: {
-			productName: "Sizzling Sisig",
-			productPrice: 90.0,
-		},
-	},
-];
-
-//SAMPLE: DEL-COD (R)
-var transSample1 = {
-	invoiceNum: 1,
-	dateCreated: "01/05/2022 06:40:40",
-	orderStatus: 0,
-	type: "Delivery",
-	fullName: "John Doe",
-	email: "johndoe@gmail.com",
-	contactNum: ["+639123456789", "+639012345678"],
-	order: products,
-	specialInstructions:
-		"Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
-	totalPrice: 1190.0,
-	address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
-	payMethod: "Cash on Delivery",
-	change: "810",
-	deliverTime: "Now",
-	storeLocation: "",
-	pickupTime: "",
-	reason: "A reason...",
-};
-
-//SAMPLE: DEL-GCASH (R)
-var transSample2 = {
-	invoiceNum: 1,
-	dateCreated: "01/05/2022 06:40:40",
-	orderStatus: 0,
-	type: "Delivery",
-	fullName: "John Doe",
-	email: "johndoe@gmail.com",
-	contactNum: ["+639123456789", "+639012345678"],
-	order: products,
-	specialInstructions:
-		"Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
-	totalPrice: 1190.0,
-	address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
-	payMethod: "GCash",
-	change: "",
-	deliverTime: "11:00 AM",
-	storeLocation: "",
-	pickupTime: "",
-};
-
-//SAMPLE: PICKUP (R)
-var transSample3 = {
-	invoiceNum: 1,
-	dateCreated: "01/05/2022 06:40:40",
-	orderStatus: 0,
-	type: "Pickup",
-	fullName: "John Doe",
-	email: "johndoe@gmail.com",
-	contactNum: ["+639123456789", "+639012345678"],
-	order: products,
-	specialInstructions:
-		"Lorem ipsum dolor sit amet. Hic sunt reiciendis et necessitatibus magnam est odio nihil qui sint dolores quo libero vitae et nihil repudiandae et nobis mollitia? Eos voluptatibus deleniti non molestias laboriosam eum impedit quidem ad sunt nesciunt ut dolores corrupti et eius fugit. Et veritatis voluptas vel accusantium praesentium qui nobis saepe et nostrum sint.",
-	totalPrice: 1190.0,
-	address: "2401 Taft Ave, Malate, Manila, 1004 Metro Manila",
-	payMethod: "",
-	change: "",
-	deliverTime: "",
-	storeLocation: "Branch 1",
-	pickupTime: "12:00 PM",
-};
+import useAxios from "axios-hooks";
+import axios from "axios";
+import Loading from "@components/Loading";
 
 // Status Conditional Rendering Variables (K)
 const statFlags = new Array(6);
 statFlags.fill(false);
 const statColors = ["bg-red-200", "bg-yellow-200", "bg-[#CF9FFF]", "bg-blue-200", "bg-green-200", "bg-gray-200"];
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 export async function getServerSideProps(context) {
-	const { params } = context;
-	const { order } = params;
+	const session = await getSession(context);
 
-	await createConnection();
-	const response = JSON.stringify(await Transaction.findOne({ invoiceNum: order }));
+	if (!session)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/signin",
+			},
+		};
 
 	return {
-		props: JSON.parse(response),
+		props: session,
 	};
 }
 
-export default function Order(props) {
+export default function Order(session) {
+	const router = useRouter();
+	const [{ data, loading, error }, refetch] = useAxios(`/api/transactions/${router.query.order}`);
+
 	// Transaction object
-	const [transaction, setTransaction] = useState(props);
+	const [transaction, setTransaction] = useState({});
 
 	// Reason for cancellation
 	const [reason, setReason] = useState("");
 
-	// Get session
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.replace("/auth/signIn");
-		},
-	});
-
-	// Once session is available, check if the session has the admin role
 	useEffect(() => {
-		if (session) if (!session.user.isAdmin) router.replace("/");
-	}, [session]);
+		if (data) setTransaction(data.transaction);
+	}, [data]);
 
 	// delpickFlag: true (Delivery), false (Pickup)
 	let delFee, payMethod, total, cash, change, delpickFlag;
@@ -168,237 +71,249 @@ export default function Order(props) {
 	statFlags.fill(false);
 	statFlags[transaction.orderStatus] = true;
 
-	/**
-	 * DEV NOTE (Enzo):
-	 * It would be more optimal (if possible) if we only have one API call for both status change and reason for cancellation (if any).
-	 */
 	const updateStatus = async (value) => {
-		// DEV NOTE (Enzo): I assumed the same transaction object will be directly modified -
-		const response = await axios.put(`/api/transactions/${transaction.invoiceNum}`, transaction);
+		let temp = transaction;
+		temp.orderStatus = value;
+		temp.lastUpdated = new Date();
+		setTransaction(temp);
 
-		/* FOR TESTING ONLY (R) */
-		transSample1.orderStatus = parseInt(value);
-		// transSample2.orderStatus = parseInt(value);
-		// transSample3.orderStatus = parseInt(value);
+		// Update both user history and transactions
+		const transRes = await axios.put(`/api/transactions/${transaction.invoiceNum}`, transaction);
+		const userRes = await axios.put(`/api/history/${transaction.email}/${transaction.invoiceNum}`, transaction);
 
-		router.push("/orders/1"); //temporary - reload same order page
+		// Refetch page to update status
+		refetch();
 	};
 
 	const saveReason = async (value) => {
-		// DEV NOTE (Enzo): I assumed the same transaction object will be directly modified
 		const response = await axios.put(`/api/transactions/${transaction.invoiceNum}`, transaction);
 
 		setReason(value);
-		transSample1.reason = value; //for testing only (R)
-		//if (success)
 		setMessage("Changes saved.");
 	};
 
-	if (status === "loading") return <h1>Loading...</h1>;
+	const formatDate = (date) => {
+		date = new Date(date).toLocaleString("en-US", {
+			weekday: "short",
+			day: "numeric",
+			year: "numeric",
+			month: "long",
+			hour: "numeric",
+			minute: "numeric",
+		});
+		const tempDate = new Date(date);
 
-	// Page will only render if the user is an admin
-	if (session.user.isAdmin) {
-		return (
-			<div className={`w-full flex flex-col`}>
-				<div className="flex flex-row items-start justify-center m-5">
-					<div className="flex flex-col w-1/2 self-left">
-						<div className="flex flex-col border rounded-md">
-							<div className="flex items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
-								<div className="">
-									<h1 className="text-4xl font-bold text-black font-rale">Order #{transaction.invoiceNum.toString().padStart(4, "0")}</h1>
-									<p className="mt-1 ml-1 text-sm text-gray-500">Date: {transaction.dateCreated}</p>
-								</div>
-								{statFlags[0] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-red-500 rounded-lg">INCOMING ORDER</div>}
-								{statFlags[1] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-yellow-500 rounded-lg">ORDER PROCESSED</div>}
-								{statFlags[2] && <div className="px-1 bg-[#9a37c4] text-white font-semibold text-lg flex items-center rounded-lg">ORDER IN PREPARATION</div>}
-								{statFlags[3] && (
-									<div className="flex items-center px-1 text-lg font-semibold text-white bg-blue-500 rounded-lg">
-										{delpickFlag && <p>ORDER IN DELIVERY</p>}
-										{!delpickFlag && <p>READY FOR PICK UP</p>}
+		// Get formatted date and time
+		const formatDate = `${months[tempDate.getMonth()]} ${tempDate.getDate()}, ${tempDate.getFullYear()}`;
+		const time = date.slice(23);
+
+		// Return formatted date
+		return `${formatDate} @ ${time}`;
+	};
+
+	return (
+		<div className={`w-full flex flex-col`}>
+			{loading ? (
+				<Loading />
+			) : (
+				<>
+					<div className="flex flex-row items-start justify-center m-5">
+						<div className="flex flex-col w-1/2 self-left">
+							<div className="flex flex-col border rounded-md">
+								<div className="flex items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
+									<div className="">
+										<h1 className="text-4xl font-bold text-black font-rale">Order #{data.transaction.invoiceNum.toString().padStart(4, "0")}</h1>
+										<p className="mt-1 ml-1 text-sm text-gray-500">Date: {formatDate(transaction.dateCreated)}</p>
 									</div>
-								)}
-								{statFlags[4] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-green-500 rounded-lg">COMPLETED ORDER</div>}
-								{statFlags[5] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-gray-500 rounded-lg">CANCELLED ORDER</div>}
-							</div>
-							<div className="p-5 pt-4 bg-white rounded-b shadow-lg">
-								<div className="flex justify-between">
-									<table className="w-full text-black divide-y divide-gray-500 table-auto font-rale">
-										<thead>
-											<tr>
-												<th className="py-2">Quantity</th>
-												<th>Item Name</th>
-												<th>Price per piece</th>
-												<th>Total Price</th>
-											</tr>
-										</thead>
-										<tbody className="divide-y divide-gray-200">
-											{transaction.order.map((product) => (
-												<tr key={product.menuItem.productName} className="py-3 text-center">
-													<td className="py-1 font-sans">{product.quantity}</td>
-													<td className="">{product.menuItem.productName}</td>
-													<td className="font-sans">{product.menuItem.productPrice}</td>
-													<td className="font-sans">{product.menuItem.productPrice * product.quantity}</td>
+									{statFlags[0] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-red-500 rounded-lg">INCOMING ORDER</div>}
+									{statFlags[1] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-yellow-500 rounded-lg">ORDER PROCESSED</div>}
+									{statFlags[2] && <div className="px-1 bg-[#9a37c4] text-white font-semibold text-lg flex items-center rounded-lg">ORDER IN PREPARATION</div>}
+									{statFlags[3] && (
+										<div className="flex items-center px-1 text-lg font-semibold text-white bg-blue-500 rounded-lg">
+											{delpickFlag && <p>ORDER IN DELIVERY</p>}
+											{!delpickFlag && <p>READY FOR PICK UP</p>}
+										</div>
+									)}
+									{statFlags[4] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-green-500 rounded-lg">COMPLETED ORDER</div>}
+									{statFlags[5] && <div className="flex items-center px-1 text-lg font-semibold text-white bg-gray-500 rounded-lg">CANCELLED ORDER</div>}
+								</div>
+								<div className="p-5 pt-4 bg-white rounded-b shadow-lg">
+									<div className="flex justify-between">
+										<table className="w-full text-black divide-y divide-gray-500 table-auto font-rale">
+											<thead>
+												<tr>
+													<th className="py-2">Quantity</th>
+													<th>Item Name</th>
+													<th>Price per piece</th>
+													<th>Total Price</th>
 												</tr>
-											))}
-										</tbody>
-									</table>
+											</thead>
+											<tbody className="divide-y divide-gray-200">
+												{data.transaction.order.map((product) => (
+													<tr key={product.menuItem.productName} className="py-3 text-center">
+														<td className="py-1 font-sans">{product.quantity}</td>
+														<td className="">{product.menuItem.productName}</td>
+														<td className="font-sans">{product.menuItem.productPrice}</td>
+														<td className="font-sans">{product.menuItem.productPrice * product.quantity}</td>
+													</tr>
+												))}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							<div className="flex flex-row items-center justify-between mt-2 bg-white border rounded-md shadow-lg">
+								<div className="p-5 px-4 sm:px-6">
+									<h1 className="font-semibold text-gray-900 text-normal">Payment Method: {payMethod}</h1>
+									<div className="flex justify-between mt-3 text-base text-gray-900">
+										<p>Cash</p>
+										<p>{cash}</p>
+									</div>
+									<div className="flex justify-between my-2 text-base text-gray-400 text-medium">
+										<p>Total</p>
+										<p>-{total}</p>
+									</div>
+									<div className="flex justify-between text-base text-gray-900">
+										<p>Change</p>
+										<p>{change}</p>
+									</div>
+								</div>
+								<div className="w-1/3 p-5 divide-y">
+									<div className="flex justify-between text-base font-medium text-gray-900">
+										<p>Subtotal</p>
+										<p>P {transaction.totalPrice - delFee}</p>
+									</div>
+									<div className="flex justify-between my-3 text-base text-gray-500 text-medium">
+										<p>Delivery Fee</p>
+										<p>P {delFee}</p>
+									</div>
+									<div className="flex justify-between my-1 text-xl font-medium text-gray-900">
+										<p>Total</p>
+										<p>P {transaction.totalPrice}</p>
+									</div>
 								</div>
 							</div>
 						</div>
-						<div className="flex flex-row items-center justify-between mt-2 bg-white border rounded-md shadow-lg">
-							<div className="p-5 px-4 sm:px-6">
-								<h1 className="font-semibold text-gray-900 text-normal">Payment Method: {payMethod}</h1>
-								<div className="flex justify-between mt-3 text-base text-gray-900">
-									<p>Cash</p>
-									<p>{cash}</p>
-								</div>
-								<div className="flex justify-between my-2 text-base text-gray-400 text-medium">
-									<p>Total</p>
-									<p>-{total}</p>
-								</div>
-								<div className="flex justify-between text-base text-gray-900">
-									<p>Change</p>
-									<p>{change}</p>
-								</div>
-							</div>
-							<div className="w-1/3 p-5 divide-y">
-								<div className="flex justify-between text-base font-medium text-gray-900">
-									<p>Subtotal</p>
-									<p>P {transaction.totalPrice - delFee}</p>
-								</div>
-								<div className="flex justify-between my-3 text-base text-gray-500 text-medium">
-									<p>Delivery Fee</p>
-									<p>P {delFee}</p>
-								</div>
-								<div className="flex justify-between my-1 text-xl font-medium text-gray-900">
-									<p>Total</p>
-									<p>P {transaction.totalPrice}</p>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div className="w-1/4 p-3 mx-3 text-black bg-white border divide-y rounded-md shadow-lg">
-						{/* For DELIVERY */}
-						{delpickFlag && (
-							<div className={`text-center ${statColors[transaction.orderStatus]}`}>
-								<b>For DELIVERY</b>
-								<br />
-								Delivery Time: {transaction.deliverTime}
-							</div>
-						)}
-						{!delpickFlag && (
-							<div className={`text-center ${statColors[transaction.orderStatus]}`}>
-								<b>For PICK UP</b>
-								<br />
-								Store: {transaction.storeLocation}
-								<br />
-								Pick Up Time: {transaction.pickupTime}
-							</div>
-						)}
-						<div className="py-2 pb-10">
-							<b> {transaction.fullName}</b>
-							<br />
-							{transaction.email}
-							<br />
-							{transaction.contactNum.map((num) => (
-								<span>
-									{num}
+						<div className="w-1/4 p-3 mx-3 text-black bg-white border divide-y rounded-md shadow-lg">
+							{/* For DELIVERY */}
+							{delpickFlag && (
+								<div className={`text-center ${statColors[transaction.orderStatus]}`}>
+									<b>For DELIVERY</b>
 									<br />
-								</span>
-							))}
-							{transaction.address}
-							<br />
-						</div>
-						<div className="pt-2 text-sm font-light leading-normal text-gray-400">
-							<span className="italic font-medium">Special Instructions</span>
-							<br />
-							<span>{transaction.specialInstructions}</span>
+									Delivery Time: {transaction.deliverTime === "Now" ? "Now" : formatDate(transaction.deliverTime)}
+								</div>
+							)}
+							{!delpickFlag && (
+								<div className={`text-center ${statColors[transaction.orderStatus]}`}>
+									<b>For PICK UP</b>
+									<br />
+									Store: {transaction.storeLocation}
+									<br />
+									Pick Up Time: {transaction.pickupTime}
+								</div>
+							)}
+							<div className="py-2 pb-10">
+								<b> {transaction.fullName}</b>
+								<br />
+								{transaction.email}
+								<br />
+								{data.transaction.contactNum.map((num) => (
+									<span>
+										{num}
+										<br />
+									</span>
+								))}
+								{transaction.address}
+								<br />
+							</div>
+							<div className="pt-2 text-sm font-light leading-normal text-gray-400">
+								<span className="italic font-medium">Special Instructions</span>
+								<br />
+								<span>{transaction.specialInstructions}</span>
+							</div>
 						</div>
 					</div>
-				</div>
-				{/* <div className={`sticky left-0 bottom-0 bg-white w-full shadow-${col}`}> */}
-				<div className={`flex-col w-full flex justify-center p-3 mb-5`}>
-					{statFlags[0] && (
-						<div className="self-center">
-							<button
-								className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
-								onClick={() => updateStatus(1)}
-							>
-								Accept Order
-							</button>
-							<button
-								className="self-center p-4 m-2 font-normal text-white bg-red-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-red-300"
-								onClick={() => updateStatus(5)}
-							>
-								Cancel Order
-							</button>
-						</div>
-					)}
-					{statFlags[1] && (
-						<div className="self-center">
-							<button
-								className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
-								onClick={() => updateStatus(2)}
-							>
-								Prepare Order
-							</button>
-						</div>
-					)}
-					{statFlags[2] && (
-						<div className="self-center">
-							<button
-								className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
-								onClick={() => updateStatus(3)}
-							>
-								Ready for Deliver / Pickup
-							</button>
-						</div>
-					)}
-					{statFlags[3] && (
-						<div className="self-center">
-							<button
-								className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
-								onClick={() => updateStatus(4)}
-							>
-								Complete Order
-							</button>
-						</div>
-					)}
-					{statFlags[4] && (
-						<div className="self-center">
-							<div className="mb-3 text-xl font-bold text-center text-black">
-								ORDER STATUS: <span className="text-green-600">COMPLETED</span>{" "}
+					<div className={`flex-col w-full flex justify-center p-3 mb-5`}>
+						{statFlags[0] && (
+							<div className="self-center">
+								<button
+									className="self-center p-4 m-5 font-semibold text-white transition-colors bg-green-700 rounded-lg pl-7 pr-7 hover:bg-green-600"
+									onClick={() => updateStatus(1)}
+								>
+									Accept Order
+								</button>
+								<button
+									className="self-center p-4 m-2 font-semibold text-white transition-colors bg-red-700 rounded-lg pl-7 pr-7 hover:bg-red-600"
+									onClick={() => updateStatus(5)}
+								>
+									Cancel Order
+								</button>
 							</div>
-						</div>
-					)}
-					{statFlags[5] && (
-						<div className="flex flex-col self-center w-1/2 mb-3">
-							<div className="mb-3 text-xl font-bold text-center text-black">
-								ORDER STATUS: <span className="text-red-600">CANCELLED</span>{" "}
+						)}
+						{statFlags[1] && (
+							<div className="self-center">
+								<button
+									className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+									onClick={() => updateStatus(2)}
+								>
+									Prepare Order
+								</button>
 							</div>
-							<label>Remarks/Reason:</label>
-							<textarea
-								contentEditable="true"
-								suppressContentEditableWarning={true}
-								className="p-1 border focus:text-black"
-								value={reason}
-								onChange={(e) => saveReason(e.target.value)}
-							>
-								{transaction.reason}
-							</textarea>
-							<p className="my-1 text-sm italic tracking-wider text-center text-green-500 bg-green-100">{message}</p>
-						</div>
-					)}
-					<span className="text-center text-black">
-						Go to{" "}
-						<span className="self-center font-semibold underline hover:text-green-700">
-							<Link href="/orders"> DASHBOARD</Link>
+						)}
+						{statFlags[2] && (
+							<div className="self-center">
+								<button
+									className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+									onClick={() => updateStatus(3)}
+								>
+									Ready for Deliver / Pickup
+								</button>
+							</div>
+						)}
+						{statFlags[3] && (
+							<div className="self-center">
+								<button
+									className="self-center p-4 m-5 font-normal text-white bg-green-500 rounded-lg pl-7 pr-7 hover:font-medium hover:bg-green-300"
+									onClick={() => updateStatus(4)}
+								>
+									Complete Order
+								</button>
+							</div>
+						)}
+						{statFlags[4] && (
+							<div className="self-center">
+								<div className="mb-3 text-xl font-bold text-center text-black">
+									ORDER STATUS: <span className="text-green-600">COMPLETED</span>{" "}
+								</div>
+							</div>
+						)}
+						{statFlags[5] && (
+							<div className="flex flex-col self-center w-1/2 mb-3">
+								<div className="mb-3 text-xl font-bold text-center text-black">
+									ORDER STATUS: <span className="text-red-600">CANCELLED</span>{" "}
+								</div>
+								<label>Remarks/Reason:</label>
+								<textarea
+									contentEditable="true"
+									suppressContentEditableWarning={true}
+									className="p-1 border focus:text-black"
+									value={reason}
+									onChange={(e) => saveReason(e.target.value)}
+								>
+									{transaction.reason}
+								</textarea>
+								<p className="my-1 text-sm italic tracking-wider text-center text-green-500 bg-green-100">{message}</p>
+							</div>
+						)}
+						<span className="text-center text-black">
+							Go to{" "}
+							<span className="self-center font-semibold underline hover:text-green-700">
+								<Link href="/admin"> DASHBOARD</Link>
+							</span>
 						</span>
-					</span>
-				</div>
-			</div>
-		);
-	} else {
-		return <h1>Loading...</h1>;
-	}
+					</div>
+				</>
+			)}
+		</div>
+	);
 }
