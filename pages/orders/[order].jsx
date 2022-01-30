@@ -325,7 +325,7 @@ export default function Order(session) {
 						<span className="text-center text-black">
 							Go to{" "}
 							<span className="self-center font-semibold underline hover:text-green-700">
-								<Link href="/orders"> DASHBOARD</Link>
+								<Link href="/admin"> DASHBOARD</Link>
 							</span>
 						</span>
 					</div>
