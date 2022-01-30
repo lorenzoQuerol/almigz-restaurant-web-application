@@ -14,13 +14,12 @@ const TransactionHistory = ({ transactions }) => {
 						{transactions.map((item) => {
 							let date = new Date(item.dateCreated);
 							let formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} @ ${date.getHours()}:${date.getMinutes()}`;
-							let link = `/tracker/${encodeURIComponent(item.invoiceNum)}`;
 
 							return (
 								<Disclosure>
 									{({ open }) => (
 										<>
-											<div className="flex justify-between rounded-md">
+											<div className="flex justify-between my-4 rounded-md">
 												<div className="flex p-2 bg-white rounded-l-md">
 													<Disclosure.Button className="mr-2">
 														<ChevronUpIcon
@@ -67,14 +66,14 @@ const TransactionHistory = ({ transactions }) => {
 													</div>
 												</div>
 
-												<div className="flex items-center flex-shrink transition-all bg-green-700 cursor-pointer hover:rounded-r-xl hover:-translate-x-1 hover:bg-green-600">
-													<Link href={`/tracker/${encodeURIComponent(item.invoiceNum)}`}>
+												<Link href={`/tracker/${encodeURIComponent(item.invoiceNum)}`}>
+													<div className="flex items-center flex-shrink transition-all bg-green-700 cursor-pointer hover:rounded-r-xl hover:-translate-x-1 hover:bg-green-600">
 														<a className="px-3 font-semibold text-white">Tracker</a>
-													</Link>
-												</div>
+													</div>
+												</Link>
 											</div>
 											<Disclosure.Panel>
-												<div className="p-4 m-2 font-semibold bg-white rounded-b-lg shadow-inner text-slate-900">
+												<div className="p-4 m-2 font-semibold bg-white rounded-b-lg text-slate-900 drop-shadow-lg">
 													<div className="py-2">
 														<div className="font-bold text-green-700">{item.type === "Delivery" ? "Delivered to" : "Pickup at"}</div>
 														<div>{item.type === "Delivery" ? item.address : item.storeLocation}</div>
