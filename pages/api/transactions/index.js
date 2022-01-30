@@ -24,7 +24,7 @@ async function handler(req, res) {
 							transactions = await Transaction.find({ orderStatus: Number(filter) }, { _id: false, __v: false })
 								.skip(Number(offset))
 								.limit(Number(limit));
-						else transactions = await Transaction.find({}, { _id: false, __v: false }).skip(Number(offset)).limit(Number(limit));
+						else transactions = await Transaction.find({}, { _id: false, __v: false });
 
 						if (!transactions) return res.status(404).json({ success: false, message: "Transactions not found" });
 
