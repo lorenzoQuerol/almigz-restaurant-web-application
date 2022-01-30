@@ -81,7 +81,7 @@ export default function Admin(session) {
 			</div>
 
 			{/* Dashboard */}
-			{currentTab === "Dashboard" && <Dashboard session={session} />}
+			{currentTab === "Dashboard" && <Dashboard session={session} setCurrentTab={setCurrentTab} />}
 
 			{/* Manage members card */}
 			{currentTab === "Transactions" && <ManageTransactions />}
