@@ -32,7 +32,6 @@ const Navbar = () => {
 		setOpen(!open);
 	};
 
-	console.log(router.pathname);
 	return (
 		<header className="border-t-8 border-green-800 shadow-xl text-slate-900 body-font">
 			<div className="container relative flex flex-col flex-wrap px-5 py-5 mx-auto md:flex-row">
