@@ -141,9 +141,9 @@ export default function CheckoutPage(session) {
 			address: getValues("useHomeAddress") === "true" ? user.address : getValues("address"),
 			payMethod: getValues("payMethod"),
 			change: Number(getValues("change")),
-			deliverTime: getValues("type") === "Delivery" ? (data.deliverNow ? "Now" : formattedDate) : undefined,
+			deliverTime: getValues("type") === "Delivery" ? (data.deliverNow === "true" ? "Now" : formattedDate) : undefined,
 			branch: getValues("branch"),
-			pickupTime: getValues("type") === "Pickup" ? (data.deliverNow ? "Now" : formattedDate) : undefined,
+			pickupTime: getValues("type") === "Pickup" ? (data.deliverNow === "true" ? "Now" : formattedDate) : undefined,
 		};
 
 		setDetails(temp);
