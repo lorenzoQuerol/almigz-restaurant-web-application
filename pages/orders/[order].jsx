@@ -227,7 +227,7 @@ export default function Order(session) {
 							{delpickFlag && (
 								<div className={`flex flex-col justify-center text-center ${statColors[transaction.orderStatus]}`}>
 									<b>For DELIVERY</b>
-									Delivery Time: {transaction.deliverTime}
+									Delivery Time: {transaction.deliverTime === "Now" ? "Now" : formatDate(transaction.deliverTime)}
 								</div>
 							)}
 							{!delpickFlag && (
@@ -235,7 +235,7 @@ export default function Order(session) {
 									<b>For PICK UP</b>
 									Store: {transaction.storeLocation}
 									<br />
-									Pick Up Time: {transaction.pickupTime}
+									Pick Up Time: {transaction.pickupTime === "Now" ? "Now" : formatDate(transaction.pickupTime)}
 								</div>
 							)}
 							<div className="flex flex-col py-2 pb-10">
