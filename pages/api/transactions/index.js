@@ -9,7 +9,7 @@ async function handler(req, res) {
 
 	// Unpack the request
 	const {
-		query: { limit, offset, filter, refetch },
+		query: { limit, offset },
 		method,
 	} = req;
 
@@ -19,7 +19,9 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.isAdmin) {
 					try {
-						const transactions = await Transaction.find({}, { _id: false, __v: false }).sort({ dateCreated: -1 }).skip(Number(offset)).limit(Number(limit));
+						let transactions;
+						if (limit) transactions = await Transaction.find({}, { _id: false, __v: false }).sort({ dateCreated: -1 }).skip(Number(offset)).limit(Number(limit));
+						else transactions = await Transaction.find({}, { _id: false, __v: false });
 						if (!transactions) return res.status(404).json({ success: false, message: "Transactions not found" });
 
 						res.status(200).json({ success: true, message: "Successful query", transactions });
