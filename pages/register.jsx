@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import axios from "axios";
-import registerUser from "@utils/registerUser";
 import toTitleCase from "@utils/toTitleCase";
 
 export default function Register() {
@@ -126,25 +125,27 @@ export default function Register() {
 							<input
 								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 								type="tel"
-								title="Input should only contain 10 digits."
 								placeholder="9XXXXXXXXX (Mobile Number)"
-								{...register("contact1", { required: true, min: 10, maxLength: 10, pattern: /[0-9]{10}/i })}
+								{...register("contact1", { required: true, maxLength: 10, pattern: /9[0-9]{9}/ })}
 							/>
 						</div>
-						{errors.contact1 && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>}
+						{errors.contact1?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>}
+						{errors.contact1?.type === "pattern" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>}
+						{errors.contact1?.type === "maxLength" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>}
 
 						{/* Contact number 2 */}
-						<label className="mt-4 label">Contact Number 2</label>
+						<label className="mt-4 label">Contact Number 2 (Optional)</label>
 						<div className="flex items-center w-full pl-2 font-sans font-medium text-gray-600 rounded-md align-left">
 							+63
 							<input
 								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 								type="tel"
-								title="Input should only contain 10 digits."
 								placeholder="9XXXXXXXXX (Mobile Number)"
-								{...register("contact2", { required: false, min: 10, maxLength: 10, pattern: /[0-9]{10}/i })}
+								{...register("contact2", { required: false, maxLength: 10, pattern: /9[0-9]{9}/ })}
 							/>
 						</div>
+						{errors.contact1?.type === "pattern" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>}
+						{errors.contact1?.type === "maxLength" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>}
 
 						{/* Confirm password error */}
 						{message && <div className="mt-4 text-sm font-medium text-left text-red-500">{message}</div>}
