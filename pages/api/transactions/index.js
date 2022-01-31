@@ -19,13 +19,7 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.isAdmin) {
 					try {
-						let transactions = [];
-						if (filter)
-							transactions = await Transaction.find({ orderStatus: Number(filter) }, { _id: false, __v: false })
-								.skip(Number(offset))
-								.limit(Number(limit));
-						else transactions = await Transaction.find({}, { _id: false, __v: false });
-
+						const transactions = await Transaction.find({}, { _id: false, __v: false }).sort({ dateCreated: -1 }).skip(Number(offset)).limit(Number(limit));
 						if (!transactions) return res.status(404).json({ success: false, message: "Transactions not found" });
 
 						res.status(200).json({ success: true, message: "Successful query", transactions });
