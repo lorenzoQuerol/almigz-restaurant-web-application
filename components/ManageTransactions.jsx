@@ -34,10 +34,8 @@ const ManageTransactions = () => {
 			refetch();
 			setLastUpdate(new Date());
 		}, 60000);
-		if (data) {
-			let temp = data.transactions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-			setTransactions(temp);
-		}
+
+		if (data) setTransactions(data.transactions);
 	}, [data]);
 
 	const formatDate = (date) => {
@@ -72,7 +70,6 @@ const ManageTransactions = () => {
 	let filtered = transactions.filter((transaction) => transaction.orderStatus == filter);
 	if (filter == "All") filtered = transactions;
 
-	console.log(filter, filtered);
 	return (
 		<div className="w-full m-10 font-rale">
 			{loading ? (
@@ -162,7 +159,9 @@ const ManageTransactions = () => {
 							<div className="flex self-center justify-center mt-5 text-white">
 								<button
 									onClick={handlePrevPage}
-									className="flex items-center px-4 py-2 mx-1 font-semibold bg-green-700 rounded-md cursor-not-allowed hover:bg-green-600"
+									className={`${
+										page === 1 ? "hidden" : "flex"
+									} items-center px-4 py-2 mx-1 font-semibold bg-green-700 rounded-md hover:bg-green-600 cursor-pointer`}
 								>
 									Previous
 								</button>
