@@ -1,29 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
+import useAxios from "axios-hooks";
 import axios from "axios";
 
 import DeleteDialog from "@components/DeleteDialog";
 import Loading from "@components/Loading";
 import toTitleCase from "@utils/toTitleCase";
 
-const UserSettings = ({ user, setUser, userRefetch }) => {
+const UserSettings = ({ session }) => {
 	const router = useRouter();
-	console.log(user);
-
-	// User
-	const [firstName, setFirstName] = useState(user.firstName);
-	const [lastName, setLastName] = useState(user.lastName);
-	const [email, setEmail] = useState(user.email);
-	const [address, setAddress] = useState(user.address);
-	const [contact1, setContactNum] = useState(user.contact1);
-	const [contact2, setAltContactNum] = useState(user.contact2);
-
-	// Page elements
-	const [editable, setEditable] = useState(false);
-	const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-	const [message, setMessage] = useState("");
+	const [{ data, loading, error }, refetch] = useAxios({ url: `${process.env.NEXTAUTH_URL}/api/users/${session.user.email}` });
 
 	const {
 		register,
@@ -31,16 +19,68 @@ const UserSettings = ({ user, setUser, userRefetch }) => {
 		formState: { errors },
 		reset,
 	} = useForm({
-		defaultValues: {
-			firstName: user.firstName,
-			lastName: user.lastName,
-			password: "",
-			confirmPassword: "",
-			address: user.address,
-			// contact1: user.contact1.slice(3),
-			// contact2: user.contact2.slice(3),
-		},
+		defaultValues: useMemo(() => {
+			if (data) {
+				return {
+					firstName: data.user.firstName,
+					lastName: data.user.lastName,
+					password: "",
+					confirmPassword: "",
+					address: data.user.address,
+					contact1: data.user.contact1.slice(3),
+					contact2: data.user.contact2.slice(3),
+				};
+			}
+
+			// return [
+			// 	{ firstName: data.user.firstName },
+			// 	{ lastName: data.user.lastName },
+			// 	{ password: "" },
+			// 	{ confirmPassword: "" },
+			// 	{ address: data.user.address },
+			// 	{ contact1: data.user.contact1.slice(3) },
+			// 	{ contact2: data.user.contact2.slice(3) },
+			// ];
+		}, [data]),
 	});
+
+	// User
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+	const [email, setEmail] = useState("");
+	const [address, setAddress] = useState("");
+	const [contact1, setContact1] = useState("");
+	const [contact2, setContact2] = useState("");
+
+	// Page elements
+	const [editable, setEditable] = useState(false);
+	const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+	const [message, setMessage] = useState("");
+
+	useEffect(() => {
+		if (data) {
+			setFirstName(data.user.firstName);
+			setLastName(data.user.lastName);
+			setEmail(data.user.email);
+			setAddress(data.user.address);
+			setContact1(data.user.contact1);
+			setContact2(data.user.contact2);
+		}
+	}, [data]);
+
+	useEffect(() => {
+		if (data) {
+			reset({
+				firstName: data.user.firstName,
+				lastName: data.user.lastName,
+				password: "",
+				confirmPassword: "",
+				address: data.user.address,
+				contact1: data.user.contact1.slice(3),
+				contact2: data.user.contact2.slice(3),
+			});
+		}
+	}, [data]);
 
 	const handleEditable = () => {
 		setEditable(!editable);
@@ -54,37 +94,38 @@ const UserSettings = ({ user, setUser, userRefetch }) => {
 		handleEditable();
 
 		reset({
-			firstName: user.firstName,
-			lastName: user.lastName,
+			firstName: data.user.firstName,
+			lastName: data.user.lastName,
 			password: "",
 			confirmPassword: "",
-			address: user.address,
-			contact1: user.contact1.slice(3),
-			contact2: user.contact2.slice(3),
+			address: data.user.address,
+			contact1: data.user.contact1.slice(3),
+			contact2: data.user.contact2.slice(3),
 		});
 
 		setMessage("");
 	};
 
-	const updateAccount = async (data) => {
-		if (data.password === data.confirmPassword) {
+	// ANCHOR Update account
+	const updateAccount = async (form) => {
+		if (form.password === form.confirmPassword) {
 			handleEditable();
 
 			// Preprocess data
-			data.firstName = toTitleCase(data.firstName);
-			data.lastName = toTitleCase(data.lastName);
-			if (data.password === "") data.password = user.password;
-			delete data.confirmPassword;
-			data.contact1 = `+63${data.contact1}`;
-			if (data.contact2 !== "") data.contact2 = `+63${data.contact2}`;
+			form.firstName = toTitleCase(form.firstName);
+			form.lastName = toTitleCase(form.lastName);
+			if (form.password === "") form.password = data.user.password;
+			delete form.confirmPassword;
+			form.contact1 = `+63${form.contact1}`;
+			if (form.contact2 !== "") form.contact2 = `+63${form.contact2}`;
 
 			// Update and refetch updated user
-			await axios.put(`/api/users/${user.email}`, data);
-			const response = await axios.get(`/api/users/${user.email}`);
-			setUser(response.data.user);
+			await axios.put(`/api/users/${data.user.email}`, form);
+			const response = await axios.get(`/api/users/${data.user.email}`);
+			// setUser(response.data.user);
 
 			// Refresh client-side
-			if (response.status < 300) userRefetch();
+			if (response.status < 300) refetch();
 
 			setMessage("");
 		} else {
@@ -92,6 +133,7 @@ const UserSettings = ({ user, setUser, userRefetch }) => {
 		}
 	};
 
+	// ANCHOR Delete account
 	const deleteAccount = async () => {
 		handleDeleteDialog();
 
@@ -107,7 +149,7 @@ const UserSettings = ({ user, setUser, userRefetch }) => {
 
 	return (
 		<>
-			{!user ? (
+			{loading ? (
 				<Loading />
 			) : (
 				<>
@@ -233,11 +275,16 @@ const UserSettings = ({ user, setUser, userRefetch }) => {
 														type="tel"
 														title="Input should only contain 10 digits."
 														placeholder="9XXXXXXXXX (Mobile Number)"
-														{...register("contact1", { required: true, min: 10, maxLength: 10, pattern: /[0-9]{10}/i })}
+														{...register("contact1", { required: true, pattern: /[0-9]{10}/i })}
 														className="w-full ml-3 rounded-md input input-sm"
 													/>
 												</div>
-												{errors.contact1 && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>}
+												{errors.contact1?.type === "required" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>
+												)}
+												{errors.contact1?.type === "pattern" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+												)}
 											</div>
 											<div>
 												<a className="font-bold">Contact Number 2 </a>
@@ -247,10 +294,13 @@ const UserSettings = ({ user, setUser, userRefetch }) => {
 														type="tel"
 														title="Input should only contain 10 digits."
 														placeholder="9XXXXXXXXX (Mobile Number)"
-														{...register("contact2", { required: false, min: 10, maxLength: 10, pattern: /[0-9]{10}/i })}
+														{...register("contact2", { required: false, pattern: /[0-9]{10}/i })}
 														className="w-full ml-3 rounded-md input input-sm"
 													/>
 												</div>
+												{errors.contact2?.type === "pattern" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+												)}
 											</div>
 										</div>
 
