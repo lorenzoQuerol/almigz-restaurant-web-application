@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import useAxios from "axios-hooks";
 import axios from "axios";
 
+import removeStorageValue from "@utils/localStorage/removeStorageValue";
 import DeleteDialog from "@components/DeleteDialog";
 import Loading from "@components/Loading";
 import toTitleCase from "@utils/toTitleCase";
@@ -142,9 +143,8 @@ const UserSettings = ({ session }) => {
 		removeStorageValue("transaction");
 
 		// Delete account from database and redirect to landing page
-		await axios.delete(`/api/users/${user.email}`);
-		await signOut({ redirect: false, callbackUrl: "/" });
-		router.push(data.url);
+		await axios.delete(`/api/users/${session.user.email}`);
+		signOut({ redirect: true, callbackUrl: "/" });
 	};
 
 	return (
@@ -273,21 +273,22 @@ const UserSettings = ({ session }) => {
 													+63
 													<input
 														type="tel"
-														title="Input should only contain 10 digits."
 														placeholder="9XXXXXXXXX (Mobile Number)"
-														{...register("contact1", { required: true, maxLength: 10, pattern: /9[0-9]{9}/ })}
+														{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9/ })}
 														className="w-full ml-3 rounded-md input input-sm"
 													/>
 												</div>
 												{errors.contact1?.type === "required" && (
 													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>
 												)}
-
-												{errors.contact1?.type === "pattern" && (
-													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
-												)}
 												{errors.contact1?.type === "maxLength" && (
 													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+												)}
+												{errors.contact1?.type === "minLength" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+												)}
+												{errors.contact1?.type === "pattern" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
 												)}
 											</div>
 											<div>
@@ -296,9 +297,8 @@ const UserSettings = ({ session }) => {
 													+63
 													<input
 														type="tel"
-														title="Input should only contain 10 digits."
 														placeholder="9XXXXXXXXX (Mobile Number)"
-														{...register("contact2", { required: false, maxLength: 10, pattern: /9[0-9]{9}/ })}
+														{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9/ })}
 														className="w-full ml-3 rounded-md input input-sm"
 													/>
 												</div>
@@ -306,6 +306,9 @@ const UserSettings = ({ session }) => {
 													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
 												)}
 												{errors.contact1?.type === "maxLength" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+												)}
+												{errors.contact1?.type === "minLength" && (
 													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
 												)}
 											</div>

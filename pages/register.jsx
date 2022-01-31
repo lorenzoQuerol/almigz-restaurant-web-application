@@ -50,6 +50,7 @@ export default function Register() {
 	// If page is stil in loading or authenticated (already signed in)
 	if (status === "loading" || status === "authenticated") return <h1>Loading...</h1>;
 
+	console.log(errors);
 	return (
 		<div className="flex justify-center font-rale text-slate-900">
 			<div className="flex-col w-full mx-6 my-16 text-center rounded-md sm:w-1/3 md:w-2/3 lg:w-1/2 xl:w-1/3 drop-shadow-lg bg-zinc-100">
@@ -126,12 +127,13 @@ export default function Register() {
 								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 								type="tel"
 								placeholder="9XXXXXXXXX (Mobile Number)"
-								{...register("contact1", { required: true, maxLength: 10, pattern: /9[0-9]{9}/ })}
+								{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9/ })}
 							/>
 						</div>
 						{errors.contact1?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>}
-						{errors.contact1?.type === "pattern" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>}
 						{errors.contact1?.type === "maxLength" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>}
+						{errors.contact1?.type === "minLength" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>}
+						{errors.contact1?.type === "pattern" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>}
 
 						{/* Contact number 2 */}
 						<label className="mt-4 label">Contact Number 2 (Optional)</label>
@@ -141,11 +143,12 @@ export default function Register() {
 								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 								type="tel"
 								placeholder="9XXXXXXXXX (Mobile Number)"
-								{...register("contact2", { required: false, maxLength: 10, pattern: /9[0-9]{9}/ })}
+								{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9/ })}
 							/>
 						</div>
-						{errors.contact1?.type === "pattern" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>}
-						{errors.contact1?.type === "maxLength" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>}
+						{errors.contact2?.type === "maxLength" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>}
+						{errors.contact1?.type === "minLength" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>}
+						{errors.contact2?.type === "pattern" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>}
 
 						{/* Confirm password error */}
 						{message && <div className="mt-4 text-sm font-medium text-left text-red-500">{message}</div>}
