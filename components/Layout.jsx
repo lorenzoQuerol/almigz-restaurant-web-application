@@ -12,7 +12,7 @@ const Layout = ({ children }) => {
 					<link rel="icon" href="/logo.ico" />
 				</Head>
 				<Navbar />
-				<div className="justify-center overflow-x-hidden">{children}</div>
+				<div className="justify-center min-h-screen overflow-x-hidden">{children}</div>
 				<Footer />
 			</div>
 			{/* </html> */}
