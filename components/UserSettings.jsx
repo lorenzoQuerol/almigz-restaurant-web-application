@@ -275,14 +275,18 @@ const UserSettings = ({ session }) => {
 														type="tel"
 														title="Input should only contain 10 digits."
 														placeholder="9XXXXXXXXX (Mobile Number)"
-														{...register("contact1", { required: true, pattern: /[0-9]{10}/i })}
+														{...register("contact1", { required: true, maxLength: 10, pattern: /9[0-9]{9}/ })}
 														className="w-full ml-3 rounded-md input input-sm"
 													/>
 												</div>
 												{errors.contact1?.type === "required" && (
 													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>
 												)}
+
 												{errors.contact1?.type === "pattern" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
+												)}
+												{errors.contact1?.type === "maxLength" && (
 													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
 												)}
 											</div>
@@ -294,11 +298,14 @@ const UserSettings = ({ session }) => {
 														type="tel"
 														title="Input should only contain 10 digits."
 														placeholder="9XXXXXXXXX (Mobile Number)"
-														{...register("contact2", { required: false, pattern: /[0-9]{10}/i })}
+														{...register("contact2", { required: false, maxLength: 10, pattern: /9[0-9]{9}/ })}
 														className="w-full ml-3 rounded-md input input-sm"
 													/>
 												</div>
-												{errors.contact2?.type === "pattern" && (
+												{errors.contact1?.type === "pattern" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
+												)}
+												{errors.contact1?.type === "maxLength" && (
 													<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
 												)}
 											</div>
