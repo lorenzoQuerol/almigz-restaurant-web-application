@@ -39,8 +39,6 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.email === req.body.email) {
 					try {
-						Transaction.watch().on("change", (data) => console.log(new Date(), data));
-
 						const transaction = await Transaction.create(req.body);
 
 						res.status(201).json({
