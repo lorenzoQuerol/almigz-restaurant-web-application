@@ -1,12 +1,13 @@
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from "swr";
 
 import pushToCart from "@utils/foodCart/pushToCart";
 import Cart from "@components/Cart";
+import Loading from "@components/Loading";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -19,6 +20,13 @@ export default function FoodItemPage() {
 	const [quantity, setquantity] = useState(1);
 	const [total, setTotal] = useState("");
 	const [open, setOpen] = useState(false);
+	const [isAdmin, setIsAdmin] = useState(false);
+
+	useEffect(() => {
+		if (session) {
+			if (session.user.isAdmin) setIsAdmin(true);
+		}
+	}, [session]);
 
 	const updateTotal = async (num) => {
 		num = Number(num);
@@ -44,8 +52,7 @@ export default function FoodItemPage() {
 			pushToCart(item);
 			handleOpen();
 		} else {
-			alert("Please login before adding to cart.");
-			router.push("/auth/signIn");
+			router.replace("/signin");
 		}
 	};
 
@@ -53,7 +60,7 @@ export default function FoodItemPage() {
 		setOpen(!open);
 	};
 
-	if (!data) return <h1>Loading...</h1>;
+	if (!data) return <Loading />;
 
 	if (!data.foodItem) {
 		return (
@@ -96,7 +103,7 @@ export default function FoodItemPage() {
 							<p className="leading-relaxed">{data.foodItem.productDescription}</p>
 							<form onSubmit={addToCart}>
 								<div className="flex items-center pb-5 mt-6 mb-5 border-b-2 border-gray-100">
-									<div className="flex items-center">
+									<div className={`${isAdmin ? "hidden" : "flex"} items-center`}>
 										<span className="mr-3">Quantity:</span>
 										<div className="relative">
 											<input
@@ -114,7 +121,11 @@ export default function FoodItemPage() {
 								</div>
 								<div className="flex">
 									<span className="text-2xl font-medium text-gray-900 title-font">₱{total}</span>
-									<button className="flex px-6 py-2 ml-auto font-semibold text-white transition-colors bg-green-700 border-0 rounded focus:outline-none hover:bg-green-600">
+									<button
+										className={`${
+											isAdmin ? "hidden" : "flex"
+										} px-6 py-2 ml-auto font-semibold text-white transition-colors bg-green-700 border-0 rounded focus:outline-none hover:bg-green-600`}
+									>
 										Add to Cart
 									</button>
 								</div>
