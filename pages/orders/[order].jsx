@@ -69,6 +69,7 @@ export default function Order(session) {
 	statFlags.fill(false);
 	statFlags[transaction.orderStatus] = true;
 
+	// ANCHOR Update transaction
 	const updateStatus = async (value) => {
 		let temp = transaction;
 		temp.orderStatus = value;
@@ -84,10 +85,19 @@ export default function Order(session) {
 	};
 
 	const saveReason = async (value) => {
-		const response = await axios.put(`/api/transactions/${transaction.invoiceNum}`, transaction);
-
-		setReason(value);
 		setMessage("Changes saved.");
+
+		let temp = transaction;
+		temp.reasonForCancel = reason;
+		temp.lastUpdated = new Date();
+		setTransaction(temp);
+
+		// Update both user history and transactions
+		const transRes = await axios.put(`/api/transactions/${transaction.invoiceNum}`, transaction);
+		const userRes = await axios.put(`/api/history/${transaction.email}/${transaction.invoiceNum}`, transaction);
+
+		// Refetch page to update status
+		refetch();
 	};
 
 	const formatDate = (date) => {
@@ -121,7 +131,7 @@ export default function Order(session) {
 								<div className="flex flex-wrap items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
 									<div className="">
 										<h1 className="text-4xl font-bold text-black font-rale">Order #{data.transaction.invoiceNum.toString().padStart(4, "0")}</h1>
-										<p className="mt-1 ml-1 text-sm text-gray-500">Date: {transaction.dateCreated}</p>
+										<p className="mt-1 ml-1 text-sm text-gray-500">Date: {transaction.type === "Now" ? "Now" : formatDate(transaction.dateCreated)}</p>
 									</div>
 									{statFlags[0] && (
 										<div className="flex items-center px-1 mt-1 text-lg font-semibold text-center text-white bg-red-500 rounded-lg md:w-max">
@@ -313,10 +323,13 @@ export default function Order(session) {
 									suppressContentEditableWarning={true}
 									className="p-1 border focus:text-black"
 									value={reason}
-									onChange={(e) => saveReason(e.target.value)}
+									onChange={(e) => setReason(e.target.value)}
 								>
 									{transaction.reason}
 								</textarea>
+								<button onClick={saveReason} className="px-2 py-3 font-bold text-white bg-green-700">
+									Save
+								</button>
 								<p className="my-1 text-sm italic tracking-wider text-center text-green-500 bg-green-100">{message}</p>
 							</div>
 						)}
