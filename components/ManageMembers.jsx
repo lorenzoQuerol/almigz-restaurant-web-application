@@ -9,7 +9,7 @@ const headers = ["First Name", "Last Name", "Email", "Role", "Contact Number 1",
 const roleTextColors = ["text-green-900", "text-yellow-900"];
 const roleBgColors = ["bg-green-200", "bg-yellow-200"];
 
-const ManageMembers = () => {
+const ManageMembers = ({ session }) => {
 	// SECTION Initialization and Declaration
 	const [{ data, loading, error }, refetch] = useAxios({
 		url: `${process.env.NEXTAUTH_URL}/api/users`,
@@ -88,12 +88,17 @@ const ManageMembers = () => {
 												</td>
 												<td className="px-5 py-5 text-sm bg-white border-b border-gray-200">{item.contact1}</td>
 												<td className="px-5 py-5 text-sm bg-white border-b border-gray-200">{item.contact2}</td>
-												<td
-													onClick={(e) => handleOpenViewUser(item)}
-													className="px-5 text-sm text-center transition-colors bg-green-700 border-b border-gray-200 cursor-pointer rounded-l-md hover:bg-green-600"
-												>
-													<a className="font-bold text-white">View</a>
-												</td>
+
+												{session.user.email !== item.email ? (
+													<td
+														onClick={(e) => handleOpenViewUser(item)}
+														className="px-5 text-sm text-center transition-all bg-green-700 border-b border-gray-200 cursor-pointer hover:rounded-l-xl hover:bg-green-600"
+													>
+														<a className="font-bold text-white">View</a>
+													</td>
+												) : (
+													<td className="bg-white border-b border-gray-200"></td>
+												)}
 											</tr>
 										);
 									})}

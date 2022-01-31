@@ -14,24 +14,26 @@ const limit = 10;
 const ManageTransactions = () => {
 	const router = useRouter();
 	const [page, setPage] = useState(1);
-	const [filter, setFilter] = useState(null);
+	const [filter, setFilter] = useState("All");
 	const [transactions, setTransactions] = useState([]);
+
+	const [lastUpdate, setLastUpdate] = useState(new Date());
 
 	const [{ data, loading, error }, refetch] = useAxios({
 		url: `${process.env.NEXTAUTH_URL}/api/transactions`,
 		params: {
 			limit: limit,
 			offset: (page - 1) * limit,
-			filter: filter === "All" ? undefined : filter,
+			// filter: filter === "All" ? undefined : filter,
 		},
 	});
 
-	useEffect(() => {
-		refetch();
-	}, [router.pathname]);
-
 	// ANCHOR Refetch for pagination
 	useEffect(() => {
+		setTimeout(() => {
+			refetch();
+			setLastUpdate(new Date());
+		}, 60000);
 		if (data) {
 			let temp = data.transactions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
 			setTransactions(temp);
@@ -67,13 +69,17 @@ const ManageTransactions = () => {
 		refetch();
 	};
 
+	let filtered = transactions.filter((transaction) => transaction.orderStatus == filter);
+	if (filter == "All") filtered = transactions;
+
+	console.log(filter, filtered);
 	return (
 		<div className="w-full m-10 font-rale">
 			{loading ? (
 				<Loading />
 			) : (
 				<>
-					<div className="flex flex-row mb-5 ">
+					<div className="flex flex-row mb-3">
 						{/* Greeting */}
 						<div className="self-center text-4xl font-extrabold">Manage Transactions</div>
 
@@ -84,7 +90,7 @@ const ManageTransactions = () => {
 								onChange={(e) => setFilter(e.target.value)}
 								className="w-full max-w-xs rounded-md select select-sm select-bordered focus:ring focus:outline-none focus:ring-green-700"
 							>
-								<option value={null}>All</option>
+								<option>All</option>
 								<option value={0}>Incoming</option>
 								<option value={1}>Processed</option>
 								<option value={2}>In Preparation</option>
@@ -95,7 +101,7 @@ const ManageTransactions = () => {
 						</div>
 						{/* !SECTION */}
 					</div>
-
+					<div className="mb-3">Last Updated: {formatDate(lastUpdate.toString())}</div>
 					<div className="mx-auto overflow-hidden rounded-lg shadow-md w-fulll bg-zinc-100">
 						<div className="p-6">
 							{/* SECTION TABLE */}
@@ -112,7 +118,7 @@ const ManageTransactions = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{transactions.map((item, index) => {
+									{filtered.map((item, index) => {
 										return (
 											<tr>
 												<td className="px-5 py-5 text-sm bg-white border-b border-gray-200">{item.invoiceNum}</td>
@@ -141,7 +147,7 @@ const ManageTransactions = () => {
 												</td>
 
 												<Link href={`/orders/${item.invoiceNum}`}>
-													<td className="px-5 text-sm text-center transition-colors bg-green-700 border-b border-gray-200 cursor-pointer rounded-l-md hover:bg-green-600">
+													<td className="px-5 text-sm text-center transition-all bg-green-700 border-b border-gray-200 cursor-pointer hover:rounded-l-xl hover:bg-green-600">
 														<a className="font-bold text-white">View</a>
 													</td>
 												</Link>

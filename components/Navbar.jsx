@@ -16,9 +16,8 @@ const Navbar = () => {
 
 	const handleSignOut = async (event) => {
 		event.preventDefault();
-		const data = await signOut({ redirect: true, callbackUrl: "/" });
+		signOut({ redirect: true, callbackUrl: "/" });
 		localStorage.clear();
-		router.push(data.url);
 	};
 
 	const navigationBar = [

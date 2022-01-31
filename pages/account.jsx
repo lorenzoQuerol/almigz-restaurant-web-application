@@ -27,17 +27,12 @@ export async function getServerSideProps(context) {
 	};
 }
 
-// Axios instances
-const userAxios = makeUseAxios({
-	axios: axios.create({ baseURL: process.env.NEXTAUTH_URL }),
-});
 const historyAxios = makeUseAxios({
 	axios: axios.create({ baseURL: process.env.NEXTAUTH_URL }),
 });
 
 export default function Account(session) {
 	const router = useRouter();
-	const [{ data: userRes, loading: userLoading, error: userError }, userRefetch] = userAxios(`/api/users/${session.user.email}`);
 	const [{ data: historyRes, loading: historyLoading, error: historyError }, historyRefetch] = historyAxios(`/api/history/${session.user.email}`);
 
 	const [user, setUser] = useState({});
@@ -53,13 +48,11 @@ export default function Account(session) {
 
 	// For setting user and transaction states
 	useEffect(() => {
-		if (userRes) setUser(userRes.user);
 		if (historyRes) setTransactions(historyRes.transactions);
-	}, [userRes, historyRes]);
+	}, [historyRes]);
 
 	// Refetch if path changes
 	useEffect(() => {
-		userRefetch();
 		historyRefetch();
 	}, [router.pathname]);
 
@@ -80,7 +73,7 @@ export default function Account(session) {
 
 	return (
 		<>
-			{userLoading ^ historyLoading ? (
+			{historyLoading ? (
 				<Loading />
 			) : (
 				<div className="flex flex-col justify-center mx-10 my-10 md:mx-36 xl:mx-72 font-rale text-slate-900">
@@ -115,7 +108,7 @@ export default function Account(session) {
 					</div>
 
 					{/* User settings card */}
-					{currentTab === "User Settings" && <UserSettings user={user} setUser={setUser} userRefetch={userRefetch} />}
+					{currentTab === "User Settings" && <UserSettings session={session} />}
 
 					{/* Transaction history card */}
 					{currentTab === "Transactions" && <TransactionHistory transactions={transactions} />}

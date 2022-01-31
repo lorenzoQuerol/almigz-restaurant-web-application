@@ -50,7 +50,7 @@ export default function Admin(session) {
 	return (
 		<div className="flex justify-center font-rale text-slate-900">
 			{/* Navigation bar */}
-			<div className="flex flex-col w-64 min-h-screen px-4 bg-white border-r ">
+			<div className="flex flex-col w-64 min-h-screen px-4 border-r ">
 				<div className="flex flex-col justify-between flex-1">
 					<nav>
 						{navigationBar.map((item, index) => {
@@ -87,7 +87,7 @@ export default function Admin(session) {
 			{currentTab === "Transactions" && <ManageTransactions />}
 
 			{/* Manage members card */}
-			{currentTab === "Management" && <ManageMembers />}
+			{currentTab === "Management" && <ManageMembers session={session} />}
 
 			{/* Manage members card */}
 			{currentTab === "Summary" && <SummaryReports />}
