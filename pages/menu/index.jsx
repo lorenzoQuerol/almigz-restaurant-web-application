@@ -10,7 +10,7 @@ import Loading from "@components/Loading";
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function MenuPage() {
-	// ANCHOR Food item variables
+	// ANCHOR Page variables
 	const { data, error } = useSWR("/api/foodItems", fetcher);
 	const [foodItems, setFoodItems] = useState([]);
 	const [activeCategory, setActiveCategory] = useState("Show all");

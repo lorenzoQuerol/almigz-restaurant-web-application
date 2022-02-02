@@ -26,7 +26,7 @@ const CategoryBar = ({ activeCategory, setActiveCategory }) => {
 				<select
 					onChange={(e) => setActiveCategory(e.target.value)}
 					aria-label="Selected tab"
-					className="relative z-10 block w-full p-3 font-semibold transition-colors bg-transparent border border-gray-300 rounded appearance-none form-select focus:border-2 focus:border-green-700 focus:outline-none"
+					className="z-10 block w-full p-3 font-semibold transition-colors bg-transparent border border-gray-300 rounded appearance-none form-select focus:border-2 focus:border-green-700 focus:outline-none"
 				>
 					{categories.map((item, index) => {
 						return <option className="text-sm">{item}</option>;

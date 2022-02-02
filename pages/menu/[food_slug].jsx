@@ -28,7 +28,7 @@ export default function FoodItemPage() {
 		},
 	});
 
-	// Page variables
+	// ANCHOR Page variables
 	const [open, setOpen] = useState(false);
 	const [isAdmin, setIsAdmin] = useState(false);
 	const [foodItem, setFoodItem] = useState({});
