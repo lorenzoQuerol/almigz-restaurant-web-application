@@ -69,7 +69,6 @@ export default function Receipt(session) {
 		router.replace(`/tracker/${transaction.invoiceNum}`);
 	};
 
-	console.log(transaction);
 	if (!transaction) return <h1>Loading...</h1>;
 
 	return (
