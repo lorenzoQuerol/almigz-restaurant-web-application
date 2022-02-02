@@ -128,6 +128,8 @@ const TransactionSchema = new mongoose.Schema({
 });
 
 const UserSchema = new mongoose.Schema({
+	dateCreated: { type: Date, required: true, default: new Date() },
+
 	isDelete: {
 		type: Boolean,
 		required: false,
