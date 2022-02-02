@@ -247,7 +247,7 @@ const Cart = ({ open, handleOpen }) => {
 															<Link href="/menu">
 																<a onClick={handleOpen}>
 																	<li className="flex justify-center font-semibold text-green-700 underline transition-colors duration-200 cursor-pointer hover:text-green-600 decoration-dotted underline-offset-2">
-																		Click here to add items
+																		Go to Our Menu!
 																	</li>
 																</a>
 															</Link>
