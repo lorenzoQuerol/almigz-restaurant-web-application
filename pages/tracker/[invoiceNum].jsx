@@ -271,9 +271,9 @@ export default function Tracker(session) {
 										<p className="text-base font-bold leading-4">₱ {transaction.totalPrice}</p>
 									</div>
 									<div className="flex flex-col items-center justify-center w-full pt-1 space-y-6 md:pt-4 xl:pt-8 md:space-y-8">
-										<Link href="/account">
+										<Link href="/user/history">
 											<button className="px-3 py-2 font-semibold text-white transition-all bg-green-700 rounded-md cursor-pointer hover:bg-green-600">
-												<a>Back to Transaction History</a>
+												<a>Back to My Orders</a>
 											</button>
 										</Link>
 									</div>
