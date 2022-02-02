@@ -22,15 +22,15 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 		{ id: "3", href: "/admin", name: "Admin", current: false },
 		{ id: "4", href: "/signin", name: "Login", current: false },
 		{ id: "5", href: "/register", name: "Register", current: false },
-		{ id: "6", href: "/account", name: "Account Settings", current: false },
-		{ id: "7", href: "/history", name: "Orders", current: false },
+		{ id: "6", href: "/user/profile", name: "My Profile", current: false },
+		{ id: "7", href: "/user/history", name: "My Orders", current: false },
 		{ id: "8", href: "#", name: "Logout", current: false },
 	];
 
 	// useEffect(() => {
 	// 	if (session) {
 	// 		navigationBar[3].visible = navigationBar[4].visible = navigationBar[5].visible = false; // make login, register, admin invisible
-	// 		navigationBar[6].visible = navigationBar[7].visible = navigationBar[8].visible = true; // make account settings, orders, logout visible
+	// 		navigationBar[6].visible = navigationBar[7].visible = navigationBar[8].visible = true; // make My Profile, My Orders, logout visible
 	// 		if (session.user.isAdmin) navigationBar[3].visible = true; // if user is admin, make admin visible
 	// 	} else {
 	// 		navigationBar[3].visible = navigationBar[6].visible = navigationBar[7].visible = navigationBar[8].visible = false;
@@ -179,7 +179,7 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 														</Link>
 													)}
 
-													{/* ANCHOR Account Settings */}
+													{/* ANCHOR My Profile */}
 													{session && (
 														<Link href={navigationBar[6].href} key={navigationBar[6].id}>
 															<a onClick={(e) => setMobileOpen(!mobileOpen)}>
@@ -196,7 +196,7 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 														</Link>
 													)}
 
-													{/* ANCHOR Orders */}
+													{/* ANCHOR My Orders */}
 													{session && (
 														<Link href={navigationBar[7].href} key={navigationBar[7].id}>
 															<a onClick={(e) => setMobileOpen(!mobileOpen)}>

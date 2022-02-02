@@ -160,7 +160,7 @@ const Navbar = () => {
 										leaveFrom="transform opacity-100 scale-100"
 										leaveTo="transform opacity-0 scale-95"
 									>
-										<Menu.Items className="absolute right-0 z-0 w-56 mt-2 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+										<Menu.Items className="absolute right-0 z-10 w-56 mt-2 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
 											<div className="px-1 py-1 ">
 												<Menu.Item>
 													{({ active }) => (
@@ -168,21 +168,22 @@ const Navbar = () => {
 															className={`${
 																active ? "bg-green-700 text-white" : "text-gray-800"
 															} group flex rounded-md items-center w-full px-2 py-2 text-sm`}
-															href="/account"
+															href="/user/profile"
 														>
-															Account Settings
+															My Profile
 														</a>
 													)}
 												</Menu.Item>
 												<Menu.Item>
 													{({ active }) => (
-														<button
+														<a
 															className={`${
 																active ? "bg-green-700 text-white" : "text-gray-800"
 															} group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+															href="/user/history"
 														>
-															Orders
-														</button>
+															My Orders
+														</a>
 													)}
 												</Menu.Item>
 											</div>
