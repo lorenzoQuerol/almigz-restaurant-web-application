@@ -1,10 +1,11 @@
 import useSWR from "swr";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 import CategoryBar from "@components/CategoryBar";
 import MenuHeader from "@components/MenuHeader";
+import Loading from "@components/Loading";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -33,50 +34,58 @@ export default function MenuPage() {
 					{/* ANCHOR Category bar */}
 					<CategoryBar activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
 
-					{/* SECTION Food items */}
-					<div className="flex flex-wrap justify-center">
-						{filtered
-							.filter((value) => {
-								if (value === "") return foodItems;
-								else if (value.productName.toLowerCase().includes(search.toLowerCase())) {
-									return value;
-								}
-							})
-							.map((item, index) => {
-								return (
-									<Link href={item.available ? `/menu/${encodeURIComponent(item.slug)}` : ""}>
-										<div className="mx-2 my-5 mb-8 shadow cursor-pointer w-72 lg:mb-0">
-											<div className="bg-zinc-100">
-												{item.productImagesCollection.items[0] && (
-													<Image width={3300} height={2550} layout="responsive" src={item.productImagesCollection.items[0].url} />
-												)}
-											</div>
-											<div className="bg-white">
-												<div className="flex items-center justify-between px-4 pt-4">
-													<div></div>
-													<div className="bg-green-700 py-1.5 px-6 rounded-full">
-														<p className="text-xs font-medium text-white">{item.category}</p>
+					{!data ? (
+						<div className="mt-16">
+							<Loading />
+						</div>
+					) : (
+						<div>
+							{/* SECTION Food items */}
+							<div className="flex flex-wrap justify-center">
+								{filtered
+									.filter((value) => {
+										if (value === "") return foodItems;
+										else if (value.productName.toLowerCase().includes(search.toLowerCase())) {
+											return value;
+										}
+									})
+									.map((item, index) => {
+										return (
+											<Link href={item.available ? `/menu/${encodeURIComponent(item.slug)}` : ""}>
+												<div className="mx-2 my-5 mb-8 shadow cursor-pointer w-72 lg:mb-0">
+													<div className="bg-zinc-100">
+														{item.productImagesCollection.items[0] && (
+															<Image width={3300} height={2550} layout="responsive" src={item.productImagesCollection.items[0].url} />
+														)}
+													</div>
+													<div className="bg-white">
+														<div className="flex items-center justify-between px-4 pt-4">
+															<div></div>
+															<div className="bg-green-700 py-1.5 px-6 rounded-full">
+																<p className="text-xs font-medium text-white">{item.category}</p>
+															</div>
+														</div>
+														<div className="p-4">
+															<div className="flex items-center">
+																<h2 className="text-lg font-semibold">{item.productName}</h2>
+															</div>
+															<p className="mt-2 text-xs text-gray-600 truncate">{item.productDescription}</p>
+
+															<div className="flex items-center justify-between py-4">
+																{/* <h2 className="text-xs font-semibold text-indigo-700">Bay Area, San Francisco</h2> */}
+																<h3 className="text-xl font-semibold text-gray-800">₱{item.productPrice}</h3>
+															</div>
+														</div>
 													</div>
 												</div>
-												<div className="p-4">
-													<div className="flex items-center">
-														<h2 className="text-lg font-semibold">{item.productName}</h2>
-													</div>
-													<p className="mt-2 text-xs text-gray-600 truncate">{item.productDescription}</p>
+											</Link>
+										);
+									})}
+							</div>
 
-													<div className="flex items-center justify-between py-4">
-														{/* <h2 className="text-xs font-semibold text-indigo-700">Bay Area, San Francisco</h2> */}
-														<h3 className="text-xl font-semibold text-gray-800">₱{item.productPrice}</h3>
-													</div>
-												</div>
-											</div>
-										</div>
-									</Link>
-								);
-							})}
-					</div>
-
-					{/* !SECTION  */}
+							{/* !SECTION  */}
+						</div>
+					)}
 				</div>
 			</div>
 		</>
