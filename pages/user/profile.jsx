@@ -6,9 +6,7 @@ import axios from "axios";
 import useAxios from "axios-hooks";
 
 import Loading from "@components/Loading";
-import UserSettings from "@components/UserSettings";
 import DeleteDialog from "@components/DeleteDialog";
-import TransactionHistory from "@components/TransactionHistory";
 import toTitleCase from "@utils/toTitleCase";
 import removeStorageValue from "@utils/localStorage/removeStorageValue";
 
@@ -198,185 +196,191 @@ export default function Profile(session) {
 
 				{/* Page title ends */}
 				<div className="container px-6 mx-auto">
-					<div className="w-full h-64 border-gray-300 rounded">
-						{editable ? (
-							<form>
+					{loading ? (
+						<Loading />
+					) : (
+						<div className="w-full h-64 border-gray-300 rounded">
+							{editable ? (
+								<form>
+									<div className="grid grid-flow-row sm:grid-cols-2">
+										{/* SECTION Editable */}
+										{/* ANCHOR First Name */}
+										<div className="flex flex-col mb-5 md:mr-16">
+											<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">First Name</label>
+											<input
+												className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
+												placeholder="First Name"
+												{...register("firstName", { required: true, maxLength: 80 })}
+											/>
+											{errors.firstName?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">First name is required</div>}
+											{errors.firstName?.type === "maxLength" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">First name must be less than 80 characters</div>
+											)}
+										</div>
+
+										{/* ANCHOR Last Name */}
+										<div className="flex flex-col mb-5 md:mr-16">
+											<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Last Name</label>
+											<input
+												className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
+												placeholder="Last Name"
+												{...register("lastName", { required: true, maxLength: 100 })}
+											/>
+											{errors.lastName?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Last name is required</div>}
+											{errors.lastName?.type === "maxLength" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Last name must be less than 100 characters</div>
+											)}
+										</div>
+
+										{/* ANCHOR Password */}
+										<div className="flex flex-col mb-5 md:mr-16">
+											<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Password</label>
+											<input
+												className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
+												placeholder="Password"
+												{...register("password", { required: false, minLength: 8, pattern: /^\S+$/i })}
+											/>
+											{errors.password?.type === "minLength" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Password must be more than 8 characters</div>
+											)}
+											{errors.password?.type === "pattern" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Password cannot contain whitespace</div>
+											)}
+										</div>
+
+										{/* ANCHOR Confirm Password */}
+										{watch("password") !== "" && (
+											<div className="flex flex-col mb-5 md:mr-16">
+												<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Confirm Password</label>
+												<input
+													className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
+													placeholder="Confirm Password"
+													{...register("confirmPassword")}
+												/>
+												{message && <div className="mt-1 text-xs font-medium text-left text-red-500">{message}</div>}
+											</div>
+										)}
+
+										{/* ANCHOR Address */}
+										<div className="flex flex-col mb-5 md:mr-16">
+											<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Address</label>
+											<textarea
+												className="flex items-center w-full h-10 pt-2 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
+												placeholder="Address"
+												{...register("address", { required: true, maxLength: 100 })}
+											/>
+											{errors.address?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Address is required</div>}
+											{errors.address?.type === "maxLength" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Address must be less than 100 characters</div>
+											)}
+										</div>
+
+										{/* ANCHOR Contact Number 1 */}
+										<div className="flex flex-col mb-5 md:mr-16">
+											<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Contact Number 1</label>
+
+											<div className="flex items-center">
+												+63
+												<input
+													className="flex items-center w-full h-10 pl-3 ml-1 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
+													placeholder="Contact Number 1"
+													{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9/ })}
+												/>
+											</div>
+											{errors.contact1?.type === "required" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>
+											)}
+											{errors.contact1?.type === "maxLength" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+											)}
+											{errors.contact1?.type === "minLength" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+											)}
+											{errors.contact1?.type === "pattern" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
+											)}
+										</div>
+
+										{/* ANCHOR Contact Number 2 */}
+										<div className="flex flex-col md:mr-16">
+											<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">
+												Contact Number 2 <a className="text-xs">(Optional)</a>
+											</label>
+											<div className="flex items-center">
+												+63
+												<input
+													className="flex items-center w-full h-10 pl-3 ml-1 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
+													placeholder="Contact Number 2"
+													{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9/ })}
+												/>
+											</div>
+											{errors.contact2?.type === "maxLength" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+											)}
+											{errors.contact2?.type === "minLength" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
+											)}
+											{errors.contact2?.type === "pattern" && (
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
+											)}
+										</div>
+										{/* !SECTION Editable */}
+										{editable && (
+											<div className="flex flex-col mt-8 w-52 md:mr-16">
+												<button
+													type="button"
+													onClick={handleDeleteDialog}
+													className="px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-red-800 border rounded hover:bg-red-700 focus:outline-none"
+												>
+													Delete Account
+												</button>
+											</div>
+										)}
+									</div>
+								</form>
+							) : (
 								<div className="grid grid-flow-row sm:grid-cols-2">
-									{/* SECTION Editable */}
+									{/* SECTION Not editable */}
 									{/* ANCHOR First Name */}
 									<div className="flex flex-col mb-5 md:mr-16">
 										<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">First Name</label>
-										<input
-											className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
-											placeholder="First Name"
-											{...register("firstName", { required: true, maxLength: 80 })}
-										/>
-										{errors.firstName?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">First name is required</div>}
-										{errors.firstName?.type === "maxLength" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">First name must be less than 80 characters</div>
-										)}
+										<span>{user.firstName}</span>
 									</div>
 
 									{/* ANCHOR Last Name */}
 									<div className="flex flex-col mb-5 md:mr-16">
 										<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Last Name</label>
-										<input
-											className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
-											placeholder="Last Name"
-											{...register("lastName", { required: true, maxLength: 100 })}
-										/>
-										{errors.lastName?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Last name is required</div>}
-										{errors.lastName?.type === "maxLength" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Last name must be less than 100 characters</div>
-										)}
+										<span>{user.lastName}</span>
 									</div>
 
 									{/* ANCHOR Password */}
 									<div className="flex flex-col mb-5 md:mr-16">
 										<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Password</label>
-										<input
-											className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
-											placeholder="Password"
-											{...register("password", { required: false, minLength: 8, pattern: /^\S+$/i })}
-										/>
-										{errors.password?.type === "minLength" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Password must be more than 8 characters</div>
-										)}
-										{errors.password?.type === "pattern" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Password cannot contain whitespace</div>
-										)}
+										<span>**************</span>
 									</div>
-
-									{/* ANCHOR Confirm Password */}
-									{watch("password") !== "" && (
-										<div className="flex flex-col mb-5 md:mr-16">
-											<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Confirm Password</label>
-											<input
-												className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
-												placeholder="Confirm Password"
-												{...register("confirmPassword")}
-											/>
-											{message && <div className="mt-1 text-xs font-medium text-left text-red-500">{message}</div>}
-										</div>
-									)}
 
 									{/* ANCHOR Address */}
 									<div className="flex flex-col mb-5 md:mr-16">
 										<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Address</label>
-										<textarea
-											className="flex items-center w-full h-10 pt-2 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
-											placeholder="Address"
-											{...register("address", { required: true, maxLength: 100 })}
-										/>
-										{errors.address?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Address is required</div>}
-										{errors.address?.type === "maxLength" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Address must be less than 100 characters</div>
-										)}
+										<span>{user.address}</span>
 									</div>
 
 									{/* ANCHOR Contact Number 1 */}
 									<div className="flex flex-col mb-5 md:mr-16">
 										<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Contact Number 1</label>
-
-										<div className="flex items-center">
-											+63
-											<input
-												className="flex items-center w-full h-10 pl-3 ml-1 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
-												placeholder="Contact Number 1"
-												{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9/ })}
-											/>
-										</div>
-										{errors.contact1?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Contact number is required</div>}
-										{errors.contact1?.type === "maxLength" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
-										)}
-										{errors.contact1?.type === "minLength" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
-										)}
-										{errors.contact1?.type === "pattern" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
-										)}
+										<span>{user.contact1}</span>
 									</div>
 
 									{/* ANCHOR Contact Number 2 */}
 									<div className="flex flex-col md:mr-16">
-										<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">
-											Contact Number 2 <a className="text-xs">(Optional)</a>
-										</label>
-										<div className="flex items-center">
-											+63
-											<input
-												className="flex items-center w-full h-10 pl-3 ml-1 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
-												placeholder="Contact Number 2"
-												{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9/ })}
-											/>
-										</div>
-										{errors.contact2?.type === "maxLength" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
-										)}
-										{errors.contact2?.type === "minLength" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
-										)}
-										{errors.contact2?.type === "pattern" && (
-											<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
-										)}
+										<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Contact Number 2</label>
+										<span>{user.contact2}</span>
 									</div>
-									{/* !SECTION Editable */}
-									{editable && (
-										<div className="flex flex-col mt-8 w-52 md:mr-16">
-											<button
-												type="button"
-												onClick={handleDeleteDialog}
-												className="px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-red-800 border rounded hover:bg-red-700 focus:outline-none"
-											>
-												Delete Account
-											</button>
-										</div>
-									)}
+									{/* !SECTION Not editable */}
 								</div>
-							</form>
-						) : (
-							<div className="grid grid-flow-row sm:grid-cols-2">
-								{/* SECTION Not editable */}
-								{/* ANCHOR First Name */}
-								<div className="flex flex-col mb-5 md:mr-16">
-									<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">First Name</label>
-									<span>{user.firstName}</span>
-								</div>
-
-								{/* ANCHOR Last Name */}
-								<div className="flex flex-col mb-5 md:mr-16">
-									<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Last Name</label>
-									<span>{user.lastName}</span>
-								</div>
-
-								{/* ANCHOR Password */}
-								<div className="flex flex-col mb-5 md:mr-16">
-									<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Password</label>
-									<span>**************</span>
-								</div>
-
-								{/* ANCHOR Address */}
-								<div className="flex flex-col mb-5 md:mr-16">
-									<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Address</label>
-									<span>{user.address}</span>
-								</div>
-
-								{/* ANCHOR Contact Number 1 */}
-								<div className="flex flex-col mb-5 md:mr-16">
-									<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Contact Number 1</label>
-									<span>{user.contact1}</span>
-								</div>
-
-								{/* ANCHOR Contact Number 2 */}
-								<div className="flex flex-col md:mr-16">
-									<label className="mb-2 text-sm font-bold leading-tight tracking-normal text-gray-800">Contact Number 2</label>
-									<span>{user.contact2}</span>
-								</div>
-								{/* !SECTION Not editable */}
-							</div>
-						)}
-					</div>
+							)}
+						</div>
+					)}
 				</div>
 			</div>
 		</>
