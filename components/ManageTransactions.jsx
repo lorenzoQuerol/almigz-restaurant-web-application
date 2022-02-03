@@ -24,7 +24,6 @@ const ManageTransactions = () => {
 		params: {
 			limit: limit,
 			offset: (page - 1) * limit,
-			// filter: filter === "All" ? undefined : filter,
 		},
 	});
 
