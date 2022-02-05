@@ -240,6 +240,18 @@ export default function Tracker(session) {
 										<p className="text-base font-semibold leading-4 ">Method</p>
 										<p className="text-sm leading-5 ">{transaction.type}</p>
 									</div>
+									<div className="flex flex-col items-start justify-start space-y-2">
+										<p className="text-base font-semibold leading-4 ">Time</p>
+										<p className="text-sm leading-5 ">
+											{transaction.type == "Delivery"
+												? transaction.deliverTime === "Now"
+													? "Now"
+													: formatDate(transaction.deliverTime)
+												: transaction.pickupTime === "Now"
+												? "Now"
+												: formatDate(transaction.pickupTime)}
+										</p>
+									</div>
 								</div>
 								{/* !SECTION */}
 
@@ -272,7 +284,7 @@ export default function Tracker(session) {
 									</div>
 									<div className="flex flex-col items-center justify-center w-full pt-1 space-y-6 md:pt-4 xl:pt-8 md:space-y-8">
 										<Link href="/user/history">
-											<button className="px-3 py-2 font-semibold text-white transition-all bg-green-700 rounded-md cursor-pointer hover:bg-green-600">
+											<button className="px-20 py-2 font-medium text-white transition-all bg-green-700 rounded shadow cursor-pointer hover:bg-green-600">
 												<a>Back to My Orders</a>
 											</button>
 										</Link>
