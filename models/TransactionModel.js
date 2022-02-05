@@ -31,6 +31,12 @@ const CartItemSchema = new mongoose.Schema({
 });
 
 const TransactionSchema = new mongoose.Schema({
+	gcashInfo: {
+		type: Array,
+		required: false,
+		default: [],
+	},
+
 	lastUpdated: {
 		type: Date,
 		required: true,
