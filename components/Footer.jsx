@@ -2,18 +2,34 @@ import Link from "next/link";
 import Logo from "/public/Logo.png";
 import Image from "next/image";
 
+import { useState } from "react";
+import TermsDialog from "@components/TermsConditions";
+import PrivDialog from "@components/PrivacyPolicy";
+
+
 const Footer = () => {
+	const [openTermsDialog, setOpenTermsDialog] = useState(false);
+	const [openPrivDialog, setOpenPrivDialog] = useState(false);
+
+	const handleTermsDialog = () => {
+		// console.log(openTermsDialog);
+		setOpenTermsDialog(!openTermsDialog);
+	};
+
+	const handlePrivDialog = () => {
+		// console.log(openPrivDialog);
+		setOpenPrivDialog(!openPrivDialog);
+	};
+
 	return (
 		<footer className="bg-yellow-100 p-7 footer font-rale text-slate-900 footer-center">
+			<TermsDialog openTermsDialog={openTermsDialog} handleOpenTermsDialog={handleTermsDialog} />
+			<PrivDialog openPrivDialog={openPrivDialog} handleOpenPrivDialog={handlePrivDialog} />		
 			<div>
 				<Image className="inline-block fill-current" src={Logo} width={200} height={40} />
 				<p className="font-bold">
-					<Link href="/#">
-						<a className="mx-3">Contact Us</a>
-					</Link>
-					<Link href="/#">
-						<a className="mx-3">Terms and Conditions</a>
-					</Link>
+					<a className="mx-3" onClick={handlePrivDialog}>Contact Us</a>
+					<a className="mx-3" onClick={handleTermsDialog}>Terms and Conditions</a>
 					<Link href="/#">
 						<a className="mx-3">Privacy Policy</a>
 					</Link>
