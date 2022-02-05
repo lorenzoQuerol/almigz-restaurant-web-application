@@ -67,30 +67,29 @@ const PrivDialog = ({ openPrivDialog, handleOpenPrivDialog }) => {
 							leaveFrom="opacity-100 scale-100"
 							leaveTo="opacity-0 scale-95"
 						>
-							<div className="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-								<div className="flex justify-between items-start pb-3 md:px-4 rounded-t border-b ">
-									<Dialog.Title as="h3"  className="text-xl font-semibold text-gray-900 lg:text-2xl ">
+							<div className="inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+								<div className="flex justify-between items-center p-4 md:p-6 rounded-t border-b">
+									<Dialog.Title as="h3"  className="text-lg font-semibold text-gray-900 lg:text-2xl">
 										Privacy Policy
 									</Dialog.Title>
 									<button className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center " onClick={handleOpenPrivDialog}>
 										<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>  
 									</button>
 								</div>
-								<div className="md:p-4 py-3 space-y-6 max-h-80 overflow-y-auto">
+								<div className="max-h-80 overflow-y-auto px-5 py-3 md:px-7 md:py-6">
 								{sections.map((section) => (
-									<div>
-										<h1 className="font-semibold">{section.sectionNumber}.0 {section.sectionTitle}</h1>
-										<p className="text-base px-6 leading-relaxed text-gray-500">
+									<div className="pb-4">
+										<h1 className="font-semibold">{section.sectionNumber}.0<span className="pl-2">{section.sectionTitle}</span></h1>
+										<p className="space-y-6 indent-10 leading-relaxed text-gray-500">
 											{section.sectionContent}
 										</p>
 									</div>
 								))}
 								</div>
-
-								<div className="flex justify-end mt-2 space-x-4">
+								<div className="flex justify-end p-4 md:p-6 space-x-2 rounded-b border-t border-gray-200">
 									<button
 										type="button"
-										className="inline-flex justify-center px-4 py-2 text-sm font-medium bg-gray-200 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+										className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
 										onClick={handleOpenPrivDialog}
 									>
 										Close

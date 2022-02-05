@@ -28,11 +28,8 @@ const Footer = () => {
 			<div>
 				<Image className="inline-block fill-current" src={Logo} width={200} height={40} />
 				<p className="font-bold">
-					<a className="mx-3" onClick={handlePrivDialog}>Contact Us</a>
+					<a className="mx-3" onClick={handlePrivDialog}>Privacy Policy</a>
 					<a className="mx-3" onClick={handleTermsDialog}>Terms and Conditions</a>
-					<Link href="/#">
-						<a className="mx-3">Privacy Policy</a>
-					</Link>
 					<br />
 				</p>
 				<p>Copyright © 2010 - All rights reserved</p>
