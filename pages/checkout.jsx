@@ -1,15 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
 import useAxios from "axios-hooks";
 import axios from "axios";
 import Image from "next/image";
 import getStorageValue from "@utils/localStorage/getStorageValue";
-import removeStorageValue from "@utils/localStorage/removeStorageValue";
+import Loading from "@components/Loading";
 
-const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const timeValid = (time) => time >= "10:00" && time <= "19:00";
 
 export async function getServerSideProps(context) {
@@ -36,35 +34,24 @@ export default function CheckoutPage(session) {
 	const {
 		register,
 		watch,
-		getValues,
 		handleSubmit,
-		trigger,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
-			type: "Delivery",
+			type: "Pickup",
 			useHomeAddress: "true",
 			payMethod: "GCash",
 			deliverNow: "true",
-			branch: "Molino Blvd.",
+			branch: "Molino Boulevard",
 			address: "",
 			change: "",
 		},
 	});
 
 	// ANCHOR Page elements
-	const [currentStep, setCurrentStep] = useState(1);
-	const [forward, setForward] = useState(true);
-	const steps = ["Review Cart", "Additional Details", "Review Order"];
-
 	const [order, setOrder] = useState({}); // Contains cart and total price
 	const [products, setProducts] = useState(undefined); // Contains food products only (w/o total price)
-	const [delFee, setDelFee] = useState(50); // NOTE Delivery fee
-	const [subTotal, setSubtotal] = useState(0);
-	const [totalPrice, setTotalPrice] = useState(0);
-
 	const [user, setUser] = useState({});
-	const [details, setDetails] = useState(null);
 
 	useEffect(() => {
 		if (cart) setOrder(cart);
@@ -72,47 +59,7 @@ export default function CheckoutPage(session) {
 		if (data) setUser(data.user);
 	}, [data]);
 
-	// ANCHOR Cart functions
-	const deleteItem = (name) => {
-		const index = products.findIndex((product) => product.menuItem.productName === name);
-		products.splice(index, 1); // Delete item
-
-		let temp = 0;
-		products.forEach((product) => {
-			temp += product.quantity * product.menuItem.productPrice;
-		});
-
-		setTotalPrice(temp);
-
-		cart.products = products;
-		cart.total = temp;
-		window.localStorage.setItem("foodCart", JSON.stringify(cart));
-
-		if (products.length === 0) {
-			setOrder(null);
-			setProducts(null);
-			removeStorageValue("foodCart");
-			router.replace("/menu");
-		}
-	};
-
-	const updateTotal = (value, name) => {
-		const index = products.findIndex((product) => product.menuItem.productName === name);
-		products[index].quantity = value; // Update quantity
-
-		let temp = 0;
-		products.forEach((product) => {
-			temp += product.quantity * product.menuItem.productPrice;
-		});
-
-		setTotalPrice(temp);
-
-		cart.products = products;
-		cart.total = temp;
-		window.localStorage.setItem("foodCart", JSON.stringify(cart));
-	};
-
-	// SECTION Additional details functions
+	// ANCHOR Today's date for limiting
 	const [dateToday, setDateToday] = useState(() => {
 		const date = new Date().toISOString().slice(0, -14);
 		return date;
@@ -122,69 +69,32 @@ export default function CheckoutPage(session) {
 	const [startTime, setStartTime] = useState("10:00");
 	const [endTime, setEndTime] = useState("19:00");
 
-	const confirmDetails = (data) => {
+	// ANCHOR Place order function
+	const placeOrder = async (data) => {
 		const formattedDate = `${data.deliverDate}T${data.deliverTime}`;
-
-		const temp = {
-			lastUpdated: undefined,
-			invoiceNum: undefined,
-			dateCreated: undefined,
+		let response = await axios.get("/api/count", { params: { filter: "transactions" } });
+		const transaction = {
+			lastUpdated: new Date(),
+			invoiceNum: response.data.count,
+			dateCreated: new Date(),
 			orderStatus: 0,
-			type: getValues("type"),
+			type: data.type,
 			fullName: `${user.firstName} ${user.lastName}`,
 			email: user.email,
 			contactNum: [user.contact1, user.contact2],
 			order: order.products,
 			specialInstructions: data.specialInstructions,
 			reasonForCancel: "",
-			totalPrice: getValues("type") === "Delivery" ? cart.total + 50 : cart.total,
-			address: getValues("useHomeAddress") === "true" ? user.address : getValues("address"),
-			payMethod: getValues("payMethod"),
-			change: Number(getValues("change")),
-			deliverTime: getValues("type") === "Delivery" ? (data.deliverNow === "true" ? "Now" : formattedDate) : undefined,
-			branch: getValues("branch"),
-			pickupTime: getValues("type") === "Pickup" ? (data.deliverNow === "true" ? "Now" : formattedDate) : undefined,
+			totalPrice: data.type === "Delivery" ? cart.total + 50 : cart.total,
+			address: data.useHomeAddress === "true" ? user.address : data.address,
+			payMethod: data.payMethod,
+			change: data.payMethod === "COD" ? Number(data.change) : null,
+			branch: data.branch,
+			deliverTime: data.type === "Delivery" ? (data.deliverNow === "true" ? "Now" : formattedDate) : null,
+			pickupTime: data.type === "Pickup" ? (data.deliverNow === "true" ? "Now" : formattedDate) : null,
 		};
 
-		setDetails(temp);
-
-		if (Object.keys(errors).length === 0 && errors.constructor === Object) {
-			setCurrentStep(currentStep + 1);
-			setForward(true);
-		}
-	};
-	// !SECTION
-
-	// SECTION Review checkout functions
-	const formatDate = (date) => {
-		date = new Date(date).toLocaleString("en-US", {
-			weekday: "short",
-			day: "numeric",
-			year: "numeric",
-			month: "long",
-			hour: "numeric",
-			minute: "numeric",
-		});
-		const tempDate = new Date(date);
-
-		// Get formatted date and time
-		const formatDate = `${months[tempDate.getMonth()]} ${tempDate.getDate()}, ${tempDate.getFullYear()}`;
-		const time = date.slice(23);
-
-		// Return formatted date
-		return `${formatDate} @ ${time}`;
-	};
-
-	const placeOrder = async () => {
-		const transaction = details;
-
-		const response = await axios.get("/api/count", { params: { filter: "transactions" } });
-
-		transaction.lastUpdated = new Date();
-		transaction.dateCreated = new Date();
-		transaction.invoiceNum = response.data.count;
-
-		// Pre-process cart for transaction
+		// Remove extra properties from each menu item
 		transaction.order.forEach((item) => {
 			delete item.menuItem.category;
 			delete item.menuItem.productDescription;
@@ -193,273 +103,176 @@ export default function CheckoutPage(session) {
 			delete item.menuItem.available;
 		});
 
-		// Set to undefined for fields not required in DELIVERY type
-		if (transaction.type === "Delivery") {
-			transaction.storeLocation = undefined;
-			transaction.pickupTime = undefined;
-			if (transaction.payMethod === "GCash") transaction.change = undefined;
-		}
-
-		// Set to undefined for fields not required in PICKUP type
-		if (transaction.type === "Pickup") {
-			transaction.address = undefined;
-			transaction.deliverTime = undefined;
-		}
-
 		// Place transaction into user history and transactions
-		const transRes = await axios.post("/api/transactions", transaction);
-		const userRes = await axios.put(`/api/history/${session.user.email}`, transaction);
+		response = await axios.post("/api/transactions", transaction);
+		await axios.put(`/api/history/${session.user.email}`, transaction);
 
-		window.localStorage.setItem("transaction", JSON.stringify(transRes.data.transaction));
+		window.localStorage.setItem("transaction", JSON.stringify(response.data.transaction));
 		router.replace("/receipt");
 	};
-	// !SECTION
-
-	// ANCHOR Animation function
-	const handleAnimation = (event) => {
-		if (event.target.id == "prev") {
-			setCurrentStep(currentStep - 1);
-			setForward(false);
-		}
-
-		if (event.target.id == "next") {
-			setCurrentStep(currentStep + 1);
-			setForward(true);
-		}
-	};
-
-	useEffect(() => {
-		setTimeout(() => {
-			setForward(true);
-		}, 500);
-	}, [forward]);
-
-	if (loading) return <h1>Loading...</h1>;
 
 	return (
-		<div className="flex justify-center">
-			<div className="relative w-full mx-5 my-10 sm:mx-0 sm:w-3/4 xl:w-1/2 font-rale text-slate-900">
-				<div className="flex flex-col text-green-700 sm:justify-between sm:flex-row">
-					<div className="mb-5 text-5xl font-extrabold ">Checkout</div>
-					<div className="text-xl font-bold sm:self-center">{steps[currentStep - 1]}</div>
-				</div>
+		<div className="container p-12 mx-auto text-gray-800 font-rale">
+			{loading ? (
+				<Loading />
+			) : (
+				<div className="flex flex-col w-full px-0 mx-auto md:flex-row">
+					{/* SECTION Shipping details */}
+					<div className="flex flex-col md:w-full">
+						<form className="justify-center w-full mx-auto" onSubmit={handleSubmit(placeOrder)}>
+							{/* ANCHOR Choose type */}
+							<h2 className="mb-4 font-bold text-green-700 md:text-xl text-heading">Type</h2>
+							<div className="my-4 border-b-2">
+								<div className="w-full">
+									<div className="flex items-center mb-2 space-x-4">
+										<div className="flex items-center">
+											<input className="accent-green-600" {...register("type", { required: true })} type="radio" value="Pickup" />
+											<p className="ml-1 text-sm font-normal leading-4">Pickup</p>
+										</div>
+										<div className="flex items-center">
+											<input className="accent-green-600" {...register("type", { required: true })} type="radio" value="Delivery" />
+											<p className="ml-1 text-sm font-normal leading-4">Delivery</p>
+										</div>
+									</div>
+								</div>
+							</div>
 
-				{/* ANCHOR Review cart */}
-				<Transition
-					show={currentStep === 1 ? true : false}
-					enter="delay-700 transform transition ease-out duration-300"
-					enterFrom={`opacity-0 ${forward ? "translate-x-full" : "-translate-x-full"}`}
-					enterTo="translate-x-0 opacity-100"
-					leave="transform transition ease-in duration-300"
-					leaveFrom="translate-x-0 opacity-100"
-					leaveTo={`opacity-0 ${forward ? "-translate-x-full" : "translate-x-full"}`}
-				>
-					<div className={`${forward ? "" : "absolute"} w-full mt-5 rounded-md text-md sm:text-lg card bg-zinc-100 drop-shadow-lg`}>
-						<div className="card-body">
-							{/* Cart details */}
-							{cart && (
-								<div className="mb-5 divide-y">
-									{cart.products.map((product) => {
-										return (
-											<li key={product.id} className="flex py-3 sm:flex-row">
-												{/* Image */}
-												<div className="flex-shrink-0 w-16 h-16 overflow-hidden border border-gray-200 rounded-md ">
-													<div className="object-cover object-center w-full h-full">
-														<Image src={product.menuItem.productImagesCollection.items[0].url} height={100} width={100} />
-													</div>
-												</div>
-
-												{/* Food item details */}
-												<div className="flex-col flex-1 w-1/4 ml-4 text-sm sm:flex sm:text-md">
-													<div>
-														<div className="flex justify-between font-medium">
-															<p className="font-bold">{product.menuItem.productName}</p>
-														</div>
-														<p className="font-medium">₱ {product.menuItem.productPrice}</p>
-													</div>
-													<div className="flex items-end justify-between flex-1">
-														<div className="flex">
-															<button
-																name={product.menuItem.productName}
-																type="button"
-																className="font-bold text-green-700 transition-colors duration-200 hover:text-green-600"
-																onClick={(e) => deleteItem(e.target.name)}
-															>
-																Remove
-															</button>
-														</div>
-													</div>
-												</div>
-
-												{/* Quantity */}
-												{/* <div className="flex self-center ml-4 sm:flex-1">
-													<input
-														className="pr-2 border rounded-md input font-black-100 text-normal w-14 input-sm input-bordered focus:ring focus:outline-none focus:ring-green-700"
-														type="number"
-														min="1"
-														step="1"
-														max="9999"
-														name={product.menuItem.productName}
-														value={product.quantity}
-														placeholder={product.quantity}
-														onLoad={(e) => setTotalPrice(product.quantity)}
-														onChange={(e) => updateTotal(e.target.value, e.target.name)}
-													/>
-												</div> */}
-												{/* Total price */}
-												<p className="self-center hidden font-bold w-22 sm:flex text-end">
-													<p className="ml-4 mr-5 font-bold ">₱ {product.menuItem.productPrice * product.quantity}</p>
-												</p>
-											</li>
-										);
-									})}
+							{/* ANCHOR Basic details */}
+							<h2 className="mb-4 font-bold text-green-700 md:text-xl text-heading">Basic Details</h2>
+							<div className="space-x-0 lg:flex lg:space-x-4">
+								<div className="w-full lg:w-1/2">
+									<label for="firstName" className="block mb-3 text-sm font-semibold">
+										Full Name
+									</label>
+									<span>
+										{user.firstName} {user.lastName}
+									</span>
+								</div>
+							</div>
+							{watch("type") === "Delivery" && (
+								<div className="mt-4">
+									<div className="w-full">
+										<label for="Email" className="block mb-3 text-sm font-semibold">
+											Email
+										</label>
+										<span>{user.email}</span>
+									</div>
 								</div>
 							)}
-
-							{/* Step button */}
-							<button
-								id="next"
-								onClick={(e) => handleAnimation(e)}
-								className="p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
-							>
-								Next
-							</button>
-						</div>
-					</div>
-				</Transition>
-
-				{/* ANCHOR Additional details */}
-				<Transition
-					show={currentStep === 2 ? true : false}
-					enter="delay-700 transform transition ease-out duration-500"
-					enterFrom={`opacity-0 ${forward ? "translate-x-full" : "-translate-x-full"}`}
-					enterTo="translate-x-0 opacity-100"
-					leave="transform transition ease-in duration-500"
-					leaveFrom="translate-x-0 opacity-100"
-					leaveTo={`opacity-0 ${forward ? "-translate-x-full" : "translate-x-full"}`}
-				>
-					<div className={`${forward ? "" : "absolute"} w-full mt-5 rounded-md text-md sm:text-lg card bg-zinc-100 drop-shadow-lg`}>
-						<div className="card-body">
-							<form onSubmit={handleSubmit(confirmDetails)}>
-								{/* ANCHOR Delivery or pickup radio buttons */}
-								<div className="flex mb-2 space-x-4 text-sm">
-									<div>
-										<input className="self-center mr-2" name="type" {...register("type")} type="radio" value="Delivery" />
-										<span className={`${watch("type") === "Delivery" ? "text-green-700 font-semibold" : ""}`}>Delivery</span>
-									</div>
-									<div>
-										<input className="self-center mr-2" name="type" {...register("type")} type="radio" value="Pickup" />
-										<span className={`${watch("type") === "Pickup" ? "text-green-700 font-semibold" : ""}`}>Pickup</span>
-									</div>
+							<div className="mt-4">
+								<div className="w-full">
+									<label for="Email" className="block mb-3 text-sm font-semibold">
+										Contact Information
+									</label>
+									<span>
+										{user.contact1}
+										{user.contact2 !== "" ? `, ${user.contact2}` : ""}
+									</span>
 								</div>
+							</div>
 
-								{/* ANCHOR User details */}
-								{watch("type") === "Delivery" ? (
-									<div className="text-sm border-b-2">
-										<div className="text-lg font-bold text-green-700">User Details</div>
-										<div className="font-bold">Full Name</div>
-										<div className="mb-2">
-											{user.firstName} {user.lastName}
-										</div>
-										<div className="font-bold">Email Address</div>
-										<div className="mb-2">{user.email}</div>
-										<div className="font-bold">Contact Information</div>
-										<div className="mb-2">
-											{user.contact1} {user.contact2 !== "" ? `, ${user.contact2}` : ""}
-										</div>
-										<div className="font-bold">Address</div>
-										<div className="flex space-x-4">
-											<div>
-												<input className="self-center mr-2" name="useHomeAddress" {...register("useHomeAddress")} type="radio" value="true" />
-												<span className={`${watch("useHomeAddress") === "true" ? "text-green-700 font-semibold" : ""}`}>Use Home Address</span>
+							<div className="my-4 border-b-2">
+								<div className="w-full">
+									{watch("type") === "Delivery" ? (
+										<>
+											<label for="Address" className="block mb-1 text-sm font-semibold">
+												Address
+											</label>
+											<div className="flex items-center mb-2 space-x-4">
+												<div className="flex items-center">
+													<input className="accent-green-600" {...register("useHomeAddress", { required: true })} type="radio" value="true" />
+													<p className="ml-1 text-sm font-normal leading-4">Home Address</p>
+												</div>
+												<div className="flex items-center">
+													<input className="accent-green-600" {...register("useHomeAddress", { required: true })} type="radio" value="false" />
+													<p className="ml-1 text-sm font-normal leading-4">Other Address</p>
+												</div>
 											</div>
-											<div>
-												<input className="self-center mr-2" name="useHomeAddress" {...register("useHomeAddress")} type="radio" value="false" />
-												<span className={`${watch("useHomeAddress") === "true" ? "" : "text-green-700 font-semibold"}`}>Use Different Address</span>
+											{watch("useHomeAddress") == "true" ? (
+												<div className="mb-1">
+													<span className="w-full">{user.address}</span>
+												</div>
+											) : (
+												<>
+													<textarea
+														className="w-full px-4 py-3 text-xs border border-gray-300 rounded lg:text-sm focus:outline-none focus:ring-1 focus:ring-green-700"
+														name="Address"
+														cols="20"
+														rows="4"
+														placeholder="Address"
+														{...register("address", { required: watch("useHomeAddress") === "false" ? true : false, maxLength: 100 })}
+													/>
+													{errors.address?.type === "required" && (
+														<div className="mb-1 text-sm font-medium text-left text-red-500">Home address is required</div>
+													)}
+													{errors.address?.type === "maxLength" && (
+														<div className="mt-1 text-sm font-medium text-left text-red-500">Home address must be less than 100 characters</div>
+													)}
+												</>
+											)}
+										</>
+									) : (
+										<>
+											<label for="Address" className="block mb-4 text-sm font-semibold">
+												Branch
+											</label>
+											<div className="items-center mb-2 text-md">
+												<select
+													className="w-full py-1 pl-2 text-sm border border-gray-300 rounded sm:w-1/2 lg:w-1/3 focus:outline-none focus:ring-1 focus:ring-green-700"
+													{...register("branch")}
+												>
+													<option value="Molino Boulevard">Molino Boulevard</option>
+													<option value="Unitop Mall">Unitop Mall</option>
+													<option value="V Central Mall">V Central Mall</option>
+												</select>
 											</div>
-										</div>
-										{watch("useHomeAddress") === "true" ? (
-											<div className="mb-2">{user.address}</div>
-										) : (
-											<>
-												<textarea
-													className="w-full h-20 my-2 rounded-md input-bordered textarea focus:ring focus:outline-none focus:ring-green-700"
-													name="address"
-													{...register("address", { required: watch("useHomeAddress") == "false" ? true : false })}
-												/>
-												{errors.address && <div className="mb-2 text-sm font-medium text-left text-red-500 ">Address is required</div>}
-											</>
-										)}
-									</div>
-								) : (
-									<div className="text-sm border-b-2">
-										<div className="font-bold">Full Name</div>
-										<div className="mb-2">
-											{user.firstName} {user.lastName}
-										</div>
-										<div className="font-bold">Contact Information</div>
-										<div className="mb-2">
-											{user.contact1} {user.contact2 !== "" ? `, ${user.contact2}` : ""}
-										</div>
-										<div>
-											<span className="font-bold">Choose Branch: </span>
-											<select
-												name="branch"
-												className="w-1/2 mb-3 rounded-md sm:w-1/3 input-bordered sm:ml-2 select select-xs focus:ring focus:outline-none focus:ring-green-700"
-												{...register("branch")}
-											>
-												<option value="Molino Blvd.">Molino Blvd.</option>
-												<option value="V Central">V Central</option>
-												<option value="Unitop">Unitop</option>
-											</select>
-										</div>
-									</div>
-								)}
+										</>
+									)}
+								</div>
+							</div>
 
-								{/* ANCHOR Payment details */}
-								<div className="mt-2 text-sm border-b-2">
-									<div className="text-lg font-bold text-green-700">Payment Details</div>
-									<div className="flex mb-2 space-x-4">
-										<div>
-											<input className="self-center mr-2" name="payMethod" {...register("payMethod")} type="radio" value="COD" />
-											<span className={`${watch("payMethod") === "COD" ? "text-green-700 font-semibold" : ""}`}>
-												{watch("type") === "Delivery" ? "COD (Cash on Delivery)" : "Cash on Pickup"}
-											</span>
+							{/* ANCHOR Payment details */}
+							<h2 className="mb-4 font-bold text-green-700 md:text-xl text-heading">Payment</h2>
+							<div className="my-4 border-b-2">
+								<div className="w-full mb-2">
+									<div className="flex items-center mb-1 space-x-4">
+										<div className="flex items-center">
+											<input className="accent-green-600" {...register("payMethod")} type="radio" value="COD" />
+											<p className="ml-2 text-sm font-normal leading-4">{watch("type") === "Pickup" ? "Cash on Pickup" : "COD (Cash on Delivery)"}</p>
 										</div>
-										<div>
-											<input className="self-center mr-2" name="payMethod" {...register("payMethod")} type="radio" value="GCash" />
-											<span className={`${watch("payMethod") === "GCash" ? "text-green-700 font-semibold" : ""}`}>GCash</span>
+										<div className="flex items-center">
+											<input className="accent-green-600" {...register("payMethod")} type="radio" value="GCash" />
+											<p className="ml-2 text-sm font-normal leading-4">GCash</p>
 										</div>
 									</div>
-									{watch("payMethod") === "COD" ? (
-										<div className="mb-2">
-											<span className="font-bold ">Change for: ₱ </span>
+									{watch("payMethod") == "COD" ? (
+										<div className="items-center mt-2 text-md">
+											Change for:
 											<input
 												type="number"
-												name="change"
-												className="w-32 ml-2 rounded-md input-bordered input input-xs focus:ring focus:outline-none focus:ring-green-700"
+												className="px-2 py-1 ml-2 text-xs border border-gray-300 rounded sm:w-1/3 lg:w-1/4 lg:text-sm focus:outline-none focus:ring-1 focus:ring-green-700"
+												placeholder="Change"
 												{...register("change", {
 													required: watch("payMethod") === "COD" ? true : false,
-													min: watch("type") === "Pickup" ? cart.total : cart.total + 50,
+													min: watch("type") === "Pickup" ? Number(order.total) : Number(order.total) + 50,
 												})}
 											/>
-											<div className="mt-2 text-xs font-bold">Total Price: ₱{watch("type") === "Pickup" ? cart.total : cart.total + 50}</div>
 											{errors.change?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Change is required</div>}
 											{errors.change?.type === "min" && (
-												<div className="mt-1 text-sm font-medium text-left text-red-500">Change must be more than the total price</div>
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Change must be more than or equal to the total price</div>
 											)}
 										</div>
 									) : (
-										<div className="flex-row">
+										<>
 											{watch("type") === "Delivery" ? (
-												<div></div>
+												<span className="text-sm font-semibold">* Payment details will be seen on the tracker page once you place an order</span>
 											) : (
-												<div>
-													{watch("branch") === "Molino Blvd." && (
+												<div className="text-sm">
+													{watch("branch") === "Molino Boulevard" && (
 														<>
 															<div>
 																<div className="font-bold">Name</div>
-																<div className="mb-2">Molino Blvd.</div>
+																<div className="mb-2">Molino Boulevard</div>
 															</div>
 															<div>
 																<div className="font-bold">GCash Number</div>
@@ -468,11 +281,11 @@ export default function CheckoutPage(session) {
 														</>
 													)}
 
-													{watch("branch") === "V Central" && (
+													{watch("branch") === "V Central Mall" && (
 														<>
 															<div>
 																<div className="font-bold">Name</div>
-																<div className="mb-2">V Central</div>
+																<div className="mb-2">V Central Mall</div>
 															</div>
 															<div>
 																<div className="font-bold">GCash Number</div>
@@ -481,11 +294,11 @@ export default function CheckoutPage(session) {
 														</>
 													)}
 
-													{watch("branch") === "Unitop" && (
+													{watch("branch") === "Unitop Mall" && (
 														<>
 															<div>
 																<div className="font-bold">Name</div>
-																<div className="mb-2">Unitop</div>
+																<div className="mb-2">Unitop Mall</div>
 															</div>
 															<div>
 																<div className="font-bold">GCash Number</div>
@@ -495,253 +308,135 @@ export default function CheckoutPage(session) {
 													)}
 												</div>
 											)}
-											<div className="mb-2 text-xs font-bold">
-												{watch("type") === "Delivery"
-													? "*The payment details will be available once you place your order"
-													: "*The payment details depends on the branch you choose"}
-											</div>
-										</div>
-									)}
-								</div>
-
-								{/* ANCHOR Deliver/Pickup now or set date/time */}
-								<div className="my-2 text-sm border-b-2">
-									<div className="text-lg font-bold text-green-700">{watch("type") === "Delivery" ? "When to Deliver" : "When to Pickup"}</div>
-									<div className="flex mb-2 space-x-4">
-										<div>
-											<input className="self-center mr-2" name="deliverNow" {...register("deliverNow")} type="radio" value="true" />
-											<span className={`${watch("deliverNow") === "true" ? "text-green-700 font-semibold" : ""}`}>
-												{watch("type") === "Delivery" ? "Deliver NOW" : "Pickup NOW"}
-											</span>
-										</div>
-										<div>
-											<input className="self-center mr-2" name="deliverNow" {...register("deliverNow")} type="radio" value="false" />
-											<span className={`${watch("deliverNow") === "false" ? "text-green-700 font-semibold" : ""}`}>Choose Date and Time</span>
-										</div>
-									</div>
-									{watch("deliverNow") === "false" && (
-										<>
-											<div>
-												<input
-													type="date"
-													name="deliverDate"
-													className="p-1 mb-2 rounded-md input-bordered focus:ring focus:outline-none focus:ring-green-700"
-													{...register("deliverDate", { required: watch("deliverNow") === "false" ? true : false, min: dateToday })}
-												/>
-												{errors.deliverDate?.type === "required" && (
-													<div className="mb-2 text-sm font-medium text-left text-red-500">Please choose a date</div>
-												)}
-												{errors.deliverDate?.type === "min" && (
-													<div className="mb-2 text-sm font-medium text-left text-red-500">Please choose a date no earlier than today</div>
-												)}
-											</div>
-
-											<div>
-												<input
-													type="time"
-													name="deliverTime"
-													placeholder="deliverTime"
-													className="p-1 mb-2 rounded-md input-bordered focus:ring focus:outline-none focus:ring-green-700"
-													{...register("deliverTime", {
-														required: watch("deliverNow") === "false" ? true : false,
-														validate: timeValid,
-													})}
-												/>
-												{errors.deliverTime?.type === "required" && (
-													<div className="mb-2 text-sm font-medium text-left text-red-500">Please choose a time</div>
-												)}
-												{errors.deliverTime?.type === "validate" && (
-													<div className="mb-2 text-sm font-medium text-left text-red-500">Please choose a time between operating hours</div>
-												)}
-											</div>
-											<div className="mb-2 text-sm font-semibold">
-												Operating Hours: {startTime} - {endTime}
-											</div>
 										</>
 									)}
 								</div>
+							</div>
 
-								{/* ANCHOR Special instructions */}
-								<div className="mb-5">
-									<p className="text-lg font-bold text-green-700">Special Instructions</p>
-									<textarea
-										className="w-full h-20 border rounded-md input-bordered textarea focus:ring focus:outline-none focus:ring-green-700"
-										name="specialInstructions"
-										{...register("specialInstructions")}
-									/>
+							{/* ANCHOR When to deliver */}
+							<h2 className="mb-1 font-bold text-green-700 md:text-xl text-heading">{watch("type") == "Delivery" ? "When to Deliver" : "When to Pickup"}</h2>
+							<div className="mt-4">
+								<div className="w-full">
+									<div className="flex items-center mb-2 space-x-4">
+										<div className="flex items-center">
+											<input className="accent-green-600" {...register("deliverNow", { required: true })} type="radio" value="true" />
+											<p className="ml-2 text-sm font-normal leading-4">NOW</p>
+										</div>
+										<div className="flex items-center">
+											<input className="accent-green-600" {...register("deliverNow", { required: true })} type="radio" value="false" />
+											<p className="ml-2 text-sm font-normal leading-4">Choose a Date and Time</p>
+										</div>
+									</div>
 								</div>
-								{/* ANCHOR Step buttons */}
-								<div className="flex w-full space-x-4">
-									<button
-										type="button"
-										id="prev"
-										onClick={(e) => handleAnimation(e)}
-										className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
-									>
-										Go Back
-									</button>
-									<button
-										type="submit"
-										id="next"
-										className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
-									>
-										Next
-									</button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</Transition>
+								{watch("deliverNow") === "false" && (
+									<>
+										<div>
+											<input
+												type="date"
+												name="deliverDate"
+												className="p-1 mb-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-700"
+												{...register("deliverDate", { required: watch("deliverNow") === "false" ? true : false, min: dateToday })}
+											/>
+											{errors.deliverDate?.type === "required" && <div className="mb-2 text-sm font-medium text-left text-red-500">Please choose a date</div>}
+											{errors.deliverDate?.type === "min" && (
+												<div className="mb-2 text-sm font-medium text-left text-red-500">Please choose a date no earlier than today</div>
+											)}
+										</div>
 
-				{/* ANCHOR Review checkout */}
-				{details && (
-					<Transition
-						show={currentStep === 3 ? true : false}
-						enter="delay-700 transform transition ease-out duration-300"
-						enterFrom={`opacity-0 ${forward ? "translate-x-full" : "-translate-x-full"}`}
-						enterTo="translate-x-0 opacity-100"
-						leave="transform transition ease-in duration-300"
-						leaveFrom="translate-x-0 opacity-100"
-						leaveTo={`opacity-0 ${forward ? "-translate-x-full" : "translate-x-full"}`}
-					>
-						<div className={`${forward ? "" : "absolute"} w-full mt-5 rounded-md text-md sm:text-lg card bg-zinc-100 drop-shadow-lg`}>
-							<div className="card-body">
-								{/* ANCHOR User details */}
-								{details.type === "Delivery" ? (
-									<div className="text-sm border-b-2">
-										<div className="text-lg font-bold text-green-700">User Details</div>
-										<div className="font-bold">Full Name</div>
-										<div className="mb-2">{details.fullName}</div>
-										<div className="font-bold">Email Address</div>
-										<div className="mb-2">{details.email}</div>
-										<div className="font-bold">Contact Information</div>
-										<div className="mb-2">
-											{details.contactNum[0]}, {details.contactNum[1]}
+										<div>
+											<input
+												type="time"
+												name="deliverTime"
+												placeholder="deliverTime"
+												className="p-1 mb-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-700"
+												{...register("deliverTime", {
+													required: watch("deliverNow") === "false" ? true : false,
+													validate: timeValid,
+												})}
+											/>
+											{errors.deliverTime?.type === "required" && <div className="mb-2 text-sm font-medium text-left text-red-500">Please choose a time</div>}
+											{errors.deliverTime?.type === "validate" && (
+												<div className="mb-2 text-sm font-medium text-left text-red-500">Please choose a time between operating hours</div>
+											)}
 										</div>
-										<div className="font-bold">Address</div>
-										<div className="mb-2">{details.address}</div>
-									</div>
-								) : (
-									<div className="text-sm border-b-2">
-										<div className="text-lg font-bold text-green-700">User Details</div>
-										<div className="font-bold">Full Name</div>
-										<div className="mb-2">{details.fullName}</div>
-										<div className="font-bold">Contact Information</div>
-										<div className="mb-2">
-											{details.contactNum[0]}, {details.contactNum[1]}
+										<div className="mb-2 text-sm font-semibold">
+											Operating Hours: {startTime} - {endTime}
 										</div>
-										<div className="font-bold">Branch</div>
-										<div className="mb-2">{details.branch}</div>
-									</div>
+									</>
 								)}
+							</div>
 
-								{/* ANCHOR Delivery details */}
-								<div className="py-2 text-sm border-b-2">
-									<div className="text-lg font-bold text-green-700">Payment Details</div>
-									<div className="font-bold">Type</div>
-									<div className="mb-2">{details.type}</div>
-									<div className="font-bold">Payment</div>
-									<div className="mb-2">
-										{details.payMethod} {details.payMethod === "COD" ? `(Change for ₱${details.change})` : ""}
-									</div>
-									{details.type === "Delivery" && <div className="font-bold">Deliver On</div>}
-									{details.type === "Delivery" && <div className="">{watch("deliverNow") ? "Now" : formatDate(details.deliverTime)}</div>}
-									{details.type === "Pickup" && <div className="font-bold">Pickup on</div>}
-									{details.type === "Pickup" && <div className="">{watch("deliverNow") ? "Now" : formatDate(details.pickupTime)}</div>}
-								</div>
+							{/* ANCHOR Special Instructions */}
+							<div className="relative pt-3">
+								<label for="note" className="block mb-3 font-bold text-green-700 md:text-xl">
+									Special Instructions
+								</label>
+								<textarea
+									name="note"
+									className="flex items-center w-full px-4 py-3 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-700"
+									rows="4"
+									placeholder="Special instructions for delivery"
+									{...register("specialInstructions", { maxLength: 100 })}
+								/>
+								{errors.specialInstructions?.type === "maxLength" && (
+									<div className="mb-2 text-sm font-medium text-left text-red-500">Special instructions must be below 100 characters</div>
+								)}
+							</div>
 
-								{/* ANCHOR Food order */}
-								<div className="py-2 text-sm border-b-2">
-									<div className="text-lg font-bold text-green-700">Order Summary</div>
-									<div className="flex justify-between font-bold">
-										<div>Item</div>
-										<div>Qty.</div>
-										<div className="hidden sm:flex"></div>
-									</div>
-									<div className="divide-y">
-										{order.products.map((product) => {
-											return (
-												<li key={product.id} className="flex py-3 sm:flex-row">
-													{/* Image */}
-													<div className="flex-shrink-0 w-16 h-16 overflow-hidden border border-gray-200 rounded-md">
-														<div className="object-cover object-center w-full h-full">
-															<Image src={product.menuItem.productImagesCollection.items[0].url} height={100} width={100} />
+							{/* ANCHOR Place order button */}
+							<div className="mt-4">
+								<button className="w-full px-6 py-2 text-white transition-colors bg-green-700 rounded hover:bg-green-600">Place Order</button>
+							</div>
+						</form>
+					</div>
+					{/* !SECTION  */}
+
+					{/* SECTION Order Summary */}
+					<div className="flex flex-col w-full ml-0 md:ml-5 lg:ml-9 lg:w-2/5">
+						<div className="pt-12 md:pt-0 2xl:ps-4">
+							<h2 className="text-xl font-bold">Order Summary</h2>
+							<div className="mt-8">
+								<div className="flex flex-col space-y-4">
+									{products && (
+										<>
+											{products.map((p, index) => {
+												return (
+													<div className="flex space-x-2">
+														<div className="p-1 rounded shadow bg-zinc-100">
+															<Image src={p.menuItem.productImagesCollection.items[0].url} width={70} height={60} />
 														</div>
-													</div>
-
-													{/* Food item details */}
-													<div className="flex-col flex-1 w-1/4 ml-4 text-sm sm:flex sm:text-md">
-														<div>
-															<div className="flex justify-between font-medium text-gray-900">
-																<p className="font-bold">{product.menuItem.productName}</p>
-															</div>
-															<p className="font-medium">₱ {product.menuItem.productPrice}</p>
+														<div className="flex-1">
+															<h2 className="text-lg font-bold">{p.menuItem.productName}</h2>₱{p.menuItem.productPrice}
 														</div>
+														<div className="pt-[.20rem] w-10">{`x ${p.quantity}`}</div>
 													</div>
-
-													{/* Quantity */}
-													<div className="flex self-center ml-4 font-medium sm:flex-1">x {product.quantity}</div>
-
-													{/* Total price */}
-													<p className="self-center hidden w-20 font-bold sm:flex text-end">
-														<p className="ml-4 mr-5 font-bold ">₱ {product.menuItem.productPrice * product.quantity}</p>
-													</p>
-												</li>
-											);
-										})}
-									</div>
-								</div>
-
-								{/* ANCHOR Payment details */}
-								<div className="py-2 text-sm border-b-2">
-									<div className="mb-1 text-lg font-bold text-green-700">Pricing</div>
-									<div className="flex justify-between font-medium text-gray-900">
-										<p className="font-semibold">Subtotal</p>
-										<p>₱{order.total}</p>
-									</div>
-									{details.type === "Delivery" ? (
-										// Delivery
-										<div className="flex justify-between my-3 text-gray-500 text-medium">
-											<p>Delivery Fee</p>
-											<p>₱{delFee}</p>
-										</div>
-									) : (
-										// Pickup
-										<div className="flex justify-between my-3 text-gray-500 text-medium">
-											<p>Delivery Fee</p>
-											<p>₱ - </p>
-										</div>
+												);
+											})}
+										</>
 									)}
-									<div className="flex justify-between font-medium text-gray-900">
-										<p className="font-bold text-green-700">Total</p>
-										{details.type === "Delivery" ? <p className="font-bold">₱{order.total + delFee}</p> : <p className="font-bold">₱{order.total}</p>}
-									</div>
-								</div>
-								<div className="py-2 text-sm">
-									<div className="mb-1 text-lg font-bold text-green-700">Special Instructions</div>
-									{details.specialInstructions ? <div>{details.specialInstructions}</div> : <div>None</div>}
-								</div>
-								{/* Place order button */}
-								<div className="flex w-full space-x-4">
-									<button
-										id="prev"
-										onClick={(e) => handleAnimation(e)}
-										className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
-									>
-										Go Back
-									</button>
-									<button
-										onClick={placeOrder}
-										className="w-full p-2 font-semibold text-white transition-colors duration-200 bg-green-700 rounded-md hover:bg-green-600"
-									>
-										Place Order
-									</button>
 								</div>
 							</div>
+							{products && (
+								<div className="flex mt-4">
+									<h2 className="text-xl font-bold">Items: {products.length}</h2>
+								</div>
+							)}
+							{order && (
+								<div className="flex items-center w-full py-4 text-sm font-semibold border-b border-gray-300 lg:py-5 lg:px-3 text-heading last:border-b-0 last:text-base last:pb-0">
+									Subtotal<span className="ml-2">₱{order.total}</span>
+								</div>
+							)}
+							<div className="flex items-center w-full py-4 text-sm font-semibold border-b border-gray-300 lg:py-5 lg:px-3 text-heading last:border-b-0 last:text-base last:pb-0">
+								Delivery Fee<span className="ml-2">{watch("type") === "Delivery" ? "₱50" : "-"}</span>
+							</div>
+							<div className="flex items-center w-full py-4 text-sm font-semibold border-b border-gray-300 lg:py-5 lg:px-3 text-heading last:border-b-0 last:text-base last:pb-0">
+								Total<span className="ml-2">₱{watch("type") === "Delivery" ? order.total + 50 : order.total}</span>
+							</div>
 						</div>
-					</Transition>
-				)}
-			</div>
+					</div>
+					{/* !SECTION */}
+				</div>
+			)}
 		</div>
 	);
 }

@@ -1,8 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
+
+import { Menu, Transition } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/solid";
 
 import Cart from "@components/Cart";
 import MobileNavbar from "@components/MobileNavbar";
@@ -21,10 +24,10 @@ const Navbar = () => {
 	};
 
 	const navigationBar = [
-		{ id: "1", href: "/", name: "HOME", current: true },
-		{ id: "2", href: "/menu", name: "MENU", current: false },
-		{ id: "3", href: "/about", name: "ABOUT US", current: false },
-		{ id: "4", href: "/admin", name: "ADMIN", current: false },
+		{ id: "1", href: "/", name: "Home", current: true },
+		{ id: "2", href: "/menu", name: "Menu", current: false },
+		{ id: "3", href: "/about", name: "About Us", current: false },
+		{ id: "4", href: "/admin", name: "Admin", current: false },
 	];
 
 	const handleOpen = () => {
@@ -32,11 +35,11 @@ const Navbar = () => {
 	};
 
 	return (
-		<header className="border-t-8 z-10 sticky top-0 inset-x-0 bg-white border-green-800 shadow-xl text-slate-900 body-font">
-			<div className="container relative flex flex-col flex-wrap px-5 py-5 mx-auto md:flex-row">
+		<header className="text-gray-800 border-t-8 border-green-700 shadow-md body-font">
+			<div className="container relative flex flex-col flex-wrap px-5 py-2 mx-auto md:flex-row">
 				<MobileNavbar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 				{/* Mobile menu button */}
-				<div className="absolute self-center md:static bottom-8 md:mr-7 left-5 lg:hidden">
+				<div className="absolute self-center md:static bottom-3 md:mr-7 left-5 lg:hidden">
 					<button className="border-0" onClick={(e) => setMobileOpen(!mobileOpen)}>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +57,7 @@ const Navbar = () => {
 				</div>
 
 				{/* Logo */}
-				<div className="flex items-center justify-center mb-4 font-medium title-font md:mb-0">
+				<div className="flex items-center justify-center font-medium title-font md:mb-0">
 					<Link href="/">
 						<a>
 							<Image src="/logo.png" alt="store-logo" width={200} height={50} />
@@ -64,7 +67,7 @@ const Navbar = () => {
 
 				{/* Cart button */}
 				{session && router.pathname !== "/checkout" && !session.user.isAdmin && (
-					<div className="absolute self-center block bottom-8 right-5 sm:hidden">
+					<div className="absolute self-center block bottom-3 right-5 sm:hidden">
 						<button className="justify-start" onClick={handleOpen}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -122,10 +125,10 @@ const Navbar = () => {
 				{session ? (
 					<>
 						<Cart open={open} handleOpen={handleOpen} />
-						<div className="items-center justify-end flex-1 hidden m-3 sm:flex">
+						<div className="items-center justify-end flex-1 hidden sm:flex">
 							{router.pathname !== "/checkout" && !session.user.isAdmin && (
 								<a onClick={handleOpen}>
-									<div className="m-4 hover:cursor-pointer">
+									<div className="m-4 text-gray-800 hover:cursor-pointer">
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											alt="View Cart"
@@ -140,35 +143,79 @@ const Navbar = () => {
 								</a>
 							)}
 
-							<div className="hidden dropdown lg:block">
-								<div tabIndex="0" className="m-1 font-normal bg-white rounded btn ">
-									Hi, {session.user.name}!
-									<svg className="w-4 h-4 ml-2" viewBox="0 -6 524 524" xmlns="http://www.w3.org/2000/svg">
-										<title>Account Options</title>
-										<path d="M64 191L98 157 262 320 426 157 460 191 262 387 64 191Z" />
-									</svg>
-								</div>
-								<ul className="p-2 divide-y rounded shadow menu dropdown-content bg-base-100 w-44">
-									<li>
-										<a href="/account">My Account</a>
-									</li>
-									<li>
-										<a href="/" onClick={(e) => handleSignOut(e)}>
-											Sign Out
-										</a>
-									</li>
-								</ul>
+							<div className="hidden text-right top-16 lg:block">
+								<Menu as="div" className="relative inline-block text-left">
+									<div>
+										<Menu.Button className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-800 border-2 border-gray-400 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+											Hi, {session.user.name}!
+											<ChevronDownIcon className="w-5 h-5 ml-2 -mr-1 text-gray-800 hover:text-gray-400" aria-hidden="true" />
+										</Menu.Button>
+									</div>
+									<Transition
+										as={Fragment}
+										enter="transition ease-out duration-100"
+										enterFrom="transform opacity-0 scale-95"
+										enterTo="transform opacity-100 scale-100"
+										leave="transition ease-in duration-75"
+										leaveFrom="transform opacity-100 scale-100"
+										leaveTo="transform opacity-0 scale-95"
+									>
+										<Menu.Items className="absolute right-0 z-10 w-56 mt-2 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+											<div className="px-1 py-1 ">
+												<Menu.Item>
+													{({ active }) => (
+														<a
+															className={`${
+																active ? "bg-green-700 text-white" : "text-gray-800"
+															} group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+															href="/user/profile"
+														>
+															My Profile
+														</a>
+													)}
+												</Menu.Item>
+												<Menu.Item>
+													{({ active }) => (
+														<a
+															className={`${
+																active ? "bg-green-700 text-white" : "text-gray-800"
+															} group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+															href="/user/history"
+														>
+															My Orders
+														</a>
+													)}
+												</Menu.Item>
+											</div>
+
+											<div className="px-1 py-1">
+												<Menu.Item>
+													{({ active }) => (
+														<a
+															onClick={handleSignOut}
+															className={`${
+																active ? "bg-green-700 text-white" : "text-gray-800"
+															} group flex cursor-pointer rounded-md items-center w-full px-2 py-2 text-sm`}
+														>
+															Logout
+														</a>
+													)}
+												</Menu.Item>
+											</div>
+										</Menu.Items>
+									</Transition>
+								</Menu>
 							</div>
 						</div>
 					</>
 				) : (
-					<div className="items-stretch justify-end flex-1 hidden mr-3 sm:flex">
+					<div className="items-stretch justify-end flex-1 hidden mr-3 lg:flex">
 						<div className="flex divide-x divide-gray-800">
 							<Link href="/signin">
-								<a className="self-center p-2 font-normal rounded-btn hover:font-medium hover:text-green-700">LOGIN</a>
+								<a className="self-center p-2 font-normal rounded-btn hover:text-green-700">Login</a>
 							</Link>
 							<Link href="/register">
-								<a className="self-center p-2 font-normal rounded-btn hover:font-medium hover:text-green-700">REGISTER</a>
+								<a className="self-center p-2 font-normal rounded-btn hover:text-green-700">Register</a>
 							</Link>
 						</div>
 					</div>

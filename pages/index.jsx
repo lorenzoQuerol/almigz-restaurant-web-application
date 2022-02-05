@@ -12,8 +12,8 @@ export default function Home() {
 	const banners = data.homepageItems;
 	return (
 		<>
-			<div className="flex items-center justify-center flex-col w-full">
-				{banners.map((pics) => (
+			<div className="flex flex-col items-center justify-center w-full">
+				{/* {banners.map((pics) => (
 					<div className="flex flex-col">
 						{pics.announcementsCollection.items.map((pic, index) => (
 							<a key={index} className="">
@@ -21,9 +21,9 @@ export default function Home() {
 							</a>
 						))}
 					</div>
-				))}
-				
-			{/* <div className="flex sticky bottom-36	 items-center w-full p-4 opacity-75 self-center justify-center mb-2 bg-black">
+				))} */}
+
+				{/* <div className="sticky flex items-center self-center justify-center w-full p-4 mb-2 bg-black opacity-75 bottom-36">
 					<h1 className="mr-4 italic font-light text-gray-400">Order now: </h1>
 					<Link href="/menu">
 						<a className="p-2 m-2 text-xl font-semibold text-yellow-600 border-2 border-yellow-500 font-rale rounded-btn hover:text-white hover:bg-yellow-500 hover:border-none">

@@ -6,9 +6,28 @@ async function handler(req, res) {
 	await createConnection();
 	const session = await getSession({ req });
 	const {
-		query: { email },
+		query: { email, offset, limit, filter },
 		method,
 	} = req;
+
+	let filterBy;
+	switch (filter) {
+		case "Latest":
+			filterBy = { "transactions.dateCreated": -1 };
+			break;
+
+		case "Oldest":
+			filterBy = { "transactions.dateCreated": 1 };
+			break;
+
+		case "Price: Lowest to Highest":
+			filterBy = { "transactions.totalPrice": 1 };
+			break;
+
+		case "Price: Highest to Lowest":
+			filterBy = { "transactions.totalPrice": -1 };
+			break;
+	}
 
 	switch (method) {
 		// Push new transaction into user's history (PROTECTED)
@@ -46,8 +65,24 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.email === email) {
 					try {
-						let { transactions } = await User.findOne({ email: email }, "transactions");
-						if (!transactions) return res.status(404).json({ success: false, message: "User not found" });
+						let result;
+						let transactions = [];
+
+						if (limit) {
+							result = await User.aggregate()
+								.match({ email: email })
+								.unwind("transactions")
+								.project("transactions")
+								.sort(filterBy)
+								.skip(Number(offset))
+								.limit(Number(limit));
+
+							result.forEach((t) => {
+								transactions.push(t.transactions);
+							});
+						} else {
+							result = await User.find({ email: email }, "transactions");
+						}
 
 						res.status(200).json({ success: true, message: "Successful query", transactions });
 					} catch (err) {
