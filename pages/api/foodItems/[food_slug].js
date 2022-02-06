@@ -8,7 +8,9 @@ function getQuery(food_slug) {
                 category
                 productDescription
                 productPrice
+                productPrices
                 available
+                sizes
                 productImagesCollection {
                   items {
                     title
@@ -29,6 +31,8 @@ function getQuery(food_slug) {
 	return query;
 }
 
+const order = ["Single", "Small", "Medium", "Large"];
+
 async function handler(req, res) {
 	const {
 		method,
@@ -45,6 +49,24 @@ async function handler(req, res) {
 				if (!response) res.status(404).json({ success: false, message: "Food item not found" });
 
 				const foodItem = response.data.foodItemCollection.items[0];
+
+				// Typecasts product prices to Number
+				if (foodItem.productPrices) {
+					foodItem.productPrices.forEach((price, index) => {
+						foodItem.productPrices[index] = Number(price);
+					});
+
+					// Sort just in case...
+					foodItem.productPrices.sort((a, b) => a - b);
+				}
+
+				// Sorts sizes in appropriate order (smallest to largest)
+				if (foodItem.sizes) {
+					foodItem.sizes = foodItem.sizes.sort((a, b) => {
+						return order.indexOf(a) - order.indexOf(b);
+					});
+				}
+
 				res.status(200).json({ success: true, message: "Successful query", foodItem });
 			} catch (err) {
 				res.status(400).json({ success: false, message: `An error occurred` });
