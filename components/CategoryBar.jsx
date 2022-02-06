@@ -1,5 +1,5 @@
 const CategoryBar = ({ activeCategory, setActiveCategory }) => {
-	const categories = ["Show all", "Binalot", "Pancit In Boxes", "House Specialties", "Drinks & Desserts", "Others"];
+	const categories = ["Show all", "Binalot", "Pancit In Boxes", "House Specialties", "Drinks & Desserts", "Barkada Treats", "Others"];
 
 	return (
 		<div>
@@ -26,7 +26,7 @@ const CategoryBar = ({ activeCategory, setActiveCategory }) => {
 				<select
 					onChange={(e) => setActiveCategory(e.target.value)}
 					aria-label="Selected tab"
-					className="z-10 block w-full p-3 font-semibold transition-colors bg-transparent border border-gray-300 rounded appearance-none form-select focus:border-2 focus:border-green-700 focus:outline-none"
+					className="z-10 block w-full px-2 py-1 font-semibold transition-colors bg-transparent border border-gray-300 rounded appearance-none form-select focus:border-1 focus:border-green-700 focus:outline-none"
 				>
 					{categories.map((item, index) => {
 						return <option className="text-sm">{item}</option>;
@@ -35,7 +35,7 @@ const CategoryBar = ({ activeCategory, setActiveCategory }) => {
 			</div>
 
 			{/* ANCHOR Desktop */}
-			<div className="flex-wrap justify-center hidden bg-white rounded shadow sm:mx-5 lg:justify-between sm:block">
+			<div className="flex-wrap justify-center hidden py-1 bg-white rounded shadow sm:mx-5 lg:justify-between sm:block">
 				<div className="h-12 px-5 xl:w-full xl:mx-0 -b">
 					<ul className="flex items-center h-full">
 						{categories.map((item, index) => {
