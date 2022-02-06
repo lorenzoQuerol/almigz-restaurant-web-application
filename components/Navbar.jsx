@@ -35,7 +35,7 @@ const Navbar = () => {
 	};
 
 	return (
-		<header className="text-gray-800 border-t-8 border-green-700 shadow-md body-font">
+		<header className="text-gray-800 sticky top-0 z-10 bg-white border-t-8 border-green-700 shadow-md body-font">
 			<div className="container relative flex flex-col flex-wrap px-5 py-2 mx-auto md:flex-row">
 				<MobileNavbar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 				{/* Mobile menu button */}
