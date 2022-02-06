@@ -11,6 +11,7 @@ import Cart from "@components/Cart";
 import Loading from "@components/Loading";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
+const order = ["Single", "Small", "Medium", "Large"];
 
 export default function FoodItemPage() {
 	const router = useRouter();
@@ -21,10 +22,12 @@ export default function FoodItemPage() {
 		handleSubmit,
 		getValues,
 		setValue,
+		watch,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
 			count: 1,
+			size: "Single",
 		},
 	});
 
@@ -38,17 +41,33 @@ export default function FoodItemPage() {
 	useEffect(() => {
 		if (session) if (session.user.isAdmin) setIsAdmin(true);
 		if (data) setFoodItem(data.foodItem);
-		if (foodItem) setImages(foodItem.productImagesCollection);
+		if (foodItem) {
+			setImages(foodItem.productImagesCollection);
+		}
 		if (images) setImage(images.items);
 	}, [session, data, foodItem, images]);
 
 	// Add to cart
 	const addToCart = async (quantity) => {
 		if (session) {
-			const item = {
-				menuItem: data.foodItem,
-				quantity: quantity.count,
-			};
+			let item;
+			if (foodItem.productPrices) {
+				let menuItem = Object.assign({}, foodItem);
+				menuItem.productPrice = menuItem.productPrices[menuItem.sizes.indexOf(watch("size"))];
+				menuItem.productName = `${menuItem.productName} - ${watch("size")}`;
+				delete menuItem.productPrices;
+				delete menuItem.sizes;
+
+				item = {
+					menuItem: menuItem,
+					quantity: quantity.count,
+				};
+			} else {
+				item = {
+					menuItem: data.foodItem,
+					quantity: quantity.count,
+				};
+			}
 
 			pushToCart(item);
 			handleOpen();
@@ -77,25 +96,30 @@ export default function FoodItemPage() {
 							<h2 className="mt-4 text-3xl font-semibold leading-7 text-gray-800 lg:text-4xl lg:leading-9">{foodItem.productName}</h2>
 
 							<p className="text-base font-normal leading-6 text-gray-800 mt-7">{foodItem.productDescription}</p>
-							<p className="mt-6 text-xl font-semibold leading-5 text-gray-800 lg:text-2xl lg:leading-6">₱{foodItem.productPrice}</p>
+							<p className="mt-6 text-xl font-semibold leading-5 text-gray-800 lg:text-2xl lg:leading-6">
+								₱
+								{foodItem.productPrice
+									? foodItem.productPrice * Number(watch("count"))
+									: foodItem.productPrices[foodItem.sizes.indexOf(watch("size"))] * Number(watch("count"))}
+							</p>
 							<form onSubmit={handleSubmit(addToCart)}>
-								<div className="mt-10 lg:mt-11">
+								<div className="mt-10 space-y-2 lg:mt-11">
 									<div className="flex flex-row justify-between">
 										<p className="self-center text-base font-medium leading-4 text-gray-800">Select quantity</p>
 										<div className="flex">
 											<span
-												onClick={() => setValue("count", Number(getValues("count")) - 1)}
+												onClick={() => setValue("count", Math.max(1, Number(getValues("count")) - 1))}
 												className="flex items-center justify-center pb-1 border border-r-0 border-gray-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 w-7 h-7"
 											>
 												-
 											</span>
 											<input
-												className="h-full pb-1 text-center border border-gray-300 w-14 focus:border-2 focus:border-green-700 focus:outline-none"
+												className="h-full pb-1 text-center border border-gray-300 w-14 focus:border-1 focus:border-green-700 focus:outline-none"
 												type="text"
 												{...register("count", { required: true, min: "1", max: "9999" })}
 											/>
 											<span
-												onClick={() => setValue("count", Number(getValues("count")) + 1)}
+												onClick={() => setValue("count", Math.max(1, Number(getValues("count")) + 1))} // Math.max(1, Number(getValues("count")) + 1))
 												className="flex items-center justify-center pb-1 border border-l-0 border-gray-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 w-7 h-7 "
 											>
 												+
@@ -105,10 +129,39 @@ export default function FoodItemPage() {
 									{errors.count?.type === "required" && <p className="text-sm font-medium leading-4 text-red-700">Quantity is required</p>}
 									{errors.count?.type === "min" && <p className="text-sm font-medium leading-4 text-red-700">Order must be more than 0</p>}
 									{errors.count?.type === "max" && <p className="text-sm font-medium leading-4 text-red-700">Order must be less than 10000</p>}
+
+									{foodItem.sizes && (
+										<div className="flex flex-row justify-between">
+											<p className="self-center text-base font-medium leading-4 text-gray-800">Select Size</p>
+											<div className="relative">
+												<select
+													className="py-1 pl-3 pr-10 text-base border border-gray-300 appearance-none focus:outline-none focus:border-green-700"
+													{...register("size")}
+												>
+													{foodItem.sizes.map((size, index) => {
+														return <option value={size}>{size}</option>;
+													})}
+												</select>
+												<span className="absolute top-0 right-0 flex items-center justify-center w-10 h-full text-center text-gray-600 pointer-events-none">
+													<svg
+														fill="none"
+														stroke="currentColor"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														className="w-4 h-4"
+														viewBox="0 0 24 24"
+													>
+														<path d="M6 9l6 6 6-6"></path>
+													</svg>
+												</span>
+											</div>
+										</div>
+									)}
 								</div>
 								<button
 									type="submit"
-									className="w-full py-5 mt-6 text-base font-medium leading-4 text-white transition-colors bg-green-700 focus:outline-none focus:ring-2 hover:bg-green-600 focus:ring-offset-2 focus:ring-gray-800 lg:mt-12"
+									className="w-full py-5 mt-6 text-base font-medium leading-4 text-white transition-colors bg-green-700 rounded focus:outline-none focus:ring-2 hover:bg-green-600 focus:ring-offset-2 focus:ring-gray-800 lg:mt-12"
 								>
 									Add to cart
 								</button>

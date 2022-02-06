@@ -7,7 +7,9 @@ const query = `{
           category
           productDescription
           productPrice
+          productPrices
           available
+          sizes
           productImagesCollection {
             items {
               title
@@ -35,6 +37,7 @@ async function handler(req, res) {
 				if (!response) res.status(404).json({ success: false, message: "Food items not found" });
 
 				const foodItems = response.data.foodItemCollection.items;
+
 				res.status(200).json({ success: true, message: "Successful query", foodItems });
 			} catch (err) {
 				res.status(400).json({ success: false, message: "An error occurred" });
