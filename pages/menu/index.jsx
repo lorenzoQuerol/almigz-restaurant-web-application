@@ -25,7 +25,7 @@ export default function MenuPage() {
 
 	return (
 		<>
-			<div className="font-rale text-slate-800">
+			<div className="text-gray-800 font-rale">
 				{/* Remove py-8 */}
 				<div className="container justify-center py-6 mx-auto">
 					{/* ANCHOR Menu header and search bar */}
@@ -72,8 +72,9 @@ export default function MenuPage() {
 															<p className="mt-2 text-xs text-gray-600 truncate">{item.productDescription}</p>
 
 															<div className="flex items-center justify-between py-4">
-																{/* <h2 className="text-xs font-semibold text-indigo-700">Bay Area, San Francisco</h2> */}
-																<h3 className="text-xl font-semibold text-gray-800">₱{item.productPrice}</h3>
+																<h3 className="text-lg font-semibold">
+																	{item.productPrice ? `₱${item.productPrice}` : `Starting at ₱${item.productPrices?.[0]}`}
+																</h3>
 															</div>
 														</div>
 													</div>
