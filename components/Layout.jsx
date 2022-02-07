@@ -9,7 +9,7 @@ const Layout = ({ children }) => {
 			<div className="w-full">
 				<Head>
 					<title>Al Migz Special Binalot</title>
-					<link rel="icon" href="/logo.ico" />
+					<link rel="icon" href="/icon.ico" />
 				</Head>
 				<Navbar />
 				<div className="justify-center min-h-screen overflow-x-hidden">{children}</div>
