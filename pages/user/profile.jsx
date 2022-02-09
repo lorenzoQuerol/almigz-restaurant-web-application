@@ -386,3 +386,5 @@ export default function Profile(session) {
 		</>
 	);
 }
+
+Profile.layout = "consumer";

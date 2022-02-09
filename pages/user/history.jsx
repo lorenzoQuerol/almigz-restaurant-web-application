@@ -239,21 +239,6 @@ export default function History(session) {
 									Next
 								</button>
 							</div>
-							{/* <button
-									onClick={handlePrevPage}
-									className={`${
-										page === 1 ? "hidden" : "flex"
-									} items-center px-4 py-2 mx-1 font-medium bg-green-700 rounded-md hover:bg-green-600 cursor-pointer`}
-								>
-									Previous
-								</button>
-
-								<button
-									onClick={handleNextPage}
-									className="flex items-center px-4 py-2 mx-1 font-medium transition-colors duration-200 transform bg-green-700 rounded-md hover:bg-green-600 hover:text-white"
-								>
-									Next
-								</button> */}
 						</div>
 						{/* !SECTION */}
 					</div>
@@ -262,3 +247,5 @@ export default function History(session) {
 		</div>
 	);
 }
+
+History.layout = "consumer";

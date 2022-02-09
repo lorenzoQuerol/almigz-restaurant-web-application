@@ -26,7 +26,7 @@ export async function getServerSideProps(context) {
 	};
 }
 
-export default function CheckoutPage(session) {
+export default function Checkout(session) {
 	const router = useRouter();
 	const [{ data, loading, error }, refetch] = useAxios(`/api/users/${session.user.email}`);
 	const cart = getStorageValue("foodCart");
@@ -440,3 +440,5 @@ export default function CheckoutPage(session) {
 		</div>
 	);
 }
+
+Checkout.layout = "consumer";

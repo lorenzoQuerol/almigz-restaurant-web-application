@@ -9,7 +9,7 @@ import Loading from "@components/Loading";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function MenuPage() {
+export default function Menu() {
 	// ANCHOR Page variables
 	const { data, error } = useSWR("/api/foodItems", fetcher);
 	const [foodItems, setFoodItems] = useState([]);
@@ -131,3 +131,5 @@ export default function MenuPage() {
 		</div>
 	);
 }
+
+Menu.layout = "consumer";
