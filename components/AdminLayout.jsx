@@ -8,15 +8,10 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
-import Dashboard from "@components/Dashboard";
-import ManageTransactions from "@components/ManageTransactions";
-import ManageMembers from "@components/ManageMembers";
-import SummaryReports from "@components/SummaryReports";
 import DashboardIcon from "@components/DashboardIcon";
 import PeopleIcon from "@components/PeopleIcon";
 import TicketIcon from "@components/TicketIcon";
 import CogIcon from "@components/CogIcon";
-import PaperIcon from "@components/PaperIcon";
 
 const AdminLayout = ({ children }) => {
 	const router = useRouter();
