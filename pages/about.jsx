@@ -16,20 +16,20 @@ export default function About() {
 
 	return (
 		<>
-			<div className="2xl:container 2xl:mx-auto lg:pb-16 lg:px-20 md:pb-12 md:px-6 pb-9 px-4">
+			<div className="lg:px-0 md:px-6 px-4 my-4  md:my-6 lg:my-0">
 				{/* Brief History */}
-				<div className="flex flex-col justify-between">
+				<div className="flex lg:w-screen flex-col justify-between">
 					<div className="w-full h-full bg-cover" style={{backgroundImage: `url(${background})`}}>
 					<div className="w-full overlay flex flex-col justify-center text-center px-4 md:px-12 lg:px-24 py-8 lg:py-12 font-rale backdrop-blur-sm bg-black/80">
-						<h1 className="text-3xl lg:text-4xl mb-6 font-bold leading-9 text-white font-rale">Brief History</h1>
-						<div className="font-normal text-base leading-6 text-white ">{documentToReactComponents(aboutText.json)}</div>
+						<h1 className="text-3xl self-center 2xl:w-2/3 lg:text-4xl mb-6 font-bold leading-9 text-white font-rale">Brief History</h1>
+						<div className="font-normal self-center 2xl:w-2/3 text-base space-y-4 leading-relaxed text-white ">{documentToReactComponents(aboutText.json)}</div>
 					</div>
 					</div>
 				</div>
 
-				<div className="flex flex-col justify-between gap-4 pt-12">
-					<div className="w-full lg:w-5/12 flex flex-col justify-center">
-						<h1 className="text-3xl lg:text-4xl font-bold leading-9 text-gray-800 font-rale">Branches</h1>
+				<div className="flex flex-col justify-between gap-4 pt-12 lg:m-24 lg:mt-0 2xl:mt-6">
+					<div className="w-full flex flex-col justify-center">
+						<h1 className="text-3xl lg:text-4xl lg:text-center 2xl:py-2 font-bold leading-9 text-black font-rale">Branches</h1>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-3 md:justify-center gap-4">
 						{branches.map((branchObj, i) => (
