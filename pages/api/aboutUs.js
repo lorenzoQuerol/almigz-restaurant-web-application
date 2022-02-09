@@ -26,7 +26,7 @@ async function handler(req, res) {
 				const response = await connectToContentful(query);
 				if (!response) res.status(404).json({ success: false, message: "Items not found" });
 
-				const aboutUsItems = response.data.aboutUsCollection.items;
+				const aboutUsItems = response.data.aboutUsCollection.items[0];
 
 				res.status(200).json({ success: true, message: "Successful query", aboutUsItems });
 			} catch (err) {

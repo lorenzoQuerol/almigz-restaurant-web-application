@@ -1,41 +1,27 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import useSWR from "swr";
-
-//sample values (R)
-const sample1 = {
-	sectionNumber: 1,
-	sectionTitle: "Section Title 1",
-	sectionContent: "Lorem ipsum dolor sit amet. Non consequuntur magnam sed voluptas quod aut incidunt commodi aut rerum impedit. Id amet quia in natus corporis aut accusamus amet ad cupiditate corporis est fugit sapiente et internos nostrum. Vel quaerat quam rem optio maxime eum reiciendis architecto sed possimus voluptatibus. Non eius omnis et nisi quasi et sapiente repellat aut fugit pariatur et reprehenderit dolor aut nesciunt molestiae qui repellat nulla. Ad cupiditate dignissimos qui nulla perspiciatis ea doloremque rerum sit facilis velit sit molestiae harum At magni dolorum eos totam voluptas? A dolor officiis et necessitatibus illo non cumque beatae et maxime ipsa. Ut repudiandae perspiciatis vel eaque voluptate est ratione aperiam ut velit voluptatem hic expedita fuga. Sit labore dolor aut quos recusandae et necessitatibus aperiam. Qui culpa explicabo eum internos quis qui expedita ipsum."
-}
-
-const sample2 = {
-	sectionNumber: 2,
-	sectionTitle: "Section Title 2",
-	sectionContent: "Lorem ipsum dolor sit amet. Non consequuntur magnam sed voluptas quod aut incidunt commodi aut rerum impedit. Id amet quia in natus corporis aut accusamus amet ad cupiditate corporis est fugit sapiente et internos nostrum. Vel quaerat quam rem optio maxime eum reiciendis architecto sed possimus voluptatibus. Non eius omnis et nisi quasi et sapiente repellat aut fugit pariatur et reprehenderit dolor aut nesciunt molestiae qui repellat nulla. Ad cupiditate dignissimos qui nulla perspiciatis ea doloremque rerum sit facilis velit sit molestiae harum At magni dolorum eos totam voluptas? A dolor officiis et necessitatibus illo non cumque beatae et maxime ipsa. Ut repudiandae perspiciatis vel eaque voluptate est ratione aperiam ut velit voluptatem hic expedita fuga. Sit labore dolor aut quos recusandae et necessitatibus aperiam. Qui culpa explicabo eum internos quis qui expedita ipsum."
-}
-
-const sample3 = {
-	sectionNumber: 3,
-	sectionTitle: "Section Title 3",
-	sectionContent: "Lorem ipsum dolor sit amet. Non consequuntur magnam sed voluptas quod aut incidunt commodi aut rerum impedit. Id amet quia in natus corporis aut accusamus amet ad cupiditate corporis est fugit sapiente et internos nostrum. Vel quaerat quam rem optio maxime eum reiciendis architecto sed possimus voluptatibus. Non eius omnis et nisi quasi et sapiente repellat aut fugit pariatur et reprehenderit dolor aut nesciunt molestiae qui repellat nulla. Ad cupiditate dignissimos qui nulla perspiciatis ea doloremque rerum sit facilis velit sit molestiae harum At magni dolorum eos totam voluptas? A dolor officiis et necessitatibus illo non cumque beatae et maxime ipsa. Ut repudiandae perspiciatis vel eaque voluptate est ratione aperiam ut velit voluptatem hic expedita fuga. Sit labore dolor aut quos recusandae et necessitatibus aperiam. Qui culpa explicabo eum internos quis qui expedita ipsum."
-}
-
-const samples = [sample2, sample1, sample3];
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
+import { BLOCKS } from '@contentful/rich-text-types';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const TermsDialog = ({ openTermsDialog, handleOpenTermsDialog }) => {
-	/*	ACTUAL - might need to change "termsConditions"
-	
 	const { data, error } = useSWR("/api/termsConditions", fetcher);
-	if (!data) return <h1 className="h-screen">Loading...</h1>;
+	if (!data) return <h1 className="overlay">Loading...</h1>;
 
-	const sections = data.termsConditions.sort((a, b) => a.sectionNumber - b.sectionNumber);
-	*/
+	const sections = data.termsConditionsItems.sort((a, b) => a.sectionNumber - b.sectionNumber);
 
-	//for testing (R)
-	const sections = samples.sort((a, b) => a.sectionNumber - b.sectionNumber);
+	const options = {
+		renderNode: {
+		  [BLOCKS.UL_LIST]: (node, children) => {
+		  	return (<ul  className="list-disc indent-0 p-10">{children}</ul>);
+		  },
+		  [BLOCKS.LIST_ITEM]: (node, children) => {
+			return (<li>{children}</li>);
+		  }
+		}
+	  };
 
 	return (
 		<>
@@ -78,11 +64,11 @@ const TermsDialog = ({ openTermsDialog, handleOpenTermsDialog }) => {
 								</div>
 								<div className="max-h-80 overflow-y-auto px-5 py-3 md:px-7 md:py-6">
 								{sections.map((section) => (
-									<div className="pb-4">
-										<h1 className="font-semibold">{section.sectionNumber}.0<span className="pl-2">{section.sectionTitle}</span></h1>
-										<p className="space-y-6 indent-10 leading-relaxed text-gray-500">
-											{section.sectionContent}
-										</p>
+									<div className="pb-2">
+										<h1 className="font-semibold pb-2">{section.sectionNumber}.0<span className="pl-2">{section.sectionTitle}</span></h1>
+										<div className="space-y-6 indent-10 pb-4 leading-relaxed text-gray-900">
+											{documentToReactComponents(section.sectionContent.json, options)}
+										</div>
 									</div>
 								))}
 								</div>
