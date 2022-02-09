@@ -1,16 +1,17 @@
-import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
+import { useForm } from "react-hook-form";
 import Link from "next/link";
 import useAxios from "axios-hooks";
 import axios from "axios";
 import Loading from "@components/Loading";
 
-// Status Conditional Rendering Variables (K)
-const statFlags = new Array(6);
-statFlags.fill(false);
+const status = ["INCOMING", "PROCESSED", "IN PREPARATION", "READY FOR PICKUP/DELIVERY", "COMPLETED ORDER", "CANCELLED ORDER"];
+const headers = ["Quantity", "Item Name", "Price per Piece", "Total Price"];
+const months = ["Jan.", "Feb.", "March", "April", "May", "June", "July", "August", "Sept.", "Oct.", "Nov.", "Dec."];
 const statColors = ["bg-red-200", "bg-yellow-200", "bg-[#CF9FFF]", "bg-blue-200", "bg-green-200", "bg-gray-200"];
-const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const statTextColors = ["text-red-900", "text-yellow-900", "text-[#320064]", "text-blue-900", "text-green-900", "text-gray-900"];
 
 export async function getServerSideProps(context) {
 	const session = await getSession(context);
@@ -28,7 +29,7 @@ export async function getServerSideProps(context) {
 	};
 }
 
-export default function Order(session) {
+export default function OrderPage(session) {
 	const router = useRouter();
 	const [{ data, loading, error }, refetch] = useAxios(`/api/transactions/${router.query.order}`);
 
@@ -36,60 +37,28 @@ export default function Order(session) {
 	const [reason, setReason] = useState("");
 	const [message, setMessage] = useState("");
 
+	const {
+		register,
+		handleSubmit,
+		watch,
+		setValue,
+		formState: { errors },
+	} = useForm();
+
 	useEffect(() => {
 		if (data) setTransaction(data.transaction);
-	}, [data]);
+		if (transaction) setValue("status", String(transaction.orderStatus));
+	}, [data, transaction]);
 
-	// delpickFlag: true (Delivery), false (Pickup)
-	let delFee, payMethod, total, cash, change, delpickFlag;
-
-	// Delivery Fee & Payment Method (K)
-	if (transaction.type === "Delivery") {
-		delFee = 50; //temporary
-		payMethod = transaction.payMethod;
-		delpickFlag = true;
-	} else if (transaction.type === "Pickup") {
-		delFee = 0;
-		payMethod = "(on pickup)";
-		delpickFlag = false;
-	}
-
-	// Set total, cash, and change values (K)
-	if (payMethod === "Cash on Delivery") {
-		total = transaction.totalPrice;
-		change = transaction.change;
-		cash = parseInt(total) + parseInt(change);
-	} else if (payMethod === "GCash" || payMethod === "(on pickup)") {
-		change = "-";
-		cash = "-";
-		total = "";
-	}
-
-	/* Set Status Conditional Rendering Flag (K) */
-	statFlags.fill(false);
-	statFlags[transaction.orderStatus] = true;
-
-	// ANCHOR Update transaction
-	const updateStatus = async (value) => {
+	// ANCHOR Update Status
+	const updateStatus = async (updated) => {
 		let temp = transaction;
-		temp.orderStatus = value;
+		temp.orderStatus = Number(updated.status);
 		temp.lastUpdated = new Date();
-		setTransaction(temp);
 
-		// Update both user history and transactions
-		const transRes = await axios.put(`/api/transactions/${transaction.invoiceNum}`, transaction);
-		const userRes = await axios.put(`/api/history/${transaction.email}/${transaction.invoiceNum}`, transaction);
+		if (temp.orderStatus == 5) temp.reasonForCancel = updated.reasonForCancel;
+		else temp.reasonForCancel = "";
 
-		// Refetch page to update status
-		refetch();
-	};
-
-	const saveReason = async (value) => {
-		setMessage("Changes saved.");
-
-		let temp = transaction;
-		temp.reasonForCancel = reason;
-		temp.lastUpdated = new Date();
 		setTransaction(temp);
 
 		// Update both user history and transactions
@@ -120,15 +89,182 @@ export default function Order(session) {
 	};
 
 	return (
-		<div className={`w-full flex flex-col`}>
+		<>
+			{loading ? (
+				<Loading />
+			) : (
+				<div className="text-gray-800 font-rale">
+					<div className="flex w-fit flex-col sm:flex-row sm:items-center mb-2 text-4xl font-bold">
+						<div className="mb-2">Order #{data.transaction.invoiceNum.toString().padStart(4, "0")}</div>
+						<div className={`sm:ml-5 p-1 text-center px-5 text-lg rounded ${statColors[transaction.orderStatus]} ${statTextColors[transaction.orderStatus]}`}>
+							{status[transaction.orderStatus]}
+						</div>
+					</div>
+					<div className="mb-2 text-gray-600 text-md">Date Created: {formatDate(transaction.dateCreated)}</div>
+
+					<div className="flex justify-between w-full mb-5">
+						<div className="flex flex-col items-start w-full bg-white rounded shadow lg:flex-row lg:items-center">
+							<div className="w-full h-full lg:w-2/3 ">
+								<table className="min-w-full bg-white">
+									<thead>
+										<tr className="w-full h-16 py-8 border-b border-gray-300">
+											{headers.map((item, index) => {
+												return <th className="px-2 text-sm font-semibold leading-4 tracking-normal text-left sm:px-6">{item}</th>;
+											})}
+										</tr>
+									</thead>
+									<tbody>
+										{transaction.order?.map((item, index) => {
+											return (
+												<tr className="text-base border-b border-gray-300 h-14">
+													<td className="px-2 leading-4 tracking-normal whitespace-no-wrap sm:px-6">{item.quantity}</td>
+													<td className="px-2 leading-4 tracking-normal whitespace-no-wrap sm:px-6">{item.menuItem.productName}</td>
+													<td className="px-2 leading-4 tracking-normal whitespace-no-wrap sm:px-6">{item.menuItem.productPrice}</td>
+													<td className="px-2 leading-4 tracking-normal whitespace-no-wrap sm:px-6">{item.menuItem.productPrice * item.quantity}</td>
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+								<div className="w-full p-5 px-4 sm:px-6">
+									<h1 className="font-semibold text-normal">Payment Method: {transaction.payMethod}</h1>
+									<div className="flex justify-between mt-3 text-base ">
+										<p>Cash</p>
+										<p>{transaction.payMethod == "GCash" ? "-" : `₱${transaction.change}`}</p>
+									</div>
+									<div className="flex justify-between my-2 text-base text-gray-500 text-medium">
+										<p>Total</p>
+										<p>-₱{transaction.totalPrice}</p>
+									</div>
+									<div className="flex justify-between text-base">
+										<p>Change</p>
+										<p>{transaction.payMethod == "GCash" ? "-" : `₱${transaction.change - transaction.totalPrice}`}</p>
+									</div>
+								</div>
+								<div className="w-full p-5 divide-y">
+									<div className="flex py-2 justify-between text-base font-medium">
+										<p>Subtotal</p>
+										<p>₱{transaction.totalPrice - 50}</p>
+									</div>
+									<div className="flex py-2 justify-between text-base text-gray-500 text-medium">
+										<p>Delivery Fee</p>
+										<p>{transaction.type == "Delivery" ? `₱${50}` : "-"}</p>
+									</div>
+									<div className="flex py-2 justify-between text-base font-medium ">
+										<p>Total</p>
+										<p>₱{transaction.totalPrice}</p>
+									</div>
+								</div>
+							</div>
+							<div className="w-full h-full bg-gray-100 border-t lg:w-1/3 lg:border-t-0 lg:border-r lg:border-l lg:rounded-r">
+								<div className="p-2">
+									<div className={`p-2 text-sm ${statColors[transaction.orderStatus]} ${statTextColors[transaction.orderStatus]}`}>
+										<p className="font-bold">For {transaction.type}</p>
+										{transaction.type === "Pickup" && (
+											<p>
+												<span className="font-bold">Store:</span> {transaction.branch}
+											</p>
+										)}
+										{transaction.deliverTime ? (
+											<p>
+												<span className="font-bold">Deliver Time:</span> {transaction.deliverTime === "Now" ? "Now" : formatDate(transaction.deliverTime)}
+											</p>
+										) : (
+											<p>
+												<span className="font-bold">Pickup Time:</span> {transaction.pickupTime === "Now" ? "Now" : formatDate(transaction.pickupTime)}
+											</p>
+										)}
+									</div>
+									<p className="pt-3 font-bold">User Details</p>
+									<div className="px-2 text-sm font-medium divide-y">
+										<div className="pt-1">
+											<p className="font-bold">Full Name</p>
+											<p className="py-1">{transaction.fullName}</p>
+										</div>
+										{transaction.type == "Delivery" && <p className="py-1">{transaction.email}</p>}
+										<div className="py-1">
+											<p className="font-bold">Contact Information</p>
+											<p className="py-1">{`${transaction.contactNum?.[0]}`}</p>
+											{transaction.contactNum?.length == 2 && <p>{transaction.contactNum[1]}</p>}
+										</div>
+
+										{transaction.type == "Delivery" && <p className="py-1">{transaction.address}</p>}
+										<div className="py-1">
+											<p className="font-bold">Special Instructions</p>
+											<p>{transaction.specialInstructions == "" ? "None" : transaction.specialInstructions}</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* ANCHOR Settings */}
+					<div className="flex flex-col">
+						<form onSubmit={handleSubmit(updateStatus)}>
+							<div className="flex-row mb-5">
+								<span className="font-bold">Update Status</span>
+								<select
+									{...register("status")}
+									className="max-w-xs px-2 py-1 ml-5 border rounded w-fit md:w-1/2 lg:w-full focus:border-1 focus:outline-none focus:border-green-700"
+								>
+									<option value={0}>Incoming</option>
+									<option value={1}>Processed</option>
+									<option value={2}>Preparing Order</option>
+									<option value={3}>Ready for Pickup/Delivery</option>
+									<option value={4}>Complete Order</option>
+									<option value={5}>Cancel Order</option>
+								</select>
+							</div>
+							{watch("status") == 5 && (
+								<>
+									<textarea
+										name="note"
+										className="flex items-center w-full px-4 py-3 mb-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-700"
+										rows="4"
+										placeholder="Reason for Cancellation"
+										{...register("reasonForCancel", { required: Number(watch("status")) == 5 ? true : false, maxLength: 100 })}
+									/>
+									{errors.reasonForCancel?.type == "required" && (
+										<div className="mb-2 text-sm font-medium text-left text-red-500">Please write a reason for cancellation</div>
+									)}
+								</>
+							)}
+							{Number(watch("status")) !== transaction.orderStatus && (
+								<div className="flex justify-center">
+									<button
+										type="submit"
+										className="w-full px-8 py-2 text-white transition duration-150 ease-in-out bg-yellow-700 border rounded sm:w-1/3 md:w-1/2 text-md hover:bg-yellow-600 focus:outline-none"
+									>
+										Update
+									</button>
+								</div>
+							)}
+						</form>
+
+						<div className="flex justify-center">
+							<Link href="/admin/transactions">
+								<button className="w-full px-8 py-2 text-white transition duration-150 ease-in-out bg-green-700 border rounded sm:w-1/3 md:w-1/2 text-md hover:bg-green-600 focus:outline-none">
+									Go Back to Transactions
+								</button>
+							</Link>
+						</div>
+					</div>
+				</div>
+			)}
+		</>
+	);
+
+	return (
+		<div>
 			{loading ? (
 				<Loading />
 			) : (
 				<>
 					<div className="flex flex-row flex-wrap items-start justify-center w-auto m-5">
-						<div className="flex flex-col w-full lg:w-1/2">
-							<div className="flex flex-col border rounded-md">
-								<div className="flex flex-wrap items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow-lg">
+						<div className="flex flex-col w-full">
+							<div className="flex flex-col border rounded">
+								<div className="flex flex-wrap items-center justify-between p-5 pb-3 bg-gray-100 rounded-t shadow">
 									<div className="">
 										<h1 className="text-4xl font-bold text-black font-rale">Order #{data.transaction.invoiceNum.toString().padStart(4, "0")}</h1>
 										<p className="mt-1 ml-1 text-sm text-gray-500">Date: {transaction.type === "Now" ? "Now" : formatDate(transaction.dateCreated)}</p>
@@ -222,7 +358,7 @@ export default function Order(session) {
 								</div>
 							</div>
 						</div>
-						<div className="flex flex-col w-full p-3 text-black bg-white border divide-y rounded-md shadow-lg lg:w-1/4 lg:mx-3">
+						<div className="flex flex-col w-full p-3 text-black bg-white border divide-y rounded lg:w-1/4 lg:mx-3">
 							{/* For DELIVERY */}
 							{delpickFlag && (
 								<div className={`flex flex-col justify-center text-center ${statColors[transaction.orderStatus]}`}>
@@ -333,15 +469,16 @@ export default function Order(session) {
 								<p className="my-1 text-sm italic tracking-wider text-center text-green-500 bg-green-100">{message}</p>
 							</div>
 						)}
-						<span className="text-center text-black">
-							Go to{" "}
-							<span className="self-center font-semibold underline hover:text-green-700">
-								<Link href="/admin"> DASHBOARD</Link>
-							</span>
-						</span>
+						<Link href="/admin/transactions">
+							<button className="px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-yellow-600 focus:outline-none">
+								Go Back to Transactions
+							</button>
+						</Link>
 					</div>
 				</>
 			)}
 		</div>
 	);
 }
+
+OrderPage.layout = "admin";
