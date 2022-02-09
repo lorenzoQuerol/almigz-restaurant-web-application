@@ -299,3 +299,5 @@ export default function Tracker(session) {
 		</>
 	);
 }
+
+Tracker.layout = "consumer";

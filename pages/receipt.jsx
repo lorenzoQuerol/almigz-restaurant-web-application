@@ -248,3 +248,5 @@ export default function Receipt(session) {
 		</div>
 	);
 }
+
+Receipt.layout = "consumer";

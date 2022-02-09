@@ -22,8 +22,10 @@ export default function Signin() {
 
 	// Redirect if already logged in
 	useEffect(() => {
-		if (status === "authenticated") router.replace("/");
-	}, [status]);
+		if (session) {
+			if (session.user.isAdmin) router.replace("/admin");
+		}
+	}, [session]);
 
 	const submitLogin = async (data) => {
 		const emailExists = await checkEmail(data.email);
@@ -89,3 +91,5 @@ export default function Signin() {
 		</div>
 	);
 }
+
+Signin.layout = "consumer";

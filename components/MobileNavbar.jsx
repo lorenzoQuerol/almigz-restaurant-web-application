@@ -27,19 +27,9 @@ const MobileNavbar = ({ mobileOpen, setMobileOpen }) => {
 		{ id: "8", href: "#", name: "Logout", current: false },
 	];
 
-	// useEffect(() => {
-	// 	if (session) {
-	// 		navigationBar[3].visible = navigationBar[4].visible = navigationBar[5].visible = false; // make login, register, admin invisible
-	// 		navigationBar[6].visible = navigationBar[7].visible = navigationBar[8].visible = true; // make My Profile, My Orders, logout visible
-	// 		if (session.user.isAdmin) navigationBar[3].visible = true; // if user is admin, make admin visible
-	// 	} else {
-	// 		navigationBar[3].visible = navigationBar[6].visible = navigationBar[7].visible = navigationBar[8].visible = false;
-	// 	}
-	// }, [session]);
-
 	return (
 		<Transition.Root show={mobileOpen} as={Fragment}>
-			<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={setMobileOpen}>
+			<Dialog as="div" className="fixed inset-0 overflow-hidden z-10" onClose={setMobileOpen}>
 				<div className="absolute inset-0 overflow-hidden">
 					<Transition.Child
 						as={Fragment}

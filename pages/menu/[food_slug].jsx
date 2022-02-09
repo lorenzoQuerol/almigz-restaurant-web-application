@@ -13,7 +13,7 @@ import Loading from "@components/Loading";
 const fetcher = (url) => fetch(url).then((res) => res.json());
 const order = ["Single", "Small", "Medium", "Large"];
 
-export default function FoodItemPage() {
+export default function FoodItem() {
 	const router = useRouter();
 	const { data, error } = useSWR(`/api/foodItems/${router.query.food_slug}`, fetcher);
 	const { data: session, status } = useSession();
@@ -179,5 +179,6 @@ export default function FoodItemPage() {
 			)}
 		</div>
 	);
-	// }
 }
+
+FoodItem.layout = "consumer";

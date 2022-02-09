@@ -50,7 +50,6 @@ export default function Register() {
 	// If page is stil in loading or authenticated (already signed in)
 	if (status === "loading" || status === "authenticated") return <h1>Loading...</h1>;
 
-	console.log(errors);
 	return (
 		<div className="flex justify-center font-rale text-slate-900">
 			<div className="flex-col w-full mx-6 my-16 text-center rounded-md sm:w-1/3 md:w-2/3 lg:w-1/2 xl:w-1/3 drop-shadow-lg bg-zinc-100">
@@ -168,3 +167,5 @@ export default function Register() {
 		</div>
 	);
 }
+
+Register.layout = "consumer";

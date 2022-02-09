@@ -1,25 +1,49 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { getSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import useAxios from "axios-hooks";
 import ViewUserDialog from "@components/ViewUserDialog";
 import Loading from "@components/Loading";
 
-const headers = ["First Name", "Last Name", "Email", "Role", "Contact Number 1", "Contact Number 2", ""];
+const headers = ["Full Name", "Email", "Role", "Contact Number 1", "Contact Number 2", ""];
 const roleTextColors = ["text-green-900", "text-yellow-900"];
 const roleBgColors = ["bg-green-200", "bg-yellow-200"];
 
-const ManageMembers = ({ session }) => {
-	// SECTION Initialization and Declaration
-	const [{ data, loading, error }, refetch] = useAxios({
-		url: `${process.env.NEXTAUTH_URL}/api/users`,
-		params: { page },
-	});
+export async function getServerSideProps(context) {
+	const session = await getSession(context);
 
+	if (!session)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/signin",
+			},
+		};
+
+	if (!session.user.isAdmin)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/",
+			},
+		};
+
+	return {
+		props: session,
+	};
+}
+
+export default function Management(session) {
+	// SECTION Initialization and Declaration
 	const [page, setPage] = useState(1);
 	const [users, setUsers] = useState([]);
 	const [currentUser, setCurrentUser] = useState({});
 	const [openViewUser, setOpenViewUser] = useState(false);
+	const [{ data, loading, error }, refetch] = useAxios({
+		url: `${process.env.NEXTAUTH_URL}/api/users`,
+		params: { page },
+	});
 	// !SECTION
 
 	useEffect(() => {
@@ -42,6 +66,96 @@ const ManageMembers = ({ session }) => {
 	const handleNextPage = () => {
 		setPage(Math.max(1, page + 1));
 	};
+
+	return (
+		<>
+			{loading ? (
+				<Loading />
+			) : (
+				<>
+					<ViewUserDialog user={currentUser} refetch={refetch} handleCloseViewUser={handleCloseViewUser} openViewUser={openViewUser} setOpenViewUser={setOpenViewUser} />
+					<div className="text-gray-800 font-rale">
+						<div className="flex pb-5 ">
+							<div className="text-xl font-bold sm:text-3xl">Manage Users</div>
+						</div>
+						<div className="container mx-auto bg-white rounded shadow">
+							{/* SECTION Table */}
+							<div className="w-full overflow-x-scroll xl:overflow-x-hidden">
+								<table className="min-w-full bg-white">
+									<thead>
+										<tr className="w-full h-16 py-8 border-b border-gray-300">
+											{headers.map((item, index) => {
+												return <th className="px-6 text-sm font-medium leading-4 tracking-normal text-left">{item}</th>;
+											})}
+										</tr>
+									</thead>
+									<tbody>
+										{users.map((item, index) => {
+											return (
+												<tr className="border-b border-gray-300 h-14">
+													<td className="px-6 text-xs leading-4 tracking-normal whitespace-no-wrap">
+														{item.firstName} {item.lastName}
+													</td>
+													<td className="px-6 text-xs leading-4 tracking-normal whitespace-no-wrap">{item.email}</td>
+
+													<td className={`px-6 text-xs leading-4 tracking-normal whitespace-no-wrap`}>
+														<div className={`${item.isAdmin ? roleBgColors[0] : roleBgColors[1]} w-fit py-1 px-2 rounded`}>
+															<span className={`font-medium ${item.isAdmin ? roleTextColors[0] : roleTextColors[1]}`}>
+																{item.isAdmin ? "Admin" : "Regular"}
+															</span>
+														</div>
+													</td>
+													<td className="px-6 text-xs leading-4 tracking-normal whitespace-no-wrap">{item.contact1}</td>
+													<td className="px-6 text-xs leading-4 tracking-normal whitespace-no-wrap">{item.contact2}</td>
+													{session.user.email !== item.email ? (
+														<td
+															onClick={(e) => handleOpenViewUser(item)}
+															className="px-5 text-xs text-center transition-colors bg-green-700 border-b border-gray-200 cursor-pointer hover:bg-green-600"
+														>
+															<a className="font-bold text-white">View</a>
+														</td>
+													) : (
+														<td className="bg-white border-b border-gray-200"></td>
+													)}
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+						{/* SECTION Pagination */}
+						<div className="flex self-center justify-between text-white lg:space-x-10 lg:justify-center">
+							<div className="flex flex-col mt-3 w-52">
+								<button
+									type="button"
+									onClick={handlePrevPage}
+									className={`${
+										page === 1 ? "hidden" : "block"
+									} px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-green-600 focus:outline-none`}
+								>
+									Previous
+								</button>
+							</div>
+							<div className="flex flex-col mt-3 w-52">
+								<button
+									type="button"
+									onClick={handleNextPage}
+									className={`${
+										users.length === 0 || users.length <= 10 ? "hidden" : "block"
+									} px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-green-600 focus:outline-none`}
+								>
+									Next
+								</button>
+							</div>
+						</div>
+						{/* !SECTION */}
+					</div>
+				</>
+			)}
+		</>
+	);
 
 	return (
 		<div className="w-full m-10 font-rale">
@@ -134,6 +248,6 @@ const ManageMembers = ({ session }) => {
 			)}
 		</div>
 	);
-};
+}
 
-export default ManageMembers;
+Management.layout = "admin";
