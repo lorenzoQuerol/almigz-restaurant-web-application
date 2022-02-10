@@ -1,10 +1,36 @@
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
+import { getSession } from "next-auth/react";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function Home() {
+export async function getServerSideProps(context) {
+	const session = await getSession(context);
+
+	if (session?.user.isAdmin) {
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/admin",
+			},
+		};
+	}
+
+	if (!session)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/signin",
+			},
+		};
+
+	return {
+		props: session,
+	};
+}
+
+export default function Home(session) {
 	const { data, error } = useSWR("/api/home", fetcher);
 
 	if (!data) return <h1 className="h-screen">Loading...</h1>;
