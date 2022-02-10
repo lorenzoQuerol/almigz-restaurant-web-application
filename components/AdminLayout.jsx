@@ -8,6 +8,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
+import PaperIcon from "@components/PaperIcon";
 import DashboardIcon from "@components/DashboardIcon";
 import PeopleIcon from "@components/PeopleIcon";
 import TicketIcon from "@components/TicketIcon";
