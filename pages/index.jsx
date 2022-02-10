@@ -17,16 +17,8 @@ export async function getServerSideProps(context) {
 		};
 	}
 
-	if (!session)
-		return {
-			redirect: {
-				permanent: false,
-				destination: "/signin",
-			},
-		};
-
 	return {
-		props: session,
+		props: { session },
 	};
 }
 
