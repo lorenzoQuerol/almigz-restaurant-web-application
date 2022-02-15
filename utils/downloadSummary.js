@@ -8,7 +8,6 @@ function filterDataByDate(data,frDate,toDate){
     var tempData = []
     for(var i = 0; i < data.length; i++){
         if(data[i].dateCreated.slice(0,10) <= toDate && data[i].dateCreated.slice(0,10) >= frDate){
-            console.log(data[i].dateCreated.slice(0,10));
             tempData.push(i);
         }
     }
@@ -32,45 +31,49 @@ export default function downloadSummary(data,frDate,toDate){
     var json = [];
     
 
-    // if(toDate && frDate){
-    //     filterDataByDate(data);
-    // }
     var filteredDataArr = filterDataByDate(data,frDate,toDate);
-    
-    console.log(filteredDataArr);
-    
-    // for (var i = 0; i < data.length; i++){
-    //     for (var j = 0; j < data[i].order.length; j++){
-    //         var filter ={
-    //             "Full Name":data[i].fullName,
-    //             "Contact Number":data[i].contactNum[0],
-    //             "Branch":data[i].branch,
-    //             "Invoice Number": data[i].invoiceNum,
-    //             "Status" : status[data[i].orderStatus],
-    //             "Remarks":data[i].reasonForCancel,
-    //             "Total Price":data[i].order[j].quantity * data[i].order[j].menuItem.productPrice,
-    //             "Payment Method": data[i].payMethod,
-    //             "Date Created":data[i].dateCreated,
-    //             "Product Name":data[i].order[j].menuItem.productName,
-    //             "Qty":data[i].order[j].quantity
-    //         }
-    //         json.push(filter);
-    //     }
-    // }
+
+    filteredDataArr.forEach( i => {
+        for (var j = 0; j < data[i].order.length; j++){
+            var filter ={
+                "Full Name":data[i].fullName,
+                "Contact Number":data[i].contactNum[0],
+                "Branch":data[i].branch,
+                "Invoice Number": data[i].invoiceNum,
+                "Status" : status[data[i].orderStatus],
+                "Remarks":data[i].reasonForCancel,
+                "Total Price":data[i].order[j].quantity * data[i].order[j].menuItem.productPrice,
+                "Payment Method": data[i].payMethod,
+                "Date Created":data[i].dateCreated,
+                "Product Name":data[i].order[j].menuItem.productName,
+                "Qty":data[i].order[j].quantity
+            }
+            json.push(filter);
+        }
+    });
+
 
     
 
-    // var fields = Object.keys(json[0])
-    // var replacer = function(key, value) { return value === null ? '' : value } 
+    
+    if(json.length){
+        var fields = Object.keys(json[0])
+        var replacer = function(key, value) { return value === null ? '' : value } 
 
-    // var csv = json.map(function(row){
-    // return fields.map(function(fieldName){
-    //     return JSON.stringify(row[fieldName], replacer)
-    // }).join(',')
-    // })
-    // csv.unshift(fields.join(',')) // add header column
-    // csv = csv.join('\r\n');
-
+        var csv = json.map(function(row){
+        return fields.map(function(fieldName){
+            return JSON.stringify(row[fieldName], replacer)
+        }).join(',')
+        })
+        csv.unshift(fields.join(',')) // add header column
+        csv = csv.join('\r\n');
+        //DOWNLOAD
+        downloadCSV(csv)
+    }
+    else{
+        window.alert("No data")
+    }
+    
     // console.log(csv)
     // console.log(data.transaction.dateCreated)
     // console.log(data.transaction.branch)
@@ -78,8 +81,7 @@ export default function downloadSummary(data,frDate,toDate){
     // console.log(data.transaction.order)
     // console.log(data.transaction.payMethod)
 
-    //DOWNLOAD
-    // downloadCSV(csv)
+   
 }
 
 

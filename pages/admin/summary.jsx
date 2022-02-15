@@ -1,12 +1,8 @@
 import downloadSummary from "@utils/downloadSummary";
 import useAxios from "axios-hooks";
 import React, { useState,useEffect } from "react";
+import moment from 'moment';
 
-// Get date and time
-const today = new Date();
-const date = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2, '0')+'-'+String(today.getDate()).padStart(2, '0');
-const time = today.getHours() + "-" + today.getMinutes() + "-" + today.getSeconds() + "-" + today.getMilliseconds();;
-const dateTime = date+'_'+time;
 
 export default function Summary() {
 	
@@ -14,14 +10,39 @@ export default function Summary() {
 		url: `${process.env.NEXTAUTH_URL}/api/transactions`
 	});
 	
-	const [frDate, setFrDate] = useState();
-	const [toDate, setToDate] = useState();
+	const [frDate, setFrDate] = useState(moment().format('YYYY-MM-DD'));
+	const [toDate, setToDate] = useState(moment().format('YYYY-MM-DD'));
 	
-	function download(){
-		if(frDate<=toDate ){
-			downloadSummary(data.transactions,frDate,toDate);
+
+	//Get date input
+	const onChangeDate = e => {
+		const newDate = moment(new Date(e.target.value)).format('YYYY-MM-DD');
+		switch(e.target.name) {
+			case "frDate":
+				setFrDate(newDate)
+			  break;
+			case "toDate":
+				setToDate(newDate)
+			  break;
+			default:
+				console.log("err")
 		}
+	};
+
+	function download(){
+		var validFrDate = !(frDate == "Invalid date");
+		var validToDate = !(toDate == "Invalid date");
+		console.log(validToDate)
+		console.log(validFrDate)
 		
+		if(validFrDate && validToDate)
+			downloadSummary(data.transactions,frDate,toDate);
+		else{
+			var dateToday = moment().format('YYYY-MM-DD');
+			window.alert("Invalid date, downloading only today's transactions");
+			downloadSummary(data.transactions,dateToday,dateToday);
+		}
+			
 	}
 	
 	// ANCHOR Refetch for pagination
@@ -31,6 +52,7 @@ export default function Summary() {
 		}, 60000);
 	}, [data]);
 
+
 	return (
 		<div>
 			<div className="flex-row pb-5 sm:flex">
@@ -38,7 +60,9 @@ export default function Summary() {
 					<form>
 						<span className="mr-2 font-bold">From Date</span>
 						<input type="date"
-							onChange={(e) => setFrDate(e.target.value)}
+							name = "frDate"
+							value = {frDate}
+							onChange={onChangeDate}
 						></input>
 					</form>
 				</div>
@@ -46,7 +70,9 @@ export default function Summary() {
 					<form>
 						<span className="mr-2 font-bold">To Date</span>
 						<input type="date"
-							onChange={e => setToDate(e.target.value)}
+							name = "toDate"
+							value = {toDate}
+							onChange={onChangeDate}
 						></input>
 					</form>
 				</div>
