@@ -52,10 +52,6 @@ export default function downloadSummary(data,frDate,toDate){
         }
     });
 
-
-    
-
-    
     if(json.length){
         var fields = Object.keys(json[0])
         var replacer = function(key, value) { return value === null ? '' : value } 
@@ -73,15 +69,6 @@ export default function downloadSummary(data,frDate,toDate){
     else{
         window.alert("No data")
     }
-    
-    // console.log(csv)
-    // console.log(data.transaction.dateCreated)
-    // console.log(data.transaction.branch)
-    // console.log(data.transaction.deliveryTime)
-    // console.log(data.transaction.order)
-    // console.log(data.transaction.payMethod)
-
-   
 }
 
 
