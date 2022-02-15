@@ -1,15 +1,21 @@
+// Get date and time
+const today = new Date();
+const date = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2, '0')+'-'+String(today.getDate()).padStart(2, '0');
+const time = today.getHours() + "-" + today.getMinutes() + "-" + today.getSeconds() + "-" + today.getMilliseconds();;
+const dateTime = date+'_'+time;
 
+function filterDataByDate(data,frDate,toDate){
+    var tempData = []
+    for(var i = 0; i < data.length; i++){
+        if(data[i].dateCreated.slice(0,10) <= toDate && data[i].dateCreated.slice(0,10) >= frDate){
+            console.log(data[i].dateCreated.slice(0,10));
+            tempData.push(i);
+        }
+    }
+    return tempData;
+}
 
 function downloadCSV (csv){
-    
-    // Get date and time
-    const today = new Date();
-    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours() + "-" + today.getMinutes() + "-" + today.getSeconds() + "-" + today.getMilliseconds();;
-    var dateTime = date+'_'+time;
-
-	
-	
     //DOWNLOAD FUNCTION
     var tag = document.createElement("a");
     var csvFile = new Blob([csv], {type: 'text/plain'});
@@ -19,45 +25,51 @@ function downloadCSV (csv){
 }
 
 
-export default function downloadSummary(data){
+export default function downloadSummary(data,frDate,toDate){
     
     const status = ["INCOMING", "PROCESSED", "IN PREPARATION", "READY FOR PICKUP/DELIVERY", "COMPLETED ORDER", "CANCELLED ORDER"];
    
     var json = [];
-   
     
+
+    // if(toDate && frDate){
+    //     filterDataByDate(data);
+    // }
+    var filteredDataArr = filterDataByDate(data,frDate,toDate);
     
-    for (var i = 0; i < data.length; i++){
-        for (var j = 0; j < data[i].order.length; j++){
-            var filter ={
-                "Full Name":data[i].fullName,
-                "Contact Number":data[i].contactNum[0],
-                "Branch":data[i].branch,
-                "Invoice Number": data[i].invoiceNum,
-                "Status" : status[data[i].orderStatus],
-                "Remarks":data[i].reasonForCancel,
-                "Total Price":data[i].order[j].quantity * data[i].order[j].menuItem.productPrice,
-                "Payment Method": data[i].payMethod,
-                "Date Created":data[i].dateCreated,
-                "Product Name":data[i].order[j].menuItem.productName,
-                "Qty":data[i].order[j].quantity
-            }
-            json.push(filter);
-        }
-    }
+    console.log(filteredDataArr);
+    
+    // for (var i = 0; i < data.length; i++){
+    //     for (var j = 0; j < data[i].order.length; j++){
+    //         var filter ={
+    //             "Full Name":data[i].fullName,
+    //             "Contact Number":data[i].contactNum[0],
+    //             "Branch":data[i].branch,
+    //             "Invoice Number": data[i].invoiceNum,
+    //             "Status" : status[data[i].orderStatus],
+    //             "Remarks":data[i].reasonForCancel,
+    //             "Total Price":data[i].order[j].quantity * data[i].order[j].menuItem.productPrice,
+    //             "Payment Method": data[i].payMethod,
+    //             "Date Created":data[i].dateCreated,
+    //             "Product Name":data[i].order[j].menuItem.productName,
+    //             "Qty":data[i].order[j].quantity
+    //         }
+    //         json.push(filter);
+    //     }
+    // }
 
     
 
-    var fields = Object.keys(json[0])
-    var replacer = function(key, value) { return value === null ? '' : value } 
+    // var fields = Object.keys(json[0])
+    // var replacer = function(key, value) { return value === null ? '' : value } 
 
-    var csv = json.map(function(row){
-    return fields.map(function(fieldName){
-        return JSON.stringify(row[fieldName], replacer)
-    }).join(',')
-    })
-    csv.unshift(fields.join(',')) // add header column
-    csv = csv.join('\r\n');
+    // var csv = json.map(function(row){
+    // return fields.map(function(fieldName){
+    //     return JSON.stringify(row[fieldName], replacer)
+    // }).join(',')
+    // })
+    // csv.unshift(fields.join(',')) // add header column
+    // csv = csv.join('\r\n');
 
     // console.log(csv)
     // console.log(data.transaction.dateCreated)
@@ -67,7 +79,7 @@ export default function downloadSummary(data){
     // console.log(data.transaction.payMethod)
 
     //DOWNLOAD
-    downloadCSV(csv)
+    // downloadCSV(csv)
 }
 
 
