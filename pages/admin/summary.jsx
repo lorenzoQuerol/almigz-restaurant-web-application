@@ -5,7 +5,6 @@ import moment from 'moment';
 
 
 export default function Summary() {
-	
 	const [{ data, loading, error }, refetch] = useAxios({
 		url: `${process.env.NEXTAUTH_URL}/api/transactions`
 	});
@@ -13,7 +12,6 @@ export default function Summary() {
 	const [frDate, setFrDate] = useState(moment().format('YYYY-MM-DD'));
 	const [toDate, setToDate] = useState(moment().format('YYYY-MM-DD'));
 	
-
 	//Get date input
 	const onChangeDate = e => {
 		const newDate = moment(new Date(e.target.value)).format('YYYY-MM-DD');
@@ -42,7 +40,6 @@ export default function Summary() {
 			window.alert("Invalid date, downloading only today's transactions");
 			downloadSummary(data.transactions,dateToday,dateToday);
 		}
-			
 	}
 	
 	// ANCHOR Refetch for pagination
@@ -51,7 +48,6 @@ export default function Summary() {
 			refetch();
 		}, 60000);
 	}, [data]);
-
 
 	return (
 		<div>

@@ -23,14 +23,9 @@ function downloadCSV (csv){
     tag.click()
 }
 
-
 export default function downloadSummary(data,frDate,toDate){
-    
     const status = ["INCOMING", "PROCESSED", "IN PREPARATION", "READY FOR PICKUP/DELIVERY", "COMPLETED ORDER", "CANCELLED ORDER"];
-   
     var json = [];
-    
-
     var filteredDataArr = filterDataByDate(data,frDate,toDate);
 
     filteredDataArr.forEach( i => {
