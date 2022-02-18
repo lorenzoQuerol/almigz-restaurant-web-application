@@ -3,12 +3,13 @@ import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import useAxios from "axios-hooks";
+import useSWR from "swr";
 import axios from "axios";
 import Image from "next/image";
 import getStorageValue from "@utils/localStorage/getStorageValue";
 import Loading from "@components/Loading";
 
-const timeValid = (time) => time >= "10:00" && time <= "19:00";
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export async function getServerSideProps(context) {
 	const session = await getSession(context);
@@ -21,6 +22,13 @@ export async function getServerSideProps(context) {
 			},
 		};
 
+	if (session.user.isAdmin)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/admin",
+			},
+		};
 	return {
 		props: session,
 	};
@@ -29,8 +37,10 @@ export async function getServerSideProps(context) {
 export default function Checkout(session) {
 	const router = useRouter();
 	const [{ data, loading, error }, refetch] = useAxios(`/api/users/${session.user.email}`);
+	const { data: timeData, error: timeError } = useSWR("/api/hours", fetcher);
+	const timeValid = (time) => time >= timeData.operatingHours.startTime && time <= timeData.operatingHours.endTime; // NOTE: time validator
 	const cart = getStorageValue("foodCart");
-
+	const branch = getStorageValue("branch");
 	const {
 		register,
 		watch,
@@ -65,10 +75,6 @@ export default function Checkout(session) {
 		return date;
 	});
 
-	// NOTE Time limit for the day to pickup and deliver
-	const [startTime, setStartTime] = useState("10:00");
-	const [endTime, setEndTime] = useState("19:00");
-
 	// ANCHOR Place order function
 	const placeOrder = async (data) => {
 		const formattedDate = `${data.deliverDate}T${data.deliverTime}`;
@@ -89,7 +95,7 @@ export default function Checkout(session) {
 			address: data.useHomeAddress === "true" ? user.address : data.address,
 			payMethod: data.payMethod,
 			change: data.payMethod === "COD" ? Number(data.change) : null,
-			branch: data.branch,
+			branch: branch,
 			deliverTime: data.type === "Delivery" ? (data.deliverNow === "true" ? "Now" : formattedDate) : null,
 			pickupTime: data.type === "Pickup" ? (data.deliverNow === "true" ? "Now" : formattedDate) : null,
 		};
@@ -212,21 +218,14 @@ export default function Checkout(session) {
 											)}
 										</>
 									) : (
-										<>
-											<label for="Address" className="block mb-4 text-sm font-semibold">
-												Branch
-											</label>
-											<div className="items-center mb-2 text-md">
-												<select
-													className="w-full py-1 pl-2 text-sm border border-gray-300 rounded sm:w-1/2 lg:w-1/3 focus:outline-none focus:ring-1 focus:ring-green-700"
-													{...register("branch")}
-												>
-													<option value="Molino Boulevard">Molino Boulevard</option>
-													<option value="Unitop Mall">Unitop Mall</option>
-													<option value="V Central Mall">V Central Mall</option>
-												</select>
+										<div className="mt-4">
+											<div className="w-full">
+												<label for="Email" className="block mb-3 text-sm font-semibold">
+													Branch
+												</label>
+												<span>{branch}</span>
 											</div>
-										</>
+										</div>
 									)}
 								</div>
 							</div>
@@ -360,7 +359,7 @@ export default function Checkout(session) {
 											)}
 										</div>
 										<div className="mb-2 text-sm font-semibold">
-											Operating Hours: {startTime} - {endTime}
+											Operating Hours: {timeData.operatingHours.startTime} - {timeData.operatingHours.endTime}
 										</div>
 									</>
 								)}

@@ -24,6 +24,14 @@ export async function getServerSideProps(context) {
 			},
 		};
 
+	if (!session.user.isAdmin)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/",
+			},
+		};
+
 	return {
 		props: session,
 	};
@@ -94,7 +102,7 @@ export default function OrderPage(session) {
 				<Loading />
 			) : (
 				<div className="text-gray-800 font-rale">
-					<div className="flex w-fit flex-col sm:flex-row sm:items-center mb-2 text-4xl font-bold">
+					<div className="flex flex-col mb-2 text-4xl font-bold w-fit sm:flex-row sm:items-center">
 						<div className="mb-2">Order #{data.transaction.invoiceNum.toString().padStart(4, "0")}</div>
 						<div className={`sm:ml-5 p-1 text-center px-5 text-lg rounded ${statColors[transaction.orderStatus]} ${statTextColors[transaction.orderStatus]}`}>
 							{status[transaction.orderStatus]}
@@ -142,15 +150,15 @@ export default function OrderPage(session) {
 									</div>
 								</div>
 								<div className="w-full p-5 divide-y">
-									<div className="flex py-2 justify-between text-base font-medium">
+									<div className="flex justify-between py-2 text-base font-medium">
 										<p>Subtotal</p>
 										<p>₱{transaction.totalPrice - 50}</p>
 									</div>
-									<div className="flex py-2 justify-between text-base text-gray-500 text-medium">
+									<div className="flex justify-between py-2 text-base text-gray-500 text-medium">
 										<p>Delivery Fee</p>
 										<p>{transaction.type == "Delivery" ? `₱${50}` : "-"}</p>
 									</div>
-									<div className="flex py-2 justify-between text-base font-medium ">
+									<div className="flex justify-between py-2 text-base font-medium ">
 										<p>Total</p>
 										<p>₱{transaction.totalPrice}</p>
 									</div>

@@ -36,6 +36,14 @@ export async function getServerSideProps(context) {
 			},
 		};
 
+	if (session.user.isAdmin)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/admin",
+			},
+		};
+
 	return {
 		props: session,
 	};
@@ -148,11 +156,13 @@ export default function Tracker(session) {
 	};
 
 	return (
-		<>
+		<div className="px-4 2xl:container 2xl:mx-auto py-14 md:px-6 xl:px-20 font-rale text-slate-900">
 			{loading ? (
-				<Loading />
+				<div className="mt-8">
+					<Loading />
+				</div>
 			) : (
-				<div className="px-4 2xl:container 2xl:mx-auto py-14 md:px-6 xl:px-20 font-rale text-slate-900">
+				<div>
 					<h3 className="w-full mb-5 text-4xl font-bold leading-7 xl:text-4xl xl:leading-9 md:text-left">Order Tracker</h3>
 					<div className="flex flex-col items-center justify-center space-y-10 xl:flex-row xl:space-y-0 xl:space-x-8">
 						{/* ANCHOR Current status of order */}
@@ -175,7 +185,13 @@ export default function Tracker(session) {
 								</h3>
 							</div>
 
-							<div className="">{Steps(transaction.type, status)}</div>
+							{transaction.reasonForCancel !== "" && (
+								<div>
+									<span>Reason for Cancellation: {transaction.reasonForCancel}</span>
+								</div>
+							)}
+
+							<div>{Steps(transaction.type, status)}</div>
 							<div>
 								<span>Last Updated: {formatDate(transaction.lastUpdated)}</span>
 							</div>
@@ -296,7 +312,7 @@ export default function Tracker(session) {
 					</div>
 				</div>
 			)}
-		</>
+		</div>
 	);
 }
 

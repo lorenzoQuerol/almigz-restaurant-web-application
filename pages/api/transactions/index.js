@@ -9,7 +9,7 @@ async function handler(req, res) {
 
 	// Unpack the request
 	const {
-		query: { limit, offset, filter },
+		query: { limit, offset, filter, branch },
 		method,
 	} = req;
 
@@ -21,13 +21,28 @@ async function handler(req, res) {
 					try {
 						let transactions;
 						if (limit) {
-							if (filter)
-								transactions = await Transaction.find({ orderStatus: filter }, { _id: false, __v: false })
+							if (branch && filter) {
+								transactions = await Transaction.find({ orderStatus: filter, branch: branch }, { _id: false, __v: false })
 									.sort({ dateCreated: -1 })
 									.skip(Number(offset))
 									.limit(Number(limit));
-							else transactions = await Transaction.find({}, { _id: false, __v: false }).sort({ dateCreated: -1 }).skip(Number(offset)).limit(Number(limit));
-						} else transactions = await Transaction.find({}, { _id: false, __v: false }).sort({ dateCreated: -1 });
+							} else if (filter) {
+								transactions = await Transaction.find({ orderStatus: Number(filter) }, { _id: false, __v: false })
+									.sort({ dateCreated: -1 })
+									.skip(Number(offset))
+									.limit(Number(limit));
+							} else if (branch) {
+								transactions = await Transaction.find({ branch: branch }, { _id: false, __v: false })
+									.sort({ dateCreated: -1 })
+									.skip(Number(offset))
+									.limit(Number(limit));
+							} else {
+								transactions = await Transaction.find({}, { _id: false, __v: false }).sort({ dateCreated: -1 }).skip(Number(offset)).limit(Number(limit));
+							}
+						} else {
+							transactions = await Transaction.find({}, { _id: false, __v: false }).sort({ dateCreated: -1 });
+						}
+
 						if (!transactions) return res.status(404).json({ success: false, message: "Transactions not found" });
 
 						res.status(200).json({ success: true, message: "Successful query", transactions });

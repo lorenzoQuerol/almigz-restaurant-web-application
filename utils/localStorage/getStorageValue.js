@@ -9,5 +9,10 @@ export default function getStorageValue(key) {
 			const transaction = JSON.parse(localStorage.getItem("transaction"));
 			return transaction;
 		}
+
+		if (key === "branch") {
+			const branch = JSON.parse(localStorage.getItem("branch"));
+			return branch;
+		}
 	}
 }

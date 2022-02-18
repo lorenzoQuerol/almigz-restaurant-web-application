@@ -70,7 +70,7 @@ const Cart = ({ open, handleOpen }) => {
 	if (cart && products.length !== 0) {
 		return (
 			<Transition.Root show={open} as={Fragment}>
-				<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={handleOpen}>
+				<Dialog as="div" className="fixed inset-0 z-20 overflow-hidden" onClose={handleOpen}>
 					<div className="absolute inset-0 overflow-hidden">
 						<Transition.Child
 							as={Fragment}
@@ -202,7 +202,7 @@ const Cart = ({ open, handleOpen }) => {
 	} else {
 		return (
 			<Transition.Root show={open} as={Fragment}>
-				<Dialog as="div" className="fixed inset-0 overflow-hidden" onClose={handleOpen}>
+				<Dialog as="div" className="fixed inset-0 z-20 overflow-hidden" onClose={handleOpen}>
 					<div className="absolute inset-0 overflow-hidden">
 						<Transition.Child
 							as={Fragment}
