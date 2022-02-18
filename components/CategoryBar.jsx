@@ -26,7 +26,7 @@ const CategoryBar = ({ activeCategory, setActiveCategory }) => {
 				<select
 					onChange={(e) => setActiveCategory(e.target.value)}
 					aria-label="Selected tab"
-					className="z-10 block w-full px-2 py-1 font-semibold transition-colors bg-transparent border border-gray-300 rounded appearance-none form-select focus:border-1 focus:border-green-700 focus:outline-none"
+					className="z-10 block w-full px-2 py-1 font-semibold transition-colors bg-transparent border border-gray-300 rounded appearance-none focus:border-1 focus:border-green-700 focus:outline-none"
 				>
 					{categories.map((item, index) => {
 						return <option className="text-sm">{item}</option>;
@@ -44,8 +44,8 @@ const CategoryBar = ({ activeCategory, setActiveCategory }) => {
 									onClick={() => setActiveCategory(item)}
 									className={
 										activeCategory == item
-											? "text-xs lg:text-sm transition-all duration-200 text-white py-2 px-3 bg-green-700 rounded mr-8 font-medium"
-											: "text-xs lg:text-sm transition-all duration-200 py-2 mr-8 px-1 font-medium hover:font-medium hover:text-green-700 cursor-pointer"
+											? "text-xs lg:text-sm transition-all duration-200 text-white py-2 px-3 bg-green-700 rounded cursor-default mx-3 lg:mr-8 font-medium"
+											: "text-xs lg:text-sm transition-all duration-200 py-2 mx-1 lg:mr-8 px-1 font-medium hover:font-medium hover:text-green-700 cursor-pointer"
 									}
 								>
 									{item}

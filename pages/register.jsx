@@ -51,15 +51,15 @@ export default function Register() {
 	if (status === "loading" || status === "authenticated") return <h1>Loading...</h1>;
 
 	return (
-		<div className="flex justify-center font-rale text-slate-900">
-			<div className="flex-col w-full mx-6 my-16 text-center rounded-md sm:w-1/3 md:w-2/3 lg:w-1/2 xl:w-1/3 drop-shadow-lg bg-zinc-100">
+		<div className="flex justify-center font-rale text-gray-800">
+			<div className="flex-col w-full mx-6 my-16 text-center rounded sm:w-1/3 md:w-2/3 lg:w-1/2 xl:w-1/3 drop-shadow-lg bg-zinc-100">
 				<div className="p-5">
 					<h1 className="py-5 text-2xl font-extrabold text-green-700 sm:text-4xl">Create an Account</h1>
 					<form className="font-bold font-rale font-lg" onSubmit={handleSubmit(submitRegister)}>
 						{/* First name */}
 						<label className="label">First Name</label>
 						<input
-							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							className="w-full p-5 rounded input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 							type="text"
 							placeholder="First Name"
 							{...register("firstName", { required: true, maxLength: 80 })}
@@ -69,7 +69,7 @@ export default function Register() {
 						{/* Last name */}
 						<label className="mt-4 label">Last Name</label>
 						<input
-							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							className="w-full p-5 rounded input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 							type="text"
 							placeholder="Last Name"
 							{...register("lastName", { required: true, maxLength: 100 })}
@@ -79,7 +79,7 @@ export default function Register() {
 						{/* Email address */}
 						<label className="mt-4 label">Email Address</label>
 						<input
-							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							className="w-full p-5 rounded input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 							type="text"
 							title="Please input a proper email address"
 							placeholder="example@email.com"
@@ -90,7 +90,7 @@ export default function Register() {
 						{/* Password */}
 						<label className="mt-4 label">Password</label>
 						<input
-							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							className="w-full p-5 rounded input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 							type="password"
 							title="Password should have at least 8 characters and should not contain whitespace."
 							placeholder="Password"
@@ -101,7 +101,7 @@ export default function Register() {
 						{/* Confirm password */}
 						<label className="mt-4 label">Confirm Password</label>
 						<input
-							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							className="w-full p-5 rounded input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 							type="password"
 							placeholder="Confirm Password"
 							{...register("confirmPassword", { required: true, min: 8, pattern: /^\S+$/i })}
@@ -111,7 +111,7 @@ export default function Register() {
 						{/* Home address */}
 						<label className="mt-4 label">Home Address</label>
 						<textarea
-							className="w-full h-20 p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+							className="w-full h-20 p-5 rounded input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 							type="text"
 							placeholder="Home Address"
 							{...register("address", { required: true, maxLength: 100 })}
@@ -120,10 +120,10 @@ export default function Register() {
 
 						{/* Contact number 1 */}
 						<label className="mt-4 label">Contact Number 1</label>
-						<div className="flex items-center w-full pl-2 font-sans font-medium text-gray-600 rounded-md align-left">
+						<div className="flex items-center w-full pl-2 font-sans font-medium text-gray-600 rounded align-left">
 							+63
 							<input
-								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 								type="tel"
 								placeholder="9XXXXXXXXX (Mobile Number)"
 								{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9/ })}
@@ -136,10 +136,10 @@ export default function Register() {
 
 						{/* Contact number 2 */}
 						<label className="mt-4 label">Contact Number 2 (Optional)</label>
-						<div className="flex items-center w-full pl-2 font-sans font-medium text-gray-600 rounded-md align-left">
+						<div className="flex items-center w-full pl-2 font-sans font-medium text-gray-600 rounded align-left">
 							+63
 							<input
-								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded-md input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
+								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded input input-sm input-bordered focus:ring-2 focus:ring-blue-300"
 								type="tel"
 								placeholder="9XXXXXXXXX (Mobile Number)"
 								{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9/ })}
@@ -154,7 +154,7 @@ export default function Register() {
 						<br />
 
 						{/* Submit button */}
-						<button className="inline-block w-full px-4 py-2 font-semibold text-white bg-green-700 rounded-xl hover:bg-green-600">Register</button>
+						<button className="inline-block w-full px-4 py-2 font-medium transition-colors text-white bg-green-700 rounded hover:bg-green-600">Register</button>
 						<div className="mt-8 mb-2 font-sans text-sm font-medium text-center">
 							Already have an account?{" "}
 							<Link href="/signin">

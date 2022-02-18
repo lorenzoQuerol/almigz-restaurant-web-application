@@ -47,15 +47,15 @@ export default function Signin() {
 	if (status === "loading" || status === "authenticated") return <h1>Loading...</h1>;
 
 	return (
-		<div className="flex justify-center mt-16 font-rale text-slate-900">
+		<div className="flex justify-center mt-16 font-rale text-gray-800">
 			<div className="flex-col text-center w-96">
-				<div className="p-10 rounded-md bg-zinc-100 drop-shadow-lg">
+				<div className="p-10 rounded bg-zinc-100 shadow">
 					<h1 className="p-8 text-5xl font-extrabold text-green-700">Login</h1>
 					<form className="font-bold font-rale font-lg" onSubmit={handleSubmit(submitLogin)}>
 						{/* Email address */}
 						<label className="label">Email Address</label>
 						<input
-							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-green-300"
+							className="w-full p-5 rounded input input-sm input-bordered focus:ring-2 focus:ring-green-300"
 							type="text"
 							title="Email Address"
 							placeholder="Email Address"
@@ -66,7 +66,7 @@ export default function Signin() {
 						{/* Password */}
 						<label className="mt-4 label">Password</label>
 						<input
-							className="w-full p-5 rounded-md input input-sm input-bordered focus:ring-2 focus:ring-green-300"
+							className="w-full p-5 rounded input input-sm input-bordered focus:ring-2 focus:ring-green-300"
 							type="password"
 							title="Password"
 							placeholder="Password"
@@ -78,7 +78,9 @@ export default function Signin() {
 						<div className="mt-1 mb-2 font-sans text-sm font-medium text-left text-red-500">{message}</div>
 
 						{/* Submit button */}
-						<button className="inline-block w-full px-4 py-2 mt-10 font-semibold text-white bg-green-700 rounded-xl hover:font-medium hover:bg-green-600">LOGIN</button>
+						<button className="inline-block w-full px-4 py-2 mt-10 transition-colors font-medium text-white bg-green-700 rounded hover:font-medium hover:bg-green-600">
+							Login
+						</button>
 						<div className="mt-8 mb-2 font-sans text-sm font-medium text-center">
 							No account?{" "}
 							<Link href="/register">
