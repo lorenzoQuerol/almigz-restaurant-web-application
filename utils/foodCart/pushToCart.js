@@ -7,7 +7,7 @@ export default async function pushToCart(data) {
 		// Check if product already exists in cart; update quantity if found.
 		let exists = false;
 		cart.products.forEach((product) => {
-			if (product.menuItem.productName === data.menuItem.productName) {
+			if (product.menuItem.productName === data.menuItem.productName && product.menuItem.category === data.menuItem.category) {
 				product.quantity = Number(product.quantity) + Number(data.quantity);
 				exists = true;
 			}
