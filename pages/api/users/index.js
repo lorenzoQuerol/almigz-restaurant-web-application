@@ -35,9 +35,9 @@ async function handler(req, res) {
 				// Check for duplicates
 				const duplicate = await User.findOne({ email: req.body.email });
 				if (duplicate)
-					return res.status(400).json({
+					return res.status(200).json({
 						success: false,
-						message: "User already registered",
+						message: "Email Address already exists in the system, please login",
 					});
 
 				if (req.body.password) req.body.password = await hash(req.body.password, 12);
