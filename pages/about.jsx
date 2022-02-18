@@ -1,12 +1,12 @@
 import Image from "next/image";
 import useSWR from "swr";
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function About() {
-	const { data:about, error: bannersError} = useSWR("/api/aboutUs", fetcher);
-	const { data:branchData, error: menuError} = useSWR("/api/branches", fetcher);
+	const { data: about, error: bannersError } = useSWR("/api/aboutUs", fetcher);
+	const { data: branchData, error: menuError } = useSWR("/api/branches", fetcher);
 	if (!about) return <h1 className="h-screen">Loading...</h1>;
 	if (!branchData) return <h1 className="h-screen">Loading...</h1>;
 
@@ -19,11 +19,11 @@ export default function About() {
 			<div className="lg:px-0 md:px-6 px-4 my-4  md:my-6 lg:my-0">
 				{/* Brief History */}
 				<div className="flex lg:w-screen flex-col justify-between">
-					<div className="w-full h-full bg-cover" style={{backgroundImage: `url(${background})`}}>
-					<div className="w-full overlay flex flex-col justify-center text-center px-4 md:px-12 lg:px-24 py-8 lg:py-12 font-rale backdrop-blur-sm bg-black/80">
-						<h1 className="text-3xl self-center 2xl:w-2/3 lg:text-4xl mb-6 font-bold leading-9 text-white font-rale">Brief History</h1>
-						<div className="font-normal self-center 2xl:w-2/3 text-base space-y-4 leading-relaxed text-white ">{documentToReactComponents(aboutText.json)}</div>
-					</div>
+					<div className="w-full h-full bg-cover" style={{ backgroundImage: `url(${background})` }}>
+						<div className="w-full overlay flex flex-col justify-center text-center px-4 md:px-12 lg:px-24 py-8 lg:py-12 font-rale backdrop-blur-sm bg-black/80">
+							<h1 className="text-3xl self-center 2xl:w-2/3 lg:text-4xl mb-6 font-bold leading-9 text-white font-rale">Brief History</h1>
+							<div className="font-normal self-center 2xl:w-2/3 text-base space-y-4 leading-relaxed text-white ">{documentToReactComponents(aboutText.json)}</div>
+						</div>
 					</div>
 				</div>
 
@@ -37,14 +37,8 @@ export default function About() {
 								<div id={`branch${i}`} className="carousel slide carousel-fade relative" data-bs-ride="carousel" data-bs-pause="hover" data-bs-interval="5500">
 									<div className="carousel-inner relative overflow-hidden">
 										{branchObj.branchImagesCollection.items.map((pic, j) => (
-											<div className={`${j == 1 ? 'active' : ''} carousel-item relative float-left w-full`}>
-												<Image key={j}
-													width={4000}
-													height={3000}
-													src={pic.url}
-													className="block w-full object-contain"
-													alt="Exotic Fruits"
-												/>
+											<div className={`${j == 1 ? "active" : ""} carousel-item relative float-left w-full`}>
+												<Image key={j} width={4000} height={3000} src={pic.url} className="block w-full object-contain" alt="Exotic Fruits" />
 											</div>
 										))}
 									</div>
@@ -68,27 +62,26 @@ export default function About() {
 									</button>
 								</div>
 
-
 								{/* Text Part */}
 								<div className="p-6 flex flex-col justify-start">
 									<h5 className="text-gray-900 text-xl font-medium mb-2">{branchObj.branch}</h5>
-									<p className="text-gray-700 text-base font-rale mb-4">
-									{branchObj.description}
-									</p>
+									<p className="text-gray-700 text-base font-rale mb-4">{branchObj.description}</p>
 									<p className="flex-row w-full">
-									{branchObj.contactNumber.map((num, k) => (
-										<span className="inline-block text-green-600 w-auto justify-items-stretch text-base font-light">{num}
-										{branchObj.contactNumber[k + 1] && <span className="px-2">/</span>}
-										</span>
-									))}
+										{branchObj.contactNumber.map((num, k) => (
+											<span className="inline-block text-green-600 w-auto justify-items-stretch text-base font-light">
+												{num}
+												{branchObj.contactNumber[k + 1] && <span className="px-2">/</span>}
+											</span>
+										))}
 									</p>
 								</div>
 							</div>
 						))}
 					</div>
 				</div>
-
 			</div>
 		</>
 	);
 }
+
+About.layout = "consumer";
