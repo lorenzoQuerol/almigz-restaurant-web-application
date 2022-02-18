@@ -6,7 +6,10 @@ import User from "@models/UserModel";
 async function handler(req, res) {
 	await createConnection();
 	const session = await getSession({ req });
-	const { method } = req;
+	const {
+		query: { limit, offset },
+		method,
+	} = req;
 
 	switch (method) {
 		// Get all users (ADMIN-PROTECTED)
@@ -14,7 +17,7 @@ async function handler(req, res) {
 			if (session) {
 				if (session.user.isAdmin) {
 					try {
-						const users = await User.find({}, { __v: false, _id: false, transactions: false });
+						const users = await User.find({}, { __v: false, _id: false, transactions: false }).sort({ isAdmin: -1 }).skip(Number(offset)).limit(Number(limit));
 						if (!users) return res.status(404).json({ success: false, message: "Cannot get users" });
 
 						res.status(200).json({ success: true, message: "Successful query", users });

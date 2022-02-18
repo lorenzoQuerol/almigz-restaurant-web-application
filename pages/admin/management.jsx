@@ -9,6 +9,7 @@ import Loading from "@components/Loading";
 const headers = ["Full Name", "Email", "Role", "Contact Number 1", "Contact Number 2", ""];
 const roleTextColors = ["text-green-900", "text-yellow-900"];
 const roleBgColors = ["bg-green-200", "bg-yellow-200"];
+const limit = 10;
 
 export async function getServerSideProps(context) {
 	const session = await getSession(context);
@@ -42,7 +43,7 @@ export default function Management(session) {
 	const [openViewUser, setOpenViewUser] = useState(false);
 	const [{ data, loading, error }, refetch] = useAxios({
 		url: `${process.env.NEXTAUTH_URL}/api/users`,
-		params: { page },
+		params: { limit: limit, offset: (page - 1) * limit },
 	});
 	// !SECTION
 
@@ -143,7 +144,7 @@ export default function Management(session) {
 									type="button"
 									onClick={handleNextPage}
 									className={`${
-										users.length === 0 || users.length <= 10 ? "hidden" : "block"
+										users.length === 0 || users.length < 10 ? "hidden" : "block"
 									} px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-green-600 focus:outline-none`}
 								>
 									Next
