@@ -40,10 +40,13 @@ export default function Profile(session) {
 		formState: { errors },
 	} = useForm();
 
+	const samePassword = () => {
+		return watch("password") == watch("confirmPassword");
+	};
+
 	const [user, setUser] = useState({});
 	const [editable, setEditable] = useState(false);
 	const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-	const [message, setMessage] = useState("");
 
 	useEffect(() => {
 		if (data) setUser(data.user);
@@ -75,26 +78,19 @@ export default function Profile(session) {
 	};
 
 	const handleEditProfile = async (edited) => {
-		if (edited.password === edited.confirmPassword) {
-			handleEditable();
+		handleEditable();
 
-			// Preprocess data
-			edited.firstName = toTitleCase(edited.firstName);
-			edited.lastName = toTitleCase(edited.lastName);
-			if (edited.password == "") edited.password = user.password;
-			delete edited.confirmPassword;
-			edited.contact1 = `+63${edited.contact1}`;
-			if (edited.contact2 !== "") edited.contact2 = `+63${edited.contact2}`;
+		// Preprocess data
+		edited.firstName = toTitleCase(edited.firstName);
+		edited.lastName = toTitleCase(edited.lastName);
+		if (edited.password == "") edited.password = user.password;
+		delete edited.confirmPassword;
+		edited.contact1 = `+63${edited.contact1}`;
+		if (edited.contact2 !== "") edited.contact2 = `+63${edited.contact2}`;
 
-			// Update and refetch data
-			const response = await axios.put(`/api/users/${user.email}`, edited);
-			if (response.status < 300) refetch();
-
-			// Reset message
-			setMessage("");
-		} else {
-			setMessage("Ensure both passwords are the same");
-		}
+		// Update and refetch data
+		const response = await axios.put(`/api/users/${user.email}`, edited);
+		if (response.status < 300) refetch();
 	};
 
 	const handleDeleteDialog = () => {
@@ -255,9 +251,14 @@ export default function Profile(session) {
 												<input
 													className="flex items-center w-full h-10 pl-3 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
 													placeholder="Confirm Password"
-													{...register("confirmPassword")}
+													{...register("confirmPassword", { required: watch("password") !== "" ? true : false, validate: samePassword })}
 												/>
-												{message && <div className="mt-1 text-xs font-medium text-left text-red-500">{message}</div>}
+												{errors.confirmPassword?.type === "required" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Please confirm password</div>
+												)}
+												{errors.confirmPassword?.type === "validate" && (
+													<div className="mt-1 text-sm font-medium text-left text-red-500">Ensure both passwords are the same</div>
+												)}
 											</div>
 										)}
 
