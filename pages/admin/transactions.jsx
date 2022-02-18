@@ -45,7 +45,7 @@ export default function Transactions() {
 	useInterval(() => {
 		refetch();
 		setLastUpdate(new Date());
-	}, 10000);
+	}, 60000);
 
 	const formatDate = (date) => {
 		date = new Date(date).toLocaleString("en-US", {
@@ -84,10 +84,10 @@ export default function Transactions() {
 				<Loading />
 			) : (
 				<div className="text-gray-800 font-rale">
-					<div className="flex-row pb-5 space-y-3 sm:flex">
+					<div className="flex-row items-center pb-5 space-y-3 sm:flex">
 						<div className="mb-5 text-xl text-2xl font-bold sm:mb-0 sm:text-3xl">Manage Transactions</div>
 						{/* ANCHOR Order Status */}
-						<div className="flex-row self-center flex-1 sm:ml-5">
+						<div className="flex-row flex-1 sm:ml-5">
 							<form className="w-full">
 								<span className="mr-2 font-bold">Status</span>
 								<select
@@ -107,11 +107,10 @@ export default function Transactions() {
 						</div>
 
 						{/* ANCHOR Branches */}
-						<div className="flex-row self-center flex-1 sm:ml-5">
+						<div className="flex-row flex-1 sm:ml-5">
 							<form className="w-full">
 								<span className="mr-2 font-bold">Branch</span>
 								<select
-									// onChange={(e) => setFilter(e.target.value)}
 									className="w-9/12 max-w-xs px-2 py-1 border rounded sm:w-fit md:w-1/2 lg:w-full focus:border-1 focus:outline-none focus:border-green-700"
 									{...register("branch")}
 								>
