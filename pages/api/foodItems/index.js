@@ -22,13 +22,17 @@ const query = `{
               height
             }
           }
+          branchesAvailable
           slug
           }
         }
       }`;
 
 async function handler(req, res) {
-	const { method } = req;
+	const {
+		method,
+		query: { branch },
+	} = req;
 
 	switch (method) {
 		case "GET":
@@ -36,7 +40,14 @@ async function handler(req, res) {
 				const response = await connectToContentful(query);
 				if (!response) res.status(404).json({ success: false, message: "Food items not found" });
 
-				const foodItems = response.data.foodItemCollection.items;
+				let foodItems;
+				let data = response.data.foodItemCollection.items;
+
+				if (branch)
+					foodItems = data.filter((foodItem) => {
+						if (foodItem.branchesAvailable !== null) return foodItem.branchesAvailable.includes(branch);
+					});
+				else foodItems = data;
 
 				res.status(200).json({ success: true, message: "Successful query", foodItems });
 			} catch (err) {
