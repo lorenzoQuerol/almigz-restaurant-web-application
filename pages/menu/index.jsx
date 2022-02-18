@@ -1,35 +1,51 @@
 import useSWR from "swr";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+import BranchDialog from "@components/BranchDialog";
 import CategoryBar from "@components/CategoryBar";
 import MenuHeader from "@components/MenuHeader";
 import Loading from "@components/Loading";
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
+import getStorageValue from "@utils/localStorage/getStorageValue";
+import removeStorageValue from "@utils/localStorage/removeStorageValue";
+
+const fetcher = (url, branch) => fetch(`${url}?branch=${branch}`).then((res) => res.json());
 
 export default function Menu() {
 	// ANCHOR Page variables
-	const { data, error } = useSWR("/api/foodItems", fetcher);
+	const [branch, setBranch] = useState(() => {
+		return getStorageValue("branch");
+	});
+	const [openBranch, setOpenBranch] = useState(true);
+	const { data, error } = useSWR([`/api/foodItems`, branch], fetcher);
 	const [foodItems, setFoodItems] = useState([]);
 	const [activeCategory, setActiveCategory] = useState("Show all");
 	const [search, setSearch] = useState("");
 
+	const handleBranchDialog = (value) => {
+		setOpenBranch(!openBranch);
+		setBranch(value);
+		removeStorageValue("foodCart");
+	};
+
 	useEffect(() => {
 		if (data) setFoodItems(data.foodItems);
+		if (branch) setOpenBranch(branch ? false : true);
 	}, [data]);
 
 	let filtered = foodItems.filter((foodItem) => foodItem.category === activeCategory);
-	if (filtered.length === 0) filtered = foodItems;
+	if (activeCategory == "Show all") filtered = foodItems;
 
 	return (
 		<>
+			<BranchDialog openBranch={openBranch} setOpenBranch={setOpenBranch} handleBranchDialog={handleBranchDialog} />
 			<div className="text-gray-800 font-rale">
 				{/* Remove py-8 */}
 				<div className="container justify-center py-6 mx-auto">
 					{/* ANCHOR Menu header and search bar */}
-					<MenuHeader numProducts={filtered.length} setSearch={setSearch} />
+					<MenuHeader openBranch={openBranch} setOpenBranch={setOpenBranch} numProducts={filtered.length} setSearch={setSearch} />
 
 					{/* ANCHOR Category bar */}
 					<CategoryBar activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
@@ -90,45 +106,6 @@ export default function Menu() {
 				</div>
 			</div>
 		</>
-	);
-
-	return (
-		<div className="overflow-hidden text-gray-900 font-rale">
-			<MenuHeader activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
-			<div className="container px-5 py-1 mx-auto">
-				<div className="h-1 mb-6 overflow-hidden bg-gray-200 rounded">
-					<div className="w-24 h-full bg-green-700"></div>
-				</div>
-				<div className="flex flex-wrap -m-4">
-					{filtered.map((foodItem) => {
-						return (
-							<Link href={foodItem.available ? `/menu/${encodeURIComponent(foodItem.slug)}` : ""}>
-								<div
-									className={`${foodItem.available ? "" : "grayscale"} w-full p-4 transition-transform cursor-pointer hover:scale-105 lg:w-1/4 md:w-1/2`}
-									key={foodItem.slug}
-								>
-									<div className="pb-2 rounded bg-gray-50 drop-shadow-md">
-										<a className="relative block overflow-hidden rounded-t">
-											{foodItem.productImagesCollection.items[0] && (
-												<Image width={500} height={300} layout="responsive" src={foodItem.productImagesCollection.items[0].url} />
-											)}
-										</a>
-										<div className="mt-3 ml-2">
-											<h3 className="mb-1 text-xs font-bold tracking-widest text-green-700">{foodItem.category}</h3>
-											<h2 className="text-sm font-semibold">
-												{foodItem.productName}
-												{foodItem.available ? "" : <a className="self-center ml-2 text-xs">UNAVAILABLE</a>}
-											</h2>
-											<p className="mt-1">₱{foodItem.productPrice}</p>
-										</div>
-									</div>
-								</div>
-							</Link>
-						);
-					})}
-				</div>
-			</div>
-		</div>
 	);
 }
 
