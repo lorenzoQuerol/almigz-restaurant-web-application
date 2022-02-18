@@ -1,9 +1,11 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import useAxios from "axios-hooks";
+import useSWR from "swr";
 import Loading from "@components/Loading";
+import useInterval from "@utils/useInterval";
 
 const status = ["INCOMING", "PROCESSED", "IN PREPARATION", "READY FOR PICKUP/DELIVERY", "COMPLETED ORDER", "CANCELLED ORDER"];
 const months = ["Jan.", "Feb.", "March", "April", "May", "June", "July", "August", "Sept.", "Oct.", "Nov.", "Dec."];
@@ -12,12 +14,15 @@ const statTextColors = ["text-red-900", "text-yellow-900", "text-[#320064]", "te
 const headers = ["Invoice #", "Date Created", "Type", "Status", "When to Deliver/Pickup", ""];
 const limit = 10;
 
+const fetcher = (url) => fetch(url).then((res) => res.json());
+
 export default function Transactions() {
 	const router = useRouter();
 	const [page, setPage] = useState(1);
 	const [filter, setFilter] = useState("All");
 	const [transactions, setTransactions] = useState([]);
 	const [lastUpdate, setLastUpdate] = useState(new Date());
+	const { data: branchData, error: branchError } = useSWR(`/api/branches`, fetcher);
 
 	const {
 		register,
@@ -33,21 +38,14 @@ export default function Transactions() {
 			limit: limit,
 			offset: (page - 1) * limit,
 			filter: watch("filter") == "All" ? null : Number(watch("filter")),
+			branch: watch("branch") == "All" ? null : watch("branch"),
 		},
 	});
 
-	// ANCHOR Refetch for pagination
-	useEffect(() => {
-		setTimeout(() => {
-			refetch();
-			setLastUpdate(new Date());
-		}, 60000);
-
-		if (data) {
-			setTransactions(data.transactions);
-			watch("filter") == "All" ? setValue("filter", "All") : setValue("filter", data.transactions[0]?.orderStatus);
-		}
-	}, [data]);
+	useInterval(() => {
+		refetch();
+		setLastUpdate(new Date());
+	}, 10000);
 
 	const formatDate = (date) => {
 		date = new Date(date).toLocaleString("en-US", {
@@ -68,18 +66,17 @@ export default function Transactions() {
 		return `${formatDate} @ ${time}`;
 	};
 
-	const handlePrevPage = () => {
+	const handlePrevPage = (e) => {
+		e.preventDefault();
 		setPage(Math.max(1, page - 1));
 		refetch();
 	};
 
-	const handleNextPage = () => {
+	const handleNextPage = (e) => {
+		e.preventDefault();
 		setPage(Math.max(1, page + 1));
 		refetch();
 	};
-
-	// let filtered = transactions.filter((transaction) => transaction.orderStatus == filter);
-	// if (filter == "All") filtered = transactions;
 
 	return (
 		<>
@@ -87,14 +84,15 @@ export default function Transactions() {
 				<Loading />
 			) : (
 				<div className="text-gray-800 font-rale">
-					<div className="flex-row pb-5 sm:flex">
+					<div className="flex-row pb-5 space-y-3 sm:flex">
 						<div className="mb-5 text-xl text-2xl font-bold sm:mb-0 sm:text-3xl">Manage Transactions</div>
+						{/* ANCHOR Order Status */}
 						<div className="flex-row self-center flex-1 sm:ml-5">
-							<form>
-								<span className="mr-2 font-bold">Order Status</span>
+							<form className="w-full">
+								<span className="mr-2 font-bold">Status</span>
 								<select
 									onChange={(e) => setFilter(e.target.value)}
-									className="max-w-xs px-2 py-1 border rounded w-fit md:w-1/2 lg:w-full focus:border-1 focus:outline-none focus:border-green-700"
+									className="w-10/12 max-w-xs px-2 py-1 border rounded sm:w-fit md:w-1/2 lg:w-full focus:border-1 focus:outline-none focus:border-green-700"
 									{...register("filter")}
 								>
 									<option>All</option>
@@ -104,6 +102,23 @@ export default function Transactions() {
 									<option value={3}>Ready for Pickup/Delivery</option>
 									<option value={4}>Completed Orders</option>
 									<option value={5}>Cancelled Orders</option>
+								</select>
+							</form>
+						</div>
+
+						{/* ANCHOR Branches */}
+						<div className="flex-row self-center flex-1 sm:ml-5">
+							<form className="w-full">
+								<span className="mr-2 font-bold">Branch</span>
+								<select
+									// onChange={(e) => setFilter(e.target.value)}
+									className="w-9/12 max-w-xs px-2 py-1 border rounded sm:w-fit md:w-1/2 lg:w-full focus:border-1 focus:outline-none focus:border-green-700"
+									{...register("branch")}
+								>
+									<option value="All">All</option>;
+									{branchData?.branchItems.map((item, index) => {
+										return <option value={item.branch}>{item.branch}</option>;
+									})}
 								</select>
 							</form>
 						</div>
@@ -120,7 +135,7 @@ export default function Transactions() {
 									</tr>
 								</thead>
 								<tbody>
-									{transactions.map((item, index) => {
+									{data.transactions.map((item, index) => {
 										return (
 											<tr className="border-b border-gray-300 h-14">
 												<td className="px-6 text-xs leading-4 tracking-normal whitespace-no-wrap">#{item.invoiceNum}</td>
@@ -159,7 +174,7 @@ export default function Transactions() {
 						<div className="flex flex-col mt-3 w-52">
 							<button
 								type="button"
-								onClick={handlePrevPage}
+								onClick={(e) => handlePrevPage(e)}
 								className={`${
 									page === 1 ? "hidden" : "block"
 								} px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-green-600 focus:outline-none`}
@@ -170,9 +185,9 @@ export default function Transactions() {
 						<div className="flex flex-col mt-3 w-52">
 							<button
 								type="button"
-								onClick={handleNextPage}
+								onClick={(e) => handleNextPage(e)}
 								className={`${
-									transactions.length === 0 || transactions.length < 10 ? "hidden" : "block"
+									data.transactions.length === 0 || data.transactions.length < 10 ? "hidden" : "block"
 								} px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-green-600 focus:outline-none`}
 							>
 								Next
