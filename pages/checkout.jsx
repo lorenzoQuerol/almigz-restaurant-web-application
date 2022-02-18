@@ -36,11 +36,13 @@ export async function getServerSideProps(context) {
 
 export default function Checkout(session) {
 	const router = useRouter();
-	const [{ data, loading, error }, refetch] = useAxios(`/api/users/${session.user.email}`);
-	const { data: timeData, error: timeError } = useSWR("/api/hours", fetcher);
+	const [{ data, loading, error }, refetch] = useAxios(`/api/users/${session.user.email}`); // NOTE User information
+	const { data: timeData, error: timeError } = useSWR("/api/hours", fetcher); // NOTE Operating hours
+	const { data: delFeeData, error: delFeeError } = useSWR("/api/delivery", fetcher); // NOTE Delivery fee
+	const cart = getStorageValue("foodCart"); // NOTE Cart contents
+	const branch = getStorageValue("branch"); // NOTE Chosen branch (from menu)
+
 	const timeValid = (time) => time >= timeData.operatingHours.startTime && time <= timeData.operatingHours.endTime; // NOTE: time validator
-	const cart = getStorageValue("foodCart");
-	const branch = getStorageValue("branch");
 	const {
 		register,
 		watch,
@@ -79,6 +81,7 @@ export default function Checkout(session) {
 	const placeOrder = async (data) => {
 		const formattedDate = `${data.deliverDate}T${data.deliverTime}`;
 		let response = await axios.get("/api/count", { params: { filter: "transactions" } });
+
 		const transaction = {
 			lastUpdated: new Date(),
 			invoiceNum: response.data.count,
@@ -91,7 +94,7 @@ export default function Checkout(session) {
 			order: order.products,
 			specialInstructions: data.specialInstructions,
 			reasonForCancel: "",
-			totalPrice: data.type === "Delivery" ? cart.total + 50 : cart.total,
+			totalPrice: data.type === "Delivery" ? cart.total + delFeeData.deliveryFeeData.delFee : cart.total,
 			address: data.useHomeAddress === "true" ? user.address : data.address,
 			payMethod: data.payMethod,
 			change: data.payMethod === "COD" ? Number(data.change) : null,
@@ -253,7 +256,7 @@ export default function Checkout(session) {
 												placeholder="Change"
 												{...register("change", {
 													required: watch("payMethod") === "COD" ? true : false,
-													min: watch("type") === "Pickup" ? Number(order.total) : Number(order.total) + 50,
+													min: watch("type") === "Pickup" ? Number(order.total) : Number(order.total) + delFeeData.deliveryFeeData.delFee,
 												})}
 											/>
 											{errors.change?.type === "required" && <div className="mt-1 text-sm font-medium text-left text-red-500">Change is required</div>}
@@ -426,10 +429,10 @@ export default function Checkout(session) {
 								</div>
 							)}
 							<div className="flex items-center w-full py-4 text-sm font-semibold border-b border-gray-300 lg:py-5 lg:px-3 text-heading last:border-b-0 last:text-base last:pb-0">
-								Delivery Fee<span className="ml-2">{watch("type") === "Delivery" ? "₱50" : "-"}</span>
+								Delivery Fee<span className="ml-2">{watch("type") === "Delivery" ? `₱${delFeeData.deliveryFeeData.delFee}` : "-"}</span>
 							</div>
 							<div className="flex items-center w-full py-4 text-sm font-semibold border-b border-gray-300 lg:py-5 lg:px-3 text-heading last:border-b-0 last:text-base last:pb-0">
-								Total<span className="ml-2">₱{watch("type") === "Delivery" ? order.total + 50 : order.total}</span>
+								Total<span className="ml-2">₱{watch("type") === "Delivery" ? order.total + delFeeData.deliveryFeeData.delFee : order.total}</span>
 							</div>
 						</div>
 					</div>

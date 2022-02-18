@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import useSWR from "swr";
 import useAxios from "axios-hooks";
 import axios from "axios";
 import Loading from "@components/Loading";
@@ -37,8 +38,11 @@ export async function getServerSideProps(context) {
 	};
 }
 
+const fetcher = (url) => fetch(url).then((res) => res.json());
+
 export default function OrderPage(session) {
 	const router = useRouter();
+	const { data: delFeeData, error: delFeeError } = useSWR("/api/delivery", fetcher); // NOTE Delivery fee
 	const [{ data, loading, error }, refetch] = useAxios(`/api/transactions/${router.query.order}`);
 
 	const [transaction, setTransaction] = useState({});
@@ -152,11 +156,11 @@ export default function OrderPage(session) {
 								<div className="w-full p-5 divide-y">
 									<div className="flex justify-between py-2 text-base font-medium">
 										<p>Subtotal</p>
-										<p>₱{transaction.totalPrice - 50}</p>
+										<p>{transaction.type == "Delivery" ? `₱${transaction.totalPrice - delFeeData?.deliveryFeeData.delFee}` : `₱${transaction.totalPrice}`}</p>
 									</div>
 									<div className="flex justify-between py-2 text-base text-gray-500 text-medium">
 										<p>Delivery Fee</p>
-										<p>{transaction.type == "Delivery" ? `₱${50}` : "-"}</p>
+										<p>{transaction.type == "Delivery" ? `₱${delFeeData.deliveryFeeData.delFee}` : "-"}</p>
 									</div>
 									<div className="flex justify-between py-2 text-base font-medium ">
 										<p>Total</p>

@@ -2,11 +2,14 @@ import router from "next/router";
 import { useState, useEffect } from "react";
 import { getSession } from "next-auth/react";
 import Image from "next/image";
+import useSWR from "swr";
 import getStorageValue from "@utils/localStorage/getStorageValue";
 import removeStorageValue from "@utils/localStorage/removeStorageValue";
 import Loading from "@components/Loading";
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export async function getServerSideProps(context) {
 	const session = await getSession(context);
@@ -33,6 +36,8 @@ export async function getServerSideProps(context) {
 }
 
 export default function Receipt(session) {
+	const { data, error } = useSWR("/api/delivery", fetcher); // NOTE Delivery fee
+
 	// Retrieve transaction from local storage
 	const [transaction, setTransaction] = useState(() => {
 		const initialValue = getStorageValue("transaction", undefined);
@@ -150,13 +155,15 @@ export default function Receipt(session) {
 								{/* ANCHOR Subtotal */}
 								<div className="flex justify-between w-full">
 									<p className="text-base leading-4 ">Subtotal</p>
-									<p className="text-base leading-4 ">₱ {transaction.type === "Delivery" ? transaction.totalPrice - 50 : transaction.totalPrice}</p>
+									<p className="text-base leading-4 ">
+										₱ {transaction.type === "Delivery" ? transaction.totalPrice - data.deliveryFeeData.delFee : transaction.totalPrice}
+									</p>
 								</div>
 
 								{/* ANCHOR Delivery fee */}
 								<div className="flex justify-between w-full">
 									<p className="text-base leading-4 ">Delivery</p>
-									<p className="text-base leading-4 ">₱ {transaction.type === "Delivery" ? "50" : "-"}</p>
+									<p className="text-base leading-4 ">₱ {transaction.type === "Delivery" ? data.deliveryFeeData.delFee : "-"}</p>
 								</div>
 							</div>
 
