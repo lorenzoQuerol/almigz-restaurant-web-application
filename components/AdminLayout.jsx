@@ -26,6 +26,7 @@ const AdminLayout = ({ children }) => {
 		{ id: 2, href: "/admin/transactions", name: "Transactions", svg: <TicketIcon />, current: false },
 		{ id: 3, href: "/admin/management", name: "Management", svg: <PeopleIcon />, current: false },
 		{ id: 4, href: "/admin/summary", name: "Summary", svg: <PaperIcon />, current: false },
+		{ id: 5, href: "/user/profile", name: "Profile", svg: <CogIcon />, current: false },
 	];
 
 	const handleSignOut = async (event) => {
