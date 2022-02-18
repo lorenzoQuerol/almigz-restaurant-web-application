@@ -377,6 +377,17 @@ export default function Profile(session) {
 										<span>{user.contact2}</span>
 									</div>
 									{/* !SECTION Not editable */}
+									{session.user.isAdmin && (
+										<div className="flex flex-col mt-8 w-52 md:mr-16">
+											<button
+												type="button"
+												onClick={() => router.replace("/admin")}
+												className="px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-green-600 focus:outline-none"
+											>
+												Return to Dashboard
+											</button>
+										</div>
+									)}
 								</div>
 							)}
 						</div>
