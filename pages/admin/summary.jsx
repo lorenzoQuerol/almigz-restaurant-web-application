@@ -1,89 +1,88 @@
 import downloadSummary from "@utils/downloadSummary";
 import useAxios from "axios-hooks";
-import React, { useState,useEffect } from "react";
-import moment from 'moment';
+import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 
+import moment from "moment";
 
 export default function Summary() {
+	const {
+		register,
+		handleSubmit,
+		setValue,
+		reset,
+		watch,
+		formState: { errors },
+	} = useForm();
+
 	const [{ data, loading, error }, refetch] = useAxios({
-		url: `${process.env.NEXTAUTH_URL}/api/transactions`
+		url: `${process.env.NEXTAUTH_URL}/api/transactions`,
 	});
-	
-	const [frDate, setFrDate] = useState(moment().format('YYYY-MM-DD'));
-	const [toDate, setToDate] = useState(moment().format('YYYY-MM-DD'));
-	
-	//Get date input
-	const onChangeDate = e => {
-		const newDate = moment(new Date(e.target.value)).format('YYYY-MM-DD');
-		switch(e.target.name) {
-			case "frDate":
-				setFrDate(newDate)
-			  break;
-			case "toDate":
-				setToDate(newDate)
-			  break;
-			default:
-				console.log("err")
-		}
+
+	// NOTE Validates if from date is before to date
+	const validRange = (frDate, toDate) => frDate > toDate; // NOTE: time validator
+
+	const downloadSummaries = (formData) => {
+		if (formData.summaryType === "Date Range") downloadSummary(data.transactions, formData.frDate, formData.toDate);
+		else downloadSummary(data.transactions, formData.specificDate, formData.specificDate);
 	};
 
-	function download(){
-		var validFrDate = !(frDate == "Invalid date");
-		var validToDate = !(toDate == "Invalid date");
-		console.log(validToDate)
-		console.log(validFrDate)
-		
-		if(validFrDate && validToDate)
-			downloadSummary(data.transactions,frDate,toDate);
-		else{
-			var dateToday = moment().format('YYYY-MM-DD');
-			window.alert("Invalid date, downloading only today's transactions");
-			downloadSummary(data.transactions,dateToday,dateToday);
-		}
-	}
-	
-	// ANCHOR Refetch for pagination
-	useEffect(() => {
-		setTimeout(() => {
-			refetch();
-		}, 60000);
-	}, [data]);
-
 	return (
-		<div>
-			<div className="flex-row pb-5 sm:flex">
-				<div className="flex-row self-center flex-1 sm:ml-5">
-					<form>
-						<span className="mr-2 font-bold">From Date</span>
-						<input type="date"
-							name = "frDate"
-							value = {frDate}
-							onChange={onChangeDate}
-						></input>
-					</form>
-				</div>
-				<div className="flex-row self-center flex-0 sm:ml-5">
-					<form>
-						<span className="mr-2 font-bold">To Date</span>
-						<input type="date"
-							name = "toDate"
-							value = {toDate}
-							onChange={onChangeDate}
-						></input>
-					</form>
-				</div>
+		<div className="text-gray-800 font-rale">
+			<div className="flex pb-5 ">
+				<div className="text-xl font-bold sm:text-3xl">Summary Report</div>
 			</div>
-			<div className="flex self-center justify-between text-white lg:space-x-10 lg:justify-center">
-				<div className="flex flex-col mt-3 w-52">
-					<button
-						type="button"
-						onClick={download}
-						className={`px-8 py-2 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-green-600 focus:outline-none`}
+			<form onSubmit={handleSubmit(downloadSummaries)}>
+				<div>
+					<select
+						className="w-10/12 max-w-xs px-1 py-1 mb-3 border rounded sm:w-fit md:w-1/2 lg:w-full focus:border-1 focus:outline-none focus:border-green-700"
+						{...register("summaryType")}
 					>
-						Download Summary
-					</button>
-				</div>			
-			</div>
+						<option>Specific Date</option>
+						<option>Date Range</option>
+					</select>
+				</div>
+
+				{watch("summaryType") == "Date Range" ? (
+					<div>
+						<div className="mb-2 text-base font-semibold">Choose Date Range</div>
+						<div className="space-x-4">
+							<input
+								type="date"
+								className="p-1 mb-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-700"
+								{...register("frDate", { required: watch("summaryType") == "Date Range" ? true : false })}
+							/>
+
+							<input
+								type="date"
+								className="p-1 mb-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-700"
+								{...register("toDate", { required: watch("summaryType") == "Date Range" ? true : false })}
+							/>
+						</div>
+						{errors.frDate?.type === "required" && <div className="mb-1 text-xs font-medium text-left text-red-500">Start Date is required</div>}
+						{errors.toDate?.type === "required" && <div className="mb-1 text-xs font-medium text-left text-red-500">End Date is required</div>}
+						{validRange(watch("frDate"), watch("toDate")) && <div className="mb-1 text-xs font-medium text-left text-red-500">Start date must be before end date</div>}
+					</div>
+				) : (
+					<div>
+						<div className="mb-2 text-base font-semibold">Choose Specific Date</div>
+						<div className="">
+							<input
+								type="date"
+								className="p-1 mb-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-700"
+								{...register("specificDate", { required: watch("summaryType") == "Specific Date" ? true : false })}
+							/>
+							{errors.specificDate?.type === "required" && <div className="mb-1 text-xs font-medium text-left text-red-500">Date is required</div>}
+						</div>
+					</div>
+				)}
+				<button
+					type="submit"
+					className={`px-8 py-2 mb-2 mt-1 text-sm text-white transition duration-150 ease-in-out bg-green-700 border rounded hover:bg-green-600 focus:outline-none`}
+				>
+					Download Summary
+				</button>
+			</form>
 		</div>
 	);
 }
