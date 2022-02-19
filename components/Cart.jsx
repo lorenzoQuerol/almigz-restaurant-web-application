@@ -28,8 +28,8 @@ const Cart = ({ open, handleOpen }) => {
 	}, [open]);
 
 	// Delete item and update prices
-	const deleteItem = (name) => {
-		const index = products.findIndex((product) => product.menuItem.productName === name);
+	const deleteItem = (name, category) => {
+		const index = products.findIndex((product) => product.menuItem.productName === name && product.menuItem.category === category);
 		products.splice(index, 1); // Delete item
 
 		let temp = 0;
@@ -51,8 +51,8 @@ const Cart = ({ open, handleOpen }) => {
 	};
 
 	// Update quantity of item and update prices
-	const updateTotal = (value, name) => {
-		const index = products.findIndex((product) => product.menuItem.productName === name);
+	const updateTotal = (value, name, category) => {
+		const index = products.findIndex((product) => product.menuItem.productName === name && product.menuItem.category === category);
 		products[index].quantity = value; // Update quantity
 
 		let temp = 0;
@@ -143,7 +143,7 @@ const Cart = ({ open, handleOpen }) => {
 																				value={product.quantity}
 																				placeholder={product.quantity}
 																				onLoad={(e) => setTotal(product.quantity)}
-																				onChange={(e) => updateTotal(e.target.value, e.target.name)}
+																				onChange={(e) => updateTotal(e.target.value, e.target.name, product.menuItem.category)}
 																			></input>
 																			pc
 																		</p>
@@ -152,7 +152,7 @@ const Cart = ({ open, handleOpen }) => {
 																				name={product.menuItem.productName}
 																				type="button"
 																				className="font-medium text-green-700 transition-colors hover:text-green-600"
-																				onClick={(e) => deleteItem(e.target.name)}
+																				onClick={(e) => deleteItem(e.target.name, product.menuItem.category)}
 																			>
 																				Remove
 																			</button>
