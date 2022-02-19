@@ -30,23 +30,31 @@ export default function downloadSummary(data, frDate, toDate) {
 
 	filteredDataArr.forEach((i) => {
 		for (var j = 0; j < data[i].order.length; j++) {
+			switch(data[i].branch) {
+				case "Molino Boulevard": var tempLoc = "MV";
+					break;
+				case "Unitop Mall Dasmariñas":var tempLoc = "UT";
+					break;
+				case "V Central Mall":var tempLoc = "VC";
+					break;
+				default:
+					var tempLoc = "Unknown";
+			}
 			var filter = {
-				"Full Name": data[i].fullName,
-				"Contact Number": data[i].contactNum[0],
-				Branch: data[i].branch,
 				"Invoice Number": data[i].invoiceNum,
+				Branch: tempLoc,
 				Status: status[data[i].orderStatus],
 				Remarks: data[i].reasonForCancel,
-				"Total Price": data[i].order[j].quantity * data[i].order[j].menuItem.productPrice,
 				"Payment Method": data[i].payMethod,
 				"Date Created": data[i].dateCreated,
 				"Product Name": data[i].order[j].menuItem.productName,
 				Qty: data[i].order[j].quantity,
+				"Total Price": data[i].order[j].quantity * data[i].order[j].menuItem.productPrice,
 			};
 			json.push(filter);
 		}
 	});
-
+	json = json.reverse();
 	if (json.length) {
 		var fields = Object.keys(json[0]);
 		var replacer = function (key, value) {
