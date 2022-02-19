@@ -145,13 +145,15 @@ export default function Register() {
 								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded input input-sm input-bordered focus:ring-2 focus:ring-green-700"
 								type="tel"
 								placeholder="9XXXXXXXXX (Mobile Number)"
-								{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9/ })}
+								{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9[0-9]+$/ })}
 							/>
 						</div>
 						{errors.contact1?.type === "required" && <div className="mt-1 text-xs font-medium text-left text-red-500">Contact number is required</div>}
 						{errors.contact1?.type === "maxLength" && <div className="mt-1 text-xs font-medium text-left text-red-500">Contact number must be 10 digits</div>}
 						{errors.contact1?.type === "minLength" && <div className="mt-1 text-xs font-medium text-left text-red-500">Contact number must be 10 digits</div>}
-						{errors.contact1?.type === "pattern" && <div className="mt-1 text-xs font-medium text-left text-red-500">Contact number must start with 9</div>}
+						{errors.contact1?.type === "pattern" && (
+							<div className="mt-1 text-xs font-medium text-left text-red-500">Contact number must start with 9 and no characters</div>
+						)}
 
 						{/* Contact number 2 */}
 						<label className="mt-4 label">Contact Number 2 (Optional)</label>
@@ -161,12 +163,14 @@ export default function Register() {
 								className="w-full p-5 pl-3 ml-2 font-sans tracking-wide rounded input input-sm input-bordered focus:ring-2 focus:ring-green-700"
 								type="tel"
 								placeholder="9XXXXXXXXX (Mobile Number)"
-								{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9/, validate: sameContact })}
+								{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9[0-9]+$/, validate: sameContact })}
 							/>
 						</div>
 						{errors.contact2?.type === "maxLength" && <div className="mt-1 text-xs font-medium text-left text-red-500">Contact number must be 10 digits</div>}
 						{errors.contact2?.type === "minLength" && <div className="mt-1 text-xs font-medium text-left text-red-500">Contact number must be 10 digits</div>}
-						{errors.contact2?.type === "pattern" && <div className="mt-1 text-xs font-medium text-left text-red-500">Contact number must start with 9</div>}
+						{errors.contact2?.type === "pattern" && (
+							<div className="mt-1 text-xs font-medium text-left text-red-500">Contact number must start with 9 and no characters</div>
+						)}
 						{errors.contact2?.type === "validate" && (
 							<div className="mt-1 text-xs font-medium text-left text-red-500">Contact number 2 must not be the same as contact number 1</div>
 						)}

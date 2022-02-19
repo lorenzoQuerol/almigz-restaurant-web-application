@@ -285,7 +285,7 @@ export default function Profile(session) {
 												<input
 													className="flex items-center w-full h-10 pl-3 ml-1 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
 													placeholder="Contact Number 1"
-													{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9/ })}
+													{...register("contact1", { required: true, minLength: 10, maxLength: 10, pattern: /^9[0-9]+$/ })}
 												/>
 											</div>
 											{errors.contact1?.type === "required" && (
@@ -298,7 +298,7 @@ export default function Profile(session) {
 												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
 											)}
 											{errors.contact1?.type === "pattern" && (
-												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9 and no characters</div>
 											)}
 										</div>
 
@@ -312,7 +312,7 @@ export default function Profile(session) {
 												<input
 													className="flex items-center w-full h-10 pl-3 ml-1 text-sm font-normal text-gray-600 bg-white border border-gray-300 rounded shadow focus:outline-none focus:border-2 focus:border-green-700"
 													placeholder="Contact Number 2"
-													{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9/ })}
+													{...register("contact2", { required: false, minLength: 10, maxLength: 10, pattern: /^9[0-9]+$/ })}
 												/>
 											</div>
 											{errors.contact2?.type === "maxLength" && (
@@ -322,7 +322,7 @@ export default function Profile(session) {
 												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must be 10 digits</div>
 											)}
 											{errors.contact2?.type === "pattern" && (
-												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9</div>
+												<div className="mt-1 text-sm font-medium text-left text-red-500">Contact number must start with 9 and no characters</div>
 											)}
 										</div>
 										{/* !SECTION Editable */}
