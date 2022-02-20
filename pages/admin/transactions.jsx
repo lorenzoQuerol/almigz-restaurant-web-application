@@ -11,7 +11,7 @@ const status = ["INCOMING", "PROCESSED", "IN PREPARATION", "READY FOR PICKUP/DEL
 const months = ["Jan.", "Feb.", "March", "April", "May", "June", "July", "August", "Sept.", "Oct.", "Nov.", "Dec."];
 const statColors = ["bg-red-200", "bg-yellow-200", "bg-[#CF9FFF]", "bg-blue-200", "bg-green-200", "bg-gray-200"];
 const statTextColors = ["text-red-900", "text-yellow-900", "text-[#320064]", "text-blue-900", "text-green-900", "text-gray-900"];
-const headers = ["Invoice #", "Date Created", "Type", "Status", "When to Deliver/Pickup", ""];
+const headers = ["Invoice #", "Date Created", "Type", "Status", "Branch", "When to Deliver/Pickup", ""];
 const limit = 10;
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -78,6 +78,13 @@ export default function Transactions() {
 		refetch();
 	};
 
+	// NOTE RESETS TO PAGE 1 AND REFETCHES ON CHANGE BRANCH
+	const handleChangeBranch = (e) => {
+		e.preventDefault();
+		setPage(1);
+		refetch();
+	};
+
 	return (
 		<>
 			{loading ? (
@@ -112,7 +119,11 @@ export default function Transactions() {
 								<span className="mr-2 font-bold">Branch</span>
 								<select
 									className="w-9/12 max-w-xs px-2 py-1 border rounded sm:w-fit md:w-1/2 lg:w-full focus:border-1 focus:outline-none focus:border-green-700"
-									{...register("branch")}
+									{...register("branch", {
+										onChange: (e) => {
+											handleChangeBranch(e);
+										},
+									})}
 								>
 									<option value="All">All</option>;
 									{branchData?.branchItems.map((item, index) => {
@@ -146,6 +157,7 @@ export default function Transactions() {
 														<span className={`font-medium ${statTextColors[item.orderStatus]}`}>{status[item.orderStatus]}</span>
 													</div>
 												</td>
+												<td className="px-6 text-xs leading-4 tracking-normal whitespace-no-wrap">{item.branch}</td>
 												<td className="px-6 text-xs leading-4 tracking-normal whitespace-no-wrap">
 													{item.type === "Delivery" // If transaction type is delivery
 														? item.deliverTime !== "Now" // Check if deliver time is undefined or not
