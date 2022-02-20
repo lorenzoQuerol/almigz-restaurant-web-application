@@ -71,6 +71,7 @@ export default function downloadSummary(data) {
 				"Product Name": food.menuItem.productName,
 				Qty: food.quantity,
 				"Total Price": food.quantity * food.menuItem.productPrice,
+			};
 
 			json.push(entry);
 		});
